@@ -1,0 +1,101 @@
+/* Campus-life conversations use a separate native dialog so the world can pause. */
+.district-dialog{--district-accent:#315f80;position:fixed;inset:0;width:min(640px,calc(100vw - 28px));max-height:calc(100dvh - 32px);margin:auto;padding:0;border:1px solid #bfcbb7;border-radius:18px;background:#fcf8eb;color:#284c45;box-shadow:0 22px 90px #112f365c;font-family:'Roboto',system-ui,sans-serif;overflow:hidden;pointer-events:auto}
+.district-dialog::backdrop{background:#183b385b;backdrop-filter:blur(3px)}
+.district-dialog[open]{display:flex;flex-direction:column}
+.district-header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:25px 27px 20px;border-bottom:1px solid #d9ddca;background:linear-gradient(120deg,#f4f3df,#fcf9ef);flex:none}
+.district-header h2{font:700 29px/1.12 Georgia,serif;letter-spacing:-.7px;margin:0;outline:none}
+.district-dialog button{font:600 12px/1.4 'Roboto',system-ui,sans-serif;min-height:44px;cursor:pointer;touch-action:manipulation;transition:background .15s,border-color .15s,box-shadow .15s}
+.district-dialog button:focus-visible{outline:3px solid #d39b3b;outline-offset:3px}
+.district-dialog button:disabled{cursor:default;opacity:.52}
+.district-close{display:grid;place-items:center;width:44px;height:44px;flex:none;border:1px solid #d0d7c2;border-radius:11px;background:#f9f8e9;color:#536e5c;font-size:28px!important;font-weight:400!important}
+.district-close:hover{background:#e8eedc}
+.district-content{padding:25px 27px;overflow:auto;overscroll-behavior:contain;min-height:0;scrollbar-width:none}
+.district-content::-webkit-scrollbar{display:none}
+.district-description{font:13px/1.8 'Roboto',system-ui,sans-serif;color:#667c69;margin:0 0 21px}
+.district-identity{display:flex;align-items:center;gap:13px;margin:0 0 20px}
+.district-portrait{display:grid;place-items:center;position:relative;flex:none;width:56px;height:59px;border:1px solid #ffffffa8;border-radius:18px 18px 22px 8px;background:var(--person-color,#315f80);color:#fff8e3;box-shadow:0 3px 0 #1d42381c;font:700 27px/1 Georgia,serif;transform:rotate(-3deg)}
+.district-portrait:after{content:'';position:absolute;bottom:7px;right:6px;width:8px;height:8px;border:1px solid #fff8;border-radius:50%;background:#e8c779}
+.district-identity b{font:700 17px/1.3 Georgia,serif}
+.district-identity p{font:10px/1.5 'Roboto Mono',monospace;color:#7c8b72;margin:5px 0 0}
+.district-identity small{display:block;color:#73826d;font:11px/1.65 'Roboto',system-ui,sans-serif;margin-top:5px;max-width:440px}
+.district-dialogue{font:19px/1.65 Georgia,serif;color:#365d50;padding:20px 23px;background:#f2f1df;border:1px solid #d6dec5;border-radius:3px 14px 14px 14px;margin-bottom:17px}
+.district-goal{padding:11px 14px;border-left:3px solid var(--district-accent);font:11px/1.7 'Roboto',system-ui,sans-serif;color:#617b66;margin:0 0 21px;background:#eaf0df}
+.district-choices{display:grid;gap:9px}
+.district-primary,.district-secondary,.district-track{display:flex;align-items:center;justify-content:center;gap:10px;text-align:center;border:1px solid #aebfa6;border-radius:10px;padding:12px 17px;background:#edf1e1;color:#41694f}
+.district-primary{background:#365e50;color:#fff9e6;border-color:#294e42;box-shadow:0 3px 0 #27493b}
+.district-primary:not(:disabled):hover{background:#2a5143;box-shadow:0 3px 0 #203d32}
+.district-secondary:not(:disabled):hover,.district-track:hover{background:#dfead2;border-color:#91ab80}
+.district-choices button{flex-direction:column}
+.district-choices button small{font:10px/1.5 system-ui;opacity:.8}
+.district-later{border:0;background:transparent;color:#71846e;border-radius:8px;padding:10px 13px;margin-top:3px}
+.district-later:hover{background:#ecefdf}
+.district-journal-summary{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:13px 15px;border:1px solid #c9d6bb;background:#eaf0df;border-radius:10px;margin:0 0 20px}
+.district-journal-summary b{font-size:12px;white-space:nowrap}
+.district-journal-summary span{font-size:10px;color:#7c8c72;text-align:right;line-height:1.6}
+.district-objectives{display:grid;gap:12px}
+.district-objective{padding:18px;border:1px solid #d0d8c2;border-radius:13px;background:#fffdf4;position:relative;overflow:hidden}
+.district-objective:before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--person-color)}
+.district-objective.complete{background:#edf2e3}
+.district-objective.tracked{box-shadow:0 0 0 2px #9bac75;border-color:#829d68}
+.district-objective-meta{display:flex;justify-content:space-between;gap:12px;color:#809070;font:9px/1.5 'Roboto Mono',monospace;letter-spacing:.03em}
+.district-objective-meta>span{color:var(--person-color);font-weight:700}
+.district-objective-meta b{font-size:8px;font-weight:500}
+.district-objective h3{font:700 19px/1.25 Georgia,serif;margin:9px 0 8px;letter-spacing:-.2px}
+.district-objective>p{font:12px/1.75 system-ui;color:#70836b;margin:0 0 15px}
+.district-objective>.district-story-reward{font:9px/1.6 'Roboto Mono',monospace;color:#8a7b52;margin-top:-5px}
+.district-objective-bottom{display:flex;align-items:center;flex-wrap:wrap;gap:10px}
+.district-objective-bottom progress{appearance:none;height:5px;min-width:55px;width:82px;border:0;background:#dfe5cf;border-radius:5px;overflow:hidden}
+.district-objective-bottom progress::-webkit-progress-bar{background:#dfe5cf}
+.district-objective-bottom progress::-webkit-progress-value{background:#91a674}
+.district-objective-bottom progress::-moz-progress-bar{background:#91a674}
+.district-objective-bottom small{font:9px/1.5 'Roboto Mono',monospace;color:#829273}
+.district-track{margin-left:auto;min-width:125px;padding:10px 13px;font-size:11px!important}
+.district-people{margin-top:29px;padding-top:24px;border-top:1px solid #d8ddc8}
+.district-people h3{font:700 12px/1.5 'Roboto Mono',monospace;letter-spacing:.05em;margin:0 0 20px}
+.district-people .district-identity{align-items:flex-start;margin-bottom:20px}
+.district-people .district-portrait{width:42px;height:45px;font-size:22px;border-radius:13px 13px 17px 6px}
+.district-people .district-identity b{font-size:15px}
+.district-return{width:100%;margin-top:22px}
+.district-sequence{list-style:none;display:flex;flex-wrap:wrap;justify-content:center;gap:10px;padding:0;margin:23px 0}
+.district-sequence li{display:flex;flex-direction:column;align-items:center;gap:7px;min-width:53px;border-radius:10px;padding:8px 5px;border:1px solid transparent}
+.district-sequence b{display:grid;place-items:center;width:43px;height:46px;background:#edf1df;border:1px solid #c1cfb1;border-radius:11px;font:29px/1 Georgia,serif;color:#6e8758}
+.district-sequence small{font:9px/1.4 system-ui;color:#7e8c70}
+.district-sequence .next{border-color:#c3a56c;background:#f9edcd}
+.district-sequence .played b{background:#dbe9cc;border-color:#8eac72;color:#517b43}
+.district-sequence .demonstrating{border-color:#658f8e;background:#e1efed;outline:2px solid #a2c8bc}
+.district-note-buttons{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin:20px 0}
+.district-note{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;min-height:98px!important;padding:12px 6px;border:1px solid #b6c7a5;border-radius:13px;background:#fffdf2;box-shadow:0 4px 0 #a1b68b30;color:#537345}
+.district-note:not(:disabled):hover{background:#e7efdb;border-color:#8ca773}
+.district-note:not(:disabled):active{background:#dce8ce;box-shadow:0 1px 0 #a1b68b30}
+.district-note b{font:32px/1 Georgia,serif}
+.district-note span{font-size:11px}
+.district-note kbd{font:9px/1.4 monospace;border:1px solid #ccd8bc;border-radius:4px;padding:1px 5px;color:#8b9a7b}
+.district-rhythm-feedback{min-height:44px;color:#8d7848;font:12px/1.75 system-ui;text-align:center;margin:15px 0}
+.district-rhythm-feedback.success{color:#4d7845;font-weight:700}
+.district-rhythm-controls{display:flex;justify-content:center;gap:10px}
+@media(max-width:480px){.district-dialog{width:calc(100vw - 20px);max-height:calc(100dvh - 20px);border-radius:14px}.district-header{padding:18px 16px 16px;gap:10px}.district-header h2{font-size:25px}.district-content{padding:20px 16px}.district-dialogue{padding:16px;font-size:17px}.district-description{font-size:12px}.district-journal-summary{align-items:flex-start;flex-direction:column;gap:7px}.district-journal-summary span{text-align:left}.district-objective{padding:16px 14px}.district-objective-meta{font-size:8px}.district-objective h3{font-size:18px}.district-objective>p{font-size:11px}.district-objective-bottom progress{width:55px}.district-track{min-width:112px;font-size:10px!important;padding:10px}.district-note-buttons{gap:6px}.district-note{min-height:91px!important}.district-note span{font-size:10px}.district-rhythm-controls{gap:8px}.district-rhythm-controls button{font-size:11px;padding:10px 12px}.district-sequence{gap:6px}.district-sequence li{min-width:42px;padding:7px 3px}.district-sequence b{width:37px;height:42px;font-size:26px}.district-sequence small{font-size:8px}}
+@media(prefers-reduced-motion:reduce){.district-dialog button{transition:none}.district-portrait{transform:none}}
+.reduced-motion .district-dialog button{transition:none}.reduced-motion .district-portrait{transform:none}
+.campus-life-entry{display:flex;align-items:center;gap:13px;padding:16px 17px;background:#e8efdf;border:1px solid #c3d0b4;border-radius:12px;margin-bottom:22px}
+.campus-life-entry>span{display:grid;place-items:center;width:33px;height:35px;flex:none;border-radius:10px;background:#d5e4ca;color:#4d795a}
+.campus-life-entry>span svg{width:22px;height:22px}
+.campus-life-entry>div{flex:1;min-width:0}
+.campus-life-entry b{font:700 15px/1.4 Georgia,serif;color:#466c52}
+.campus-life-entry p{font:10px/1.7 system-ui;color:#78896c;margin:4px 0 0}
+.campus-life-entry button{min-height:44px;flex:none}
+.campus-life-map-key{list-style:none;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:10px 15px;margin:17px 0}
+.campus-life-map-key li{display:flex;gap:8px;align-items:center}
+.campus-life-map-key i{display:block;width:9px;height:9px;background:var(--person-color);transform:rotate(45deg);border:1px solid #fff7;flex:none}
+.campus-life-map-key b{display:block;font:700 11px/1.5 system-ui;color:#4b7358}
+.campus-life-map-key small{display:block;font:9px/1.6 system-ui;color:#7b8a6c}
+@media(max-width:650px){.top-actions .campus-life-hud{display:none}.campus-life-entry{gap:10px;padding:14px;flex-wrap:wrap}.campus-life-entry button{margin-left:43px}.campus-life-entry b{font-size:14px}.campus-life-map-key{gap:10px}}
+.campus-journal-filters{display:grid;gap:12px;margin:20px 0}
+.campus-journal-filters label{font:700 13px/1.6 system-ui;display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.campus-journal-filters select{max-width:100%;min-height:44px;padding:8px 12px;background:#fffaf0;color:#294e48;border:1px solid #91a68b;border-radius:8px;font:14px system-ui}
+.campus-status-filters{display:flex;gap:7px;flex-wrap:wrap}
+.campus-status-filters button{min-height:44px;padding:8px 11px;font-size:12px}
+.campus-status-filters [aria-pressed=true]{background:#315f55;color:#fffaf0}
+.campus-story-place{display:block;color:#647b68;font:12px/1.6 system-ui;margin:6px 0 12px}
+.campus-map-stories{display:grid;gap:7px;margin:15px 0}
+.campus-map-stories .location-row{width:100%;text-align:left}
+.district-dialogue{white-space:pre-line}

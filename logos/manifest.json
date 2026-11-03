@@ -1,0 +1,1053 @@
+[
+  {
+    "id": "01-mark-y-tile-blue",
+    "family": "A · Y-tile",
+    "title": "Y-tile — blue",
+    "desc": "White calendar card, blue header band, ink Y. Closest evolution of the current favicon.",
+    "type": "mark",
+    "ratio": "1:1",
+    "vb": [
+      512,
+      512
+    ],
+    "file": "svg/01-mark-y-tile-blue.svg",
+    "png": [
+      "png/marks/01-mark-y-tile-blue-512.png",
+      "png/marks/01-mark-y-tile-blue-128.png"
+    ]
+  },
+  {
+    "id": "02-mark-y-tile-green",
+    "family": "A · Y-tile",
+    "title": "Y-tile — green",
+    "desc": "Green header accent variant.",
+    "type": "mark",
+    "ratio": "1:1",
+    "vb": [
+      512,
+      512
+    ],
+    "file": "svg/02-mark-y-tile-green.svg",
+    "png": [
+      "png/marks/02-mark-y-tile-green-512.png",
+      "png/marks/02-mark-y-tile-green-128.png"
+    ]
+  },
+  {
+    "id": "03-mark-y-tile-purple",
+    "family": "A · Y-tile",
+    "title": "Y-tile — purple",
+    "desc": "Purple header accent variant.",
+    "type": "mark",
+    "ratio": "1:1",
+    "vb": [
+      512,
+      512
+    ],
+    "file": "svg/03-mark-y-tile-purple.svg",
+    "png": [
+      "png/marks/03-mark-y-tile-purple-512.png",
+      "png/marks/03-mark-y-tile-purple-128.png"
+    ]
+  },
+  {
+    "id": "04-mark-y-tile-orange",
+    "family": "A · Y-tile",
+    "title": "Y-tile — orange",
+    "desc": "Orange header accent variant.",
+    "type": "mark",
+    "ratio": "1:1",
+    "vb": [
+      512,
+      512
+    ],
+    "file": "svg/04-mark-y-tile-orange.svg",
+    "png": [
+      "png/marks/04-mark-y-tile-orange-512.png",
+      "png/marks/04-mark-y-tile-orange-128.png"
+    ]
+  },
+  {
+    "id": "05-mark-y-tile-teal",
+    "family": "A · Y-tile",
+    "title": "Y-tile — teal",
+    "desc": "Teal header accent variant.",
+    "type": "mark",
+    "ratio": "1:1",
+    "vb": [
+      512,
+      512
+    ],
+    "file": "svg/05-mark-y-tile-teal.svg",
+    "png": [
+      "png/marks/05-mark-y-tile-teal-512.png",
+      "png/marks/05-mark-y-tile-teal-128.png"
+    ]
+  },
+  {
+    "id": "06-mark-y-tile-solid-blue",
+    "family": "A · Y-tile",
+    "title": "Y-tile — solid blue",
+    "desc": "Full blue card with white Y. Direct refresh of today's favicon.",
+    "type": "mark",
+    "ratio": "1:1",
+    "vb": [
+      512,
+      512
+    ],
+    "file": "svg/06-mark-y-tile-solid-blue.svg",
+    "png": [
+      "png/marks/06-mark-y-tile-solid-blue-512.png",
+      "png/marks/06-mark-y-tile-solid-blue-128.png"
+    ]
+  },
+  {
+    "id": "07-mark-y-tile-mono",
+    "family": "A · Y-tile",
+    "title": "Y-tile — mono",
+    "desc": "Single-color repro version: ink header, ink Y, ink shadow.",
+    "type": "mark",
+    "ratio": "1:1",
+    "vb": [
+      512,
+      512
+    ],
+    "file": "svg/07-mark-y-tile-mono.svg",
+    "png": [
+      "png/marks/07-mark-y-tile-mono-512.png",
+      "png/marks/07-mark-y-tile-mono-128.png"
+    ]
+  },
+  {
+    "id": "08-mark-y-tile-dark",
+    "family": "A · Y-tile",
+    "title": "Y-tile — dark mode",
+    "desc": "Inverted card for dark backgrounds; blue header, white Y.",
+    "type": "mark",
+    "ratio": "1:1",
+    "vb": [
+      512,
+      512
+    ],
+    "file": "svg/08-mark-y-tile-dark.svg",
+    "png": [
+      "png/marks/08-mark-y-tile-dark-512.png",
+      "png/marks/08-mark-y-tile-dark-128.png"
+    ]
+  },
+  {
+    "id": "09-mark-y-date-blue",
+    "family": "B · Y-date",
+    "title": "Y-date — blue",
+    "desc": "Calendar page where the Y is the date; SEP header, event chip, notification dot.",
+    "type": "mark",
+    "ratio": "1:1",
+    "vb": [
+      512,
+      512
+    ],
+    "file": "svg/09-mark-y-date-blue.svg",
+    "png": [
+      "png/marks/09-mark-y-date-blue-512.png",
+      "png/marks/09-mark-y-date-blue-128.png"
+    ]
+  },
+  {
+    "id": "10-mark-y-date-orange",
+    "family": "B · Y-date",
+    "title": "Y-date — orange",
+    "desc": "Orange accent variant of the Y-date page.",
+    "type": "mark",
+    "ratio": "1:1",
+    "vb": [
+      512,
+      512
+    ],
+    "file": "svg/10-mark-y-date-orange.svg",
+    "png": [
+      "png/marks/10-mark-y-date-orange-512.png",
+      "png/marks/10-mark-y-date-orange-128.png"
+    ]
+  },
+  {
+    "id": "11-mark-y-date-green",
+    "family": "B · Y-date",
+    "title": "Y-date — green",
+    "desc": "Green accent variant of the Y-date page.",
+    "type": "mark",
+    "ratio": "1:1",
+    "vb": [
+      512,
+      512
+    ],
+    "file": "svg/11-mark-y-date-green.svg",
+    "png": [
+      "png/marks/11-mark-y-date-green-512.png",
+      "png/marks/11-mark-y-date-green-128.png"
+    ]
+  },
+  {
+    "id": "12-mark-bc-lettermark",
+    "family": "C · Lettermark",
+    "title": "BC lettermark",
+    "desc": "\"BC\" monogram on a page with folded calendar corner.",
+    "type": "mark",
+    "ratio": "1:1",
+    "vb": [
+      512,
+      512
+    ],
+    "file": "svg/12-mark-bc-lettermark.svg",
+    "png": [
+      "png/marks/12-mark-bc-lettermark-512.png",
+      "png/marks/12-mark-bc-lettermark-128.png"
+    ]
+  },
+  {
+    "id": "13-mark-byu-lettermark",
+    "family": "C · Lettermark",
+    "title": "BYU lettermark",
+    "desc": "\"BYU\" on a page with folded calendar corner.",
+    "type": "mark",
+    "ratio": "1:1",
+    "vb": [
+      512,
+      512
+    ],
+    "file": "svg/13-mark-byu-lettermark.svg",
+    "png": [
+      "png/marks/13-mark-byu-lettermark-512.png",
+      "png/marks/13-mark-byu-lettermark-128.png"
+    ]
+  },
+  {
+    "id": "14-mark-dot-y",
+    "family": "D · Event-dot Y",
+    "title": "Event-dot Y",
+    "desc": "Y assembled from calendar event dots in the five accent colors. Transparent background.",
+    "type": "mark",
+    "ratio": "1:1",
+    "vb": [
+      512,
+      512
+    ],
+    "file": "svg/14-mark-dot-y.svg",
+    "png": [
+      "png/marks/14-mark-dot-y-512.png",
+      "png/marks/14-mark-dot-y-128.png"
+    ]
+  },
+  {
+    "id": "15-mark-dot-y-tile",
+    "family": "D · Event-dot Y",
+    "title": "Event-dot Y — on card",
+    "desc": "Dot-mosaic Y on a bordered white card.",
+    "type": "mark",
+    "ratio": "1:1",
+    "vb": [
+      512,
+      512
+    ],
+    "file": "svg/15-mark-dot-y-tile.svg",
+    "png": [
+      "png/marks/15-mark-dot-y-tile-512.png",
+      "png/marks/15-mark-dot-y-tile-128.png"
+    ]
+  },
+  {
+    "id": "16-mark-stack-pages",
+    "family": "E · One-calendar stack",
+    "title": "One-calendar stack",
+    "desc": "Scattered event pages collapsing into one calendar card — the product story as a mark.",
+    "type": "mark",
+    "ratio": "1:1",
+    "vb": [
+      512,
+      512
+    ],
+    "file": "svg/16-mark-stack-pages.svg",
+    "png": [
+      "png/marks/16-mark-stack-pages-512.png",
+      "png/marks/16-mark-stack-pages-128.png"
+    ]
+  },
+  {
+    "id": "17-wordmark-byu-calendar",
+    "family": "F · Wordmark",
+    "title": "Wordmark — two-tone",
+    "desc": "Archivo ExtraBold: ink \"BYU\" + blue \"Calendar\".",
+    "type": "wordmark",
+    "ratio": "wide",
+    "vb": [
+      1159,
+      227.2
+    ],
+    "file": "svg/17-wordmark-byu-calendar.svg",
+    "png": [
+      "png/wordmarks/17-wordmark-byu-calendar-1600.png"
+    ]
+  },
+  {
+    "id": "18-wordmark-byu-calendar-dark",
+    "family": "F · Wordmark",
+    "title": "Wordmark — dark mode",
+    "desc": "White/pale-blue wordmark for dark backgrounds.",
+    "type": "wordmark",
+    "ratio": "wide",
+    "vb": [
+      1159,
+      227.2
+    ],
+    "file": "svg/18-wordmark-byu-calendar-dark.svg",
+    "png": [
+      "png/wordmarks/18-wordmark-byu-calendar-dark-1600.png"
+    ]
+  },
+  {
+    "id": "19-wordmark-caps-period",
+    "family": "F · Wordmark",
+    "title": "Wordmark — caps + period",
+    "desc": "Archivo Black caps with an orange full-stop.",
+    "type": "wordmark",
+    "ratio": "wide",
+    "vb": [
+      1357,
+      213
+    ],
+    "file": "svg/19-wordmark-caps-period.svg",
+    "png": [
+      "png/wordmarks/19-wordmark-caps-period-1600.png"
+    ]
+  },
+  {
+    "id": "20-wordmark-terminal",
+    "family": "F · Wordmark",
+    "title": "Wordmark — terminal",
+    "desc": "Roboto Mono lowercase with a blue block cursor. Nods to the app's mono labels.",
+    "type": "wordmark",
+    "ratio": "wide",
+    "vb": [
+      1094,
+      195
+    ],
+    "file": "svg/20-wordmark-terminal.svg",
+    "png": [
+      "png/wordmarks/20-wordmark-terminal-1600.png"
+    ]
+  },
+  {
+    "id": "21-wordmark-stacked",
+    "family": "F · Wordmark",
+    "title": "Wordmark — stacked",
+    "desc": "Big Archivo Black BYU over tracked-out mono CALENDAR with dotted rules.",
+    "type": "wordmark",
+    "ratio": "square-ish",
+    "vb": [
+      557,
+      340
+    ],
+    "file": "svg/21-wordmark-stacked.svg",
+    "png": [
+      "png/wordmarks/21-wordmark-stacked-1600.png"
+    ]
+  },
+  {
+    "id": "22-lockup-horizontal",
+    "family": "G · Lockup",
+    "title": "Horizontal lockup",
+    "desc": "Y-tile + two-tone wordmark + orange event dot. Primary header lockup candidate.",
+    "type": "lockup",
+    "ratio": "wide",
+    "vb": [
+      1389,
+      246
+    ],
+    "file": "svg/22-lockup-horizontal.svg",
+    "png": [
+      "png/lockups/22-lockup-horizontal-1600.png"
+    ]
+  },
+  {
+    "id": "23-lockup-horizontal-dark",
+    "family": "G · Lockup",
+    "title": "Horizontal lockup — dark",
+    "desc": "Solid-blue tile + light wordmark for dark surfaces.",
+    "type": "lockup",
+    "ratio": "wide",
+    "vb": [
+      1389,
+      246
+    ],
+    "file": "svg/23-lockup-horizontal-dark.svg",
+    "png": [
+      "png/lockups/23-lockup-horizontal-dark-1600.png"
+    ]
+  },
+  {
+    "id": "24-lockup-stacked",
+    "family": "G · Lockup",
+    "title": "Stacked lockup",
+    "desc": "Y-tile over centered wordmark. Square-ish footprint for splash screens.",
+    "type": "lockup",
+    "ratio": "square-ish",
+    "vb": [
+      752,
+      505
+    ],
+    "file": "svg/24-lockup-stacked.svg",
+    "png": [
+      "png/lockups/24-lockup-stacked-1600.png"
+    ]
+  },
+  {
+    "id": "25-lockup-stacked-pages",
+    "family": "G · Lockup",
+    "title": "Stacked lockup — story mark",
+    "desc": "One-calendar stack over big BYU + tracked CALENDAR.",
+    "type": "lockup",
+    "ratio": "square-ish",
+    "vb": [
+      410,
+      536
+    ],
+    "file": "svg/25-lockup-stacked-pages.svg",
+    "png": [
+      "png/lockups/25-lockup-stacked-pages-1600.png"
+    ]
+  },
+  {
+    "id": "26-lockup-mono",
+    "family": "G · Lockup",
+    "title": "Mono lockup",
+    "desc": "All-ink version for single-color printing or embroidery.",
+    "type": "lockup",
+    "ratio": "wide",
+    "vb": [
+      1579,
+      246
+    ],
+    "file": "svg/26-lockup-mono.svg",
+    "png": [
+      "png/lockups/26-lockup-mono-1600.png"
+    ]
+  },
+  {
+    "id": "27-emblem-badge",
+    "family": "H · Emblem",
+    "title": "Badge emblem",
+    "desc": "Circular badge: Y-tile center, BYU CALENDAR around the ring, EST·2026 at bottom. Sticker/merch vibe.",
+    "type": "emblem",
+    "ratio": "1:1",
+    "vb": [
+      1024,
+      1024
+    ],
+    "file": "svg/27-emblem-badge.svg",
+    "png": [
+      "png/emblem/27-emblem-badge-1024.png",
+      "png/emblem/27-emblem-badge-256.png"
+    ]
+  },
+  {
+    "id": "28-banner-og-refined",
+    "family": "I · Banner",
+    "title": "OG banner — product",
+    "desc": "1200×630 social preview: headline, URL chip, and a this-week calendar card with real fonts.",
+    "type": "banner",
+    "ratio": "1200×630",
+    "vb": [
+      1200,
+      630
+    ],
+    "file": "svg/28-banner-og-refined.svg",
+    "png": [
+      "png/banners/28-banner-og-refined-1200x630.png"
+    ]
+  },
+  {
+    "id": "29-banner-og-centered",
+    "family": "I · Banner",
+    "title": "OG banner — centered",
+    "desc": "1200×630 framed centered lockup with dotted offset frame.",
+    "type": "banner",
+    "ratio": "1200×630",
+    "vb": [
+      1200,
+      630
+    ],
+    "file": "svg/29-banner-og-centered.svg",
+    "png": [
+      "png/banners/29-banner-og-centered-1200x630.png"
+    ]
+  },
+  {
+    "id": "30-banner-header",
+    "family": "I · Banner",
+    "title": "Social header",
+    "desc": "1500×500 centered wordmark with event-dot strip. Twitter/X or LinkedIn cover.",
+    "type": "banner",
+    "ratio": "1500×500",
+    "vb": [
+      1500,
+      500
+    ],
+    "file": "svg/30-banner-header.svg",
+    "png": [
+      "png/banners/30-banner-header-1500x500.png"
+    ]
+  },
+  {
+    "id": "31-favicon-blue",
+    "family": "J · Favicon",
+    "title": "Favicon — blue",
+    "desc": "Blue tile, white Y. The workhorse favicon. 16/32/48 PNG + SVG in favicons/.",
+    "type": "favicon",
+    "ratio": "1:1",
+    "vb": [
+      64,
+      64
+    ],
+    "file": "svg/31-favicon-blue.svg",
+    "png": [
+      "favicons/31-favicon-blue-16.png",
+      "favicons/31-favicon-blue-32.png",
+      "favicons/31-favicon-blue-48.png"
+    ]
+  },
+  {
+    "id": "32-favicon-blue-rings",
+    "family": "J · Favicon",
+    "title": "Favicon — blue + rings",
+    "desc": "Blue tile with calendar ring posts. 16/32/48 PNG + SVG in favicons/.",
+    "type": "favicon",
+    "ratio": "1:1",
+    "vb": [
+      64,
+      64
+    ],
+    "file": "svg/32-favicon-blue-rings.svg",
+    "png": [
+      "favicons/32-favicon-blue-rings-16.png",
+      "favicons/32-favicon-blue-rings-32.png",
+      "favicons/32-favicon-blue-rings-48.png"
+    ]
+  },
+  {
+    "id": "33-favicon-ink",
+    "family": "J · Favicon",
+    "title": "Favicon — ink",
+    "desc": "Dark tile with blue Y. 16/32/48 PNG + SVG in favicons/.",
+    "type": "favicon",
+    "ratio": "1:1",
+    "vb": [
+      64,
+      64
+    ],
+    "file": "svg/33-favicon-ink.svg",
+    "png": [
+      "favicons/33-favicon-ink-16.png",
+      "favicons/33-favicon-ink-32.png",
+      "favicons/33-favicon-ink-48.png"
+    ]
+  },
+  {
+    "id": "34-favicon-light",
+    "family": "J · Favicon",
+    "title": "Favicon — light",
+    "desc": "White tile, ink border, blue Y (light browser themes). 16/32/48 PNG + SVG in favicons/.",
+    "type": "favicon",
+    "ratio": "1:1",
+    "vb": [
+      64,
+      64
+    ],
+    "file": "svg/34-favicon-light.svg",
+    "png": [
+      "favicons/34-favicon-light-16.png",
+      "favicons/34-favicon-light-32.png",
+      "favicons/34-favicon-light-48.png"
+    ]
+  },
+  {
+    "id": "35-favicon-headerline",
+    "family": "J · Favicon",
+    "title": "Favicon — outline",
+    "desc": "White tile, blue header band, rings, ink Y. 16/32/48 PNG + SVG in favicons/.",
+    "type": "favicon",
+    "ratio": "1:1",
+    "vb": [
+      64,
+      64
+    ],
+    "file": "svg/35-favicon-headerline.svg",
+    "png": [
+      "favicons/35-favicon-headerline-16.png",
+      "favicons/35-favicon-headerline-32.png",
+      "favicons/35-favicon-headerline-48.png"
+    ]
+  },
+  {
+    "id": "36-favicon-ico",
+    "family": "J · Favicon",
+    "title": "favicon.ico (multi-size)",
+    "desc": "Classic multi-resolution ICO built from the blue favicon (16/32/48).",
+    "type": "favicon",
+    "ratio": "1:1",
+    "vb": [
+      48,
+      48
+    ],
+    "file": "favicons/favicon.ico"
+  },
+  {
+    "id": "37-appicon-card",
+    "family": "K · App icon",
+    "title": "App icon — calendar card",
+    "desc": "Full-bleed blue with white event-card mark (refined current style). 192/512.",
+    "type": "app-icon",
+    "ratio": "1:1",
+    "vb": [
+      512,
+      512
+    ],
+    "file": "svg/37-appicon-card.svg",
+    "png": [
+      "app-icons/37-appicon-card-512.png",
+      "app-icons/37-appicon-card-192.png"
+    ]
+  },
+  {
+    "id": "38-appicon-card-maskable",
+    "family": "K · App icon",
+    "title": "App icon — maskable",
+    "desc": "Same card design inside the Android maskable safe zone. 512.",
+    "type": "app-icon",
+    "ratio": "1:1",
+    "vb": [
+      512,
+      512
+    ],
+    "file": "svg/38-appicon-card-maskable.svg",
+    "png": [
+      "app-icons/38-appicon-card-maskable-512.png"
+    ]
+  },
+  {
+    "id": "39-appicon-light",
+    "family": "K · App icon",
+    "title": "App icon — light",
+    "desc": "Y-tile mark on pale-blue field. Light-theme launcher icon. 192/512.",
+    "type": "app-icon",
+    "ratio": "1:1",
+    "vb": [
+      512,
+      512
+    ],
+    "file": "svg/39-appicon-light.svg",
+    "png": [
+      "app-icons/39-appicon-light-512.png",
+      "app-icons/39-appicon-light-192.png"
+    ]
+  },
+  {
+    "id": "40-appicon-appletouch",
+    "family": "K · App icon",
+    "title": "App icon — Apple touch",
+    "desc": "Y-tile on white, 180×180 for iOS home screens.",
+    "type": "app-icon",
+    "ratio": "1:1",
+    "vb": [
+      512,
+      512
+    ],
+    "file": "svg/40-appicon-appletouch.svg",
+    "png": [
+      "app-icons/40-appicon-appletouch-180.png"
+    ]
+  },
+  {
+    "id": "46-glyph-y-ink",
+    "family": "M · Big-Y glyph",
+    "title": "Big Y — ink field",
+    "desc": "Chunky Archivo Y in white on a near-black rounded square. Favicon-proof at any size.",
+    "type": "mark",
+    "ratio": "1:1",
+    "vb": [
+      512,
+      512
+    ],
+    "file": "svg/46-glyph-y-ink.svg",
+    "png": [
+      "png/marks/46-glyph-y-ink-512.png",
+      "png/marks/46-glyph-y-ink-128.png"
+    ]
+  },
+  {
+    "id": "47-glyph-y-blue",
+    "family": "M · Big-Y glyph",
+    "title": "Big Y — blue field",
+    "desc": "White Y on the app blue. Simple, ownable, unmistakably an app icon.",
+    "type": "mark",
+    "ratio": "1:1",
+    "vb": [
+      512,
+      512
+    ],
+    "file": "svg/47-glyph-y-blue.svg",
+    "png": [
+      "png/marks/47-glyph-y-blue-512.png",
+      "png/marks/47-glyph-y-blue-128.png"
+    ]
+  },
+  {
+    "id": "48-glyph-y-orange",
+    "family": "M · Big-Y glyph",
+    "title": "Big Y — orange field",
+    "desc": "White Y on orange — the friendliest accent in the palette.",
+    "type": "mark",
+    "ratio": "1:1",
+    "vb": [
+      512,
+      512
+    ],
+    "file": "svg/48-glyph-y-orange.svg",
+    "png": [
+      "png/marks/48-glyph-y-orange-512.png",
+      "png/marks/48-glyph-y-orange-128.png"
+    ]
+  },
+  {
+    "id": "49-glyph-y-teal",
+    "family": "M · Big-Y glyph",
+    "title": "Big Y — teal field",
+    "desc": "White Y on teal. Cooler, calmer read than blue.",
+    "type": "mark",
+    "ratio": "1:1",
+    "vb": [
+      512,
+      512
+    ],
+    "file": "svg/49-glyph-y-teal.svg",
+    "png": [
+      "png/marks/49-glyph-y-teal-512.png",
+      "png/marks/49-glyph-y-teal-128.png"
+    ]
+  },
+  {
+    "id": "50-glyph-y-outline",
+    "family": "M · Big-Y glyph",
+    "title": "Big Y — hollow outline",
+    "desc": "Outlined Y, no fill. Sporty, light, works on photos.",
+    "type": "mark",
+    "ratio": "1:1",
+    "vb": [
+      512,
+      512
+    ],
+    "file": "svg/50-glyph-y-outline.svg",
+    "png": [
+      "png/marks/50-glyph-y-outline-512.png",
+      "png/marks/50-glyph-y-outline-128.png"
+    ]
+  },
+  {
+    "id": "51-glyph-y-split",
+    "family": "M · Big-Y glyph",
+    "title": "Big Y — split tone",
+    "desc": "Y split straight down the middle: blue left, teal right.",
+    "type": "mark",
+    "ratio": "1:1",
+    "vb": [
+      512,
+      512
+    ],
+    "file": "svg/51-glyph-y-split.svg",
+    "png": [
+      "png/marks/51-glyph-y-split-512.png",
+      "png/marks/51-glyph-y-split-128.png"
+    ]
+  },
+  {
+    "id": "52-glyph-y-gradient",
+    "family": "M · Big-Y glyph",
+    "title": "Big Y — gradient",
+    "desc": "Blue→teal diagonal gradient. Modern-SaaS take, furthest from collegiate.",
+    "type": "mark",
+    "ratio": "1:1",
+    "vb": [
+      512,
+      512
+    ],
+    "file": "svg/52-glyph-y-gradient.svg",
+    "png": [
+      "png/marks/52-glyph-y-gradient-512.png",
+      "png/marks/52-glyph-y-gradient-128.png"
+    ]
+  },
+  {
+    "id": "53-built-y-capsule",
+    "family": "N · Constructed Y",
+    "title": "Capsule Y",
+    "desc": "Y drawn as three fat rounded strokes — friendly, geometric, font-free.",
+    "type": "mark",
+    "ratio": "1:1",
+    "vb": [
+      512,
+      512
+    ],
+    "file": "svg/53-built-y-capsule.svg",
+    "png": [
+      "png/marks/53-built-y-capsule-512.png",
+      "png/marks/53-built-y-capsule-128.png"
+    ]
+  },
+  {
+    "id": "54-built-y-eventbars",
+    "family": "N · Constructed Y",
+    "title": "Event-bar Y",
+    "desc": "The Y built from the app's own week-view event chips — pale cards with color tabs. Calendar-coded without drawing a calendar.",
+    "type": "mark",
+    "ratio": "1:1",
+    "vb": [
+      512,
+      512
+    ],
+    "file": "svg/54-built-y-eventbars.svg",
+    "png": [
+      "png/marks/54-built-y-eventbars-512.png",
+      "png/marks/54-built-y-eventbars-128.png"
+    ]
+  },
+  {
+    "id": "55-built-y-rings",
+    "family": "N · Constructed Y",
+    "title": "Binder-ring Y",
+    "desc": "Capsule Y with calendar binder rings riding the arm tips. Playful calendar cue.",
+    "type": "mark",
+    "ratio": "1:1",
+    "vb": [
+      512,
+      512
+    ],
+    "file": "svg/55-built-y-rings.svg",
+    "png": [
+      "png/marks/55-built-y-rings-512.png",
+      "png/marks/55-built-y-rings-128.png"
+    ]
+  },
+  {
+    "id": "56-built-y-chip",
+    "family": "N · Constructed Y",
+    "title": "Notification Y",
+    "desc": "Giant ink Y with an orange notification chip riding its shoulder. Events live here.",
+    "type": "mark",
+    "ratio": "1:1",
+    "vb": [
+      512,
+      512
+    ],
+    "file": "svg/56-built-y-chip.svg",
+    "png": [
+      "png/marks/56-built-y-chip-512.png",
+      "png/marks/56-built-y-chip-128.png"
+    ]
+  },
+  {
+    "id": "57-built-y-grid",
+    "family": "N · Constructed Y",
+    "title": "Grid Y",
+    "desc": "Y as a 7×7 grid of rounded tiles with three accent tiles — calendar cells forming the letter.",
+    "type": "mark",
+    "ratio": "1:1",
+    "vb": [
+      512,
+      512
+    ],
+    "file": "svg/57-built-y-grid.svg",
+    "png": [
+      "png/marks/57-built-y-grid-512.png",
+      "png/marks/57-built-y-grid-128.png"
+    ]
+  },
+  {
+    "id": "58-playful-y-sticker",
+    "family": "O · Playful Y",
+    "title": "Sticker Y",
+    "desc": "Tilted sticker with hard blue shadow and an orange sparkle. Laptop-sticker energy.",
+    "type": "mark",
+    "ratio": "1:1",
+    "vb": [
+      512,
+      512
+    ],
+    "file": "svg/58-playful-y-sticker.svg",
+    "png": [
+      "png/marks/58-playful-y-sticker-512.png",
+      "png/marks/58-playful-y-sticker-128.png"
+    ]
+  },
+  {
+    "id": "59-playful-y-squiggle",
+    "family": "O · Playful Y",
+    "title": "Squiggle Y",
+    "desc": "Hand-drawn orange squiggle under the Y — a highlighter swipe.",
+    "type": "mark",
+    "ratio": "1:1",
+    "vb": [
+      512,
+      512
+    ],
+    "file": "svg/59-playful-y-squiggle.svg",
+    "png": [
+      "png/marks/59-playful-y-squiggle-512.png",
+      "png/marks/59-playful-y-squiggle-128.png"
+    ]
+  },
+  {
+    "id": "60-playful-y-tricolor",
+    "family": "O · Playful Y",
+    "title": "Tri-color capsule Y",
+    "desc": "Capsule Y in blue / green / orange — the event-palette as the letter itself.",
+    "type": "mark",
+    "ratio": "1:1",
+    "vb": [
+      512,
+      512
+    ],
+    "file": "svg/60-playful-y-tricolor.svg",
+    "png": [
+      "png/marks/60-playful-y-tricolor-512.png",
+      "png/marks/60-playful-y-tricolor-128.png"
+    ]
+  },
+  {
+    "id": "61-lockup-y-mono",
+    "family": "P · Big-Y lockup",
+    "title": "Lockup — capsule Y + mono",
+    "desc": "Blue capsule Y over lowercase mono wordmark with dotted rule. Square-ish splash footprint.",
+    "type": "lockup",
+    "ratio": "square-ish",
+    "vb": [
+      680,
+      680
+    ],
+    "file": "svg/61-lockup-y-mono.svg",
+    "png": [
+      "png/lockups/61-lockup-y-mono-1600.png"
+    ]
+  },
+  {
+    "id": "62-lockup-y-unofficial",
+    "family": "P · Big-Y lockup",
+    "title": "Lockup — “the unofficial one”",
+    "desc": "Big Y + wordmark with an honest orange tag: THE UNOFFICIAL ONE. Directly answers “not BYU themselves”.",
+    "type": "lockup",
+    "ratio": "wide",
+    "vb": [
+      900,
+      460
+    ],
+    "file": "svg/62-lockup-y-unofficial.svg",
+    "png": [
+      "png/lockups/62-lockup-y-unofficial-1600.png"
+    ]
+  },
+  {
+    "id": "63-badge-y-circle",
+    "family": "P · Big-Y lockup",
+    "title": "Circle badge Y",
+    "desc": "Thick ink ring, big blue Y, two accent dots. Minimal stamp-style badge.",
+    "type": "mark",
+    "ratio": "1:1",
+    "vb": [
+      512,
+      512
+    ],
+    "file": "svg/63-badge-y-circle.svg",
+    "png": [
+      "png/marks/63-badge-y-circle-512.png",
+      "png/marks/63-badge-y-circle-128.png"
+    ]
+  },
+  {
+    "id": "64-lockup-y-horizontal",
+    "family": "P · Big-Y lockup",
+    "title": "Lockup — capsule Y horizontal",
+    "desc": "Blue capsule Y, dotted divider, wordmark with quiet “unofficial” note and event dots.",
+    "type": "lockup",
+    "ratio": "wide",
+    "vb": [
+      980,
+      380
+    ],
+    "file": "svg/64-lockup-y-horizontal.svg",
+    "png": [
+      "png/lockups/64-lockup-y-horizontal-1600.png"
+    ]
+  },
+  {
+    "id": "65-glyph-y-blue-fill",
+    "family": "M · Big-Y glyph",
+    "title": "Big Y — blue fill",
+    "desc": "The hollow Y filled solid blue — now the live favicon; its hollow sibling (50) is the header logo.",
+    "type": "mark",
+    "ratio": "1:1",
+    "vb": [
+      512,
+      512
+    ],
+    "file": "svg/65-glyph-y-blue-fill.svg",
+    "png": [
+      "png/marks/65-glyph-y-blue-fill-512.png",
+      "png/marks/65-glyph-y-blue-fill-128.png"
+    ]
+  },
+  {
+    "id": "66-banner-og-y-stacked",
+    "family": "I · Banner",
+    "title": "OG — Y left + stacked",
+    "desc": "Simple OG: solid blue Y left, stacked BYU / Calendar., URL.",
+    "type": "banner",
+    "ratio": "1200×630",
+    "vb": [
+      1200,
+      630
+    ],
+    "file": "svg/66-banner-og-y-stacked.svg",
+    "png": [
+      "png/banners/66-banner-og-y-stacked-1200x630.png"
+    ]
+  },
+  {
+    "id": "67-banner-og-y-centered",
+    "family": "I · Banner",
+    "title": "OG — centered (LIVE)",
+    "desc": "Simple OG: centered blue Y over one-line BYU Calendar + URL. Installed as public/og-image.png.",
+    "type": "banner",
+    "ratio": "1200×630",
+    "vb": [
+      1200,
+      630
+    ],
+    "file": "svg/67-banner-og-y-centered.svg",
+    "png": [
+      "png/banners/67-banner-og-y-centered-1200x630.png"
+    ]
+  },
+  {
+    "id": "68-banner-og-y-outline",
+    "family": "I · Banner",
+    "title": "OG — hollow Y left",
+    "desc": "Variant A layout with the hollow outline Y.",
+    "type": "banner",
+    "ratio": "1200×630",
+    "vb": [
+      1200,
+      630
+    ],
+    "file": "svg/68-banner-og-y-outline.svg",
+    "png": [
+      "png/banners/68-banner-og-y-outline-1200x630.png"
+    ]
+  }
+]

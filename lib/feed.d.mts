@@ -1,0 +1,17 @@
+export const FEED_ORIGIN: string;
+export const FEED_PATH: string;
+export const FEED_EVENT_CAP: number;
+export const FEED_MAX_EVENTS_PER_QUERY: number;
+export const FEED_MAX_TAGS: number;
+export const FEED_MAX_CATEGORIES: number;
+export const FEED_DETAIL_TAGS: string[];
+export type FeedFilter = {query: string; categories: string[]; tags: string[]};
+export type FeedOptions = {name?: string; description?: string; origin?: string; now?: Date};
+export function feedFilter(params: URLSearchParams): FeedFilter;
+export function feedSearch(filter: FeedFilter): string;
+export function feedSummary(filter: FeedFilter): string;
+export function feedEvents<T>(events: T[], filter: FeedFilter, now?: Date): T[];
+export function savedFeedEvents<T>(events: T[], savedIds: string[], now?: Date): T[];
+export function buildCalendarFeed(events: unknown[], options?: FeedOptions): string;
+export function feedToken(userId: string, secret: string): Promise<string>;
+export function verifyFeedToken(token: string | null, secret: string): Promise<string | null>;

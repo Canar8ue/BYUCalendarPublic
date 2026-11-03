@@ -1,0 +1,41 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1789405606963,
+      "tag": "0000_pink_scarlet_spider",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1789445971801,
+      "tag": "0001_byu_accounts_community",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1789712428806,
+      "tag": "0002_moderator_inbox",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1789721191350,
+      "tag": "0003_usage_analytics",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1790026804209,
+      "tag": "0004_event_moderation",
+      "breakpoints": true
+    }
+  ]
+}

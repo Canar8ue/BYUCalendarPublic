@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /signin
+Disallow: /account
+Disallow: /moderation
+Disallow: /listings/new
+Disallow: /api/
+
+Sitemap: https://byucalendar.com/sitemap.xml

@@ -1,0 +1,277 @@
+{
+  "version": 1,
+  "assets": {
+    "music-day": {
+      "id": "music-day",
+      "kind": "music",
+      "title": "Taking the Long Way",
+      "seconds": 75,
+      "file": "music-day-3796f85c32cd.mp3",
+      "url": "/explorer/audio/music-day-3796f85c32cd.mp3",
+      "bytes": 1800620,
+      "sha256": "3796f85c32cd195136df9ce39427e285b7b82ee2fc47170e2f2e8a879829266f"
+    },
+    "music-sunset": {
+      "id": "music-sunset",
+      "kind": "music",
+      "title": "A Good Place to Get Lost",
+      "seconds": 75,
+      "file": "music-sunset-aae403bd713b.mp3",
+      "url": "/explorer/audio/music-sunset-aae403bd713b.mp3",
+      "bytes": 1800620,
+      "sha256": "aae403bd713b290c3705fbf1f60520982f89d74c3a99e44c23613c3872da7f75"
+    },
+    "music-night": {
+      "id": "music-night",
+      "kind": "music",
+      "title": "After the Last Class",
+      "seconds": 75,
+      "file": "music-night-6e890e664190.mp3",
+      "url": "/explorer/audio/music-night-6e890e664190.mp3",
+      "bytes": 1800620,
+      "sha256": "6e890e6641902fa88d3df9f2d3df00f8d5ba3452f0929108a3c6e216032d0a81"
+    },
+    "ambience": {
+      "id": "ambience",
+      "kind": "effect",
+      "seconds": 16,
+      "loop": true,
+      "file": "ambience-d7da9c67d927.mp3",
+      "url": "/explorer/audio/ambience-d7da9c67d927.mp3",
+      "bytes": 257087,
+      "sha256": "d7da9c67d927b5b2f142182b166966daef3005cea785b196e6c83e4eb479dbc1"
+    },
+    "scooter": {
+      "id": "scooter",
+      "kind": "effect",
+      "seconds": 5,
+      "loop": true,
+      "file": "scooter-51ceb8f24bc6.mp3",
+      "url": "/explorer/audio/scooter-51ceb8f24bc6.mp3",
+      "bytes": 81127,
+      "sha256": "51ceb8f24bc6c11f2e00068f72159ad1fe8bcc2921c12a930b9c951fdf243f05"
+    },
+    "step": {
+      "id": "step",
+      "kind": "effect",
+      "seconds": 0.6,
+      "loop": false,
+      "file": "step-67ed7187bc63.mp3",
+      "url": "/explorer/audio/step-67ed7187bc63.mp3",
+      "bytes": 10492,
+      "sha256": "67ed7187bc63dfbb75b0b535eb6b26d0d6b41b4abf04caf822402bd5d479959f"
+    },
+    "cat": {
+      "id": "cat",
+      "kind": "effect",
+      "seconds": 1.4,
+      "loop": false,
+      "file": "cat-e2df7b5ea1f7.mp3",
+      "url": "/explorer/audio/cat-e2df7b5ea1f7.mp3",
+      "bytes": 23030,
+      "sha256": "e2df7b5ea1f73fb8d2685c63542590e7e2b93561945d10adc94b2e0cd6805f3f"
+    },
+    "discovery": {
+      "id": "discovery",
+      "kind": "effect",
+      "seconds": 2.1,
+      "loop": false,
+      "file": "discovery-e8bd852a3a92.mp3",
+      "url": "/explorer/audio/discovery-e8bd852a3a92.mp3",
+      "bytes": 34315,
+      "sha256": "e8bd852a3a925b5323175c27854d5163d17a2347b2a58c067fecd0e07e60c1d3"
+    },
+    "quest": {
+      "id": "quest",
+      "kind": "effect",
+      "seconds": 3.5,
+      "loop": false,
+      "file": "quest-0953b96db3bf.mp3",
+      "url": "/explorer/audio/quest-0953b96db3bf.mp3",
+      "bytes": 56885,
+      "sha256": "0953b96db3bf54eb63f75c8c1d7865e5b9c4ecef8dc5d573564a87be72d80b0b"
+    },
+    "fragment": {
+      "id": "fragment",
+      "kind": "effect",
+      "seconds": 3,
+      "loop": false,
+      "file": "fragment-3e3df90827ae.mp3",
+      "url": "/explorer/audio/fragment-3e3df90827ae.mp3",
+      "bytes": 48944,
+      "sha256": "3e3df90827ae0fde6cc54f3e432432c0e6b3c7b0e59afe5789b7d487904670bf"
+    },
+    "checkpoint": {
+      "id": "checkpoint",
+      "kind": "effect",
+      "seconds": 0.7,
+      "loop": false,
+      "file": "checkpoint-c41af824d57f.mp3",
+      "url": "/explorer/audio/checkpoint-c41af824d57f.mp3",
+      "bytes": 12163,
+      "sha256": "c41af824d57f89d18dc216f8bdb00c8e838dd8fe5324eb506912a74a2a77ddd9"
+    },
+    "shutter": {
+      "id": "shutter",
+      "kind": "effect",
+      "seconds": 0.6,
+      "loop": false,
+      "file": "shutter-bbad61ae7d1b.mp3",
+      "url": "/explorer/audio/shutter-bbad61ae7d1b.mp3",
+      "bytes": 10492,
+      "sha256": "bbad61ae7d1bbf30cb8a80184c3a8fc58d17cbcf031f040e95f7b0fdc53f5730"
+    },
+    "horn": {
+      "id": "horn",
+      "kind": "effect",
+      "seconds": 0.8,
+      "loop": false,
+      "file": "horn-2b9226f81d39.mp3",
+      "url": "/explorer/audio/horn-2b9226f81d39.mp3",
+      "bytes": 13835,
+      "sha256": "2b9226f81d3995ceee4fc6a7a588fc3a9c918cc4eb8220e05f53620a983c11ba"
+    },
+    "voice-intro": {
+      "id": "voice-intro",
+      "kind": "voice",
+      "speaker": "Maya",
+      "caption": "I’m Maya. Four pieces of your lost page are somewhere out here. Start with the library. Follow the gold marker.",
+      "voice": "EXAVITQu4vr4xnSDxMaL",
+      "file": "voice-intro-954cf98fd007.mp3",
+      "url": "/explorer/audio/voice-intro-954cf98fd007.mp3",
+      "bytes": 116653,
+      "sha256": "954cf98fd007f0bb698c6979b6f6089c1b754537432f1a372b4df045f2546ee9",
+      "edit": {
+        "sourceSha256": "fc874e57a526d978a9ea742d877f706e04b330035748b2ce505d7b0fb970fca6",
+        "start": 2.76,
+        "end": 9.97
+      }
+    },
+    "voice-fragment-orientation": {
+      "id": "voice-fragment-orientation",
+      "kind": "voice",
+      "speaker": "Maya",
+      "caption": "Your first piece! The library, the student center, and a little curiosity. That’s a pretty good start. Next stop: the science district. Your scooter is always one tap away.",
+      "voice": "EXAVITQu4vr4xnSDxMaL",
+      "file": "voice-fragment-orientation-9005f1efe725.mp3",
+      "url": "/explorer/audio/voice-fragment-orientation-9005f1efe725.mp3",
+      "bytes": 195647,
+      "sha256": "9005f1efe725a83b6a1fc582c982aa8254128acbc32e2ba67f2a715901cf7d3f"
+    },
+    "voice-fragment-long-way": {
+      "id": "voice-fragment-long-way",
+      "kind": "voice",
+      "speaker": "Maya",
+      "caption": "Two pieces. Nicely wandered! Now head east. Someone left a melody between the Arts Building and the Music Building. There’s a whole different rhythm over there.",
+      "voice": "EXAVITQu4vr4xnSDxMaL",
+      "file": "voice-fragment-long-way-e45bc010d972.mp3",
+      "url": "/explorer/audio/voice-fragment-long-way-e45bc010d972.mp3",
+      "bytes": 171406,
+      "sha256": "e45bc010d972080d2fbb064d2f928f901e156a109e3638a44f6a30be1fb991ef"
+    },
+    "voice-fragment-sound-vision": {
+      "id": "voice-fragment-sound-vision",
+      "kind": "voice",
+      "speaker": "Maya",
+      "caption": "Three pieces, one very good detour. Your last lead points north, toward the bells. Keep an eye out for someone in blue and white.",
+      "voice": "EXAVITQu4vr4xnSDxMaL",
+      "file": "voice-fragment-sound-vision-a1dcca1dfb26.mp3",
+      "url": "/explorer/audio/voice-fragment-sound-vision-a1dcca1dfb26.mp3",
+      "bytes": 148418,
+      "sha256": "a1dcca1dfb26b3487e2a129c191d3df7fe34993195864d7ab304d87eea073f42"
+    },
+    "voice-fragment-familiar-face": {
+      "id": "voice-fragment-familiar-face",
+      "kind": "voice",
+      "speaker": "Maya",
+      "caption": "You found the last piece. Bring them back to the little departure board where we started. I have a feeling your calendar is going to look a lot more interesting now.",
+      "voice": "EXAVITQu4vr4xnSDxMaL",
+      "file": "voice-fragment-familiar-face-cf638c1c0bad.mp3",
+      "url": "/explorer/audio/voice-fragment-familiar-face-cf638c1c0bad.mp3",
+      "bytes": 150926,
+      "sha256": "cf638c1c0bad2e138fc27796949e468ed12670236f62204e1ee29d9f27104db5"
+    },
+    "voice-finale": {
+      "id": "voice-finale",
+      "kind": "voice",
+      "speaker": "Maya",
+      "caption": "There it is. Your way back.",
+      "voice": "EXAVITQu4vr4xnSDxMaL",
+      "file": "voice-finale-d2265f177ac3.mp3",
+      "url": "/explorer/audio/voice-finale-d2265f177ac3.mp3",
+      "bytes": 38077,
+      "sha256": "d2265f177ac3f5c4103cb1e70305690278a5283e2c86dae6007f7b7f8d890331",
+      "edit": {
+        "sourceSha256": "4f857bf8ee97b3676cfd4f01f4831360316bcefe452e2c0120a5c1015292d1e9",
+        "start": 0,
+        "end": 2.3
+      }
+    },
+    "voice-cat-start": {
+      "id": "voice-cat-start",
+      "kind": "voice",
+      "speaker": "Maya",
+      "caption": "Well, hello there. That cat looks like it knows exactly where it’s going. Which is more than we can say. Follow the little paw prints.",
+      "voice": "EXAVITQu4vr4xnSDxMaL",
+      "file": "voice-cat-start-112ab0d2b934.mp3",
+      "url": "/explorer/audio/voice-cat-start-112ab0d2b934.mp3",
+      "bytes": 136715,
+      "sha256": "112ab0d2b9347d1717210a7b45196b63cbe34f80efc7e1be908afa2d2aba4682"
+    },
+    "voice-cat-finish": {
+      "id": "voice-cat-finish",
+      "kind": "voice",
+      "speaker": "Maya",
+      "caption": "Mystery solved. It wasn’t a secret passage. It was a very carefully selected napping spot. I think you’ve made a friend.",
+      "voice": "EXAVITQu4vr4xnSDxMaL",
+      "file": "voice-cat-finish-616b301640e3.mp3",
+      "url": "/explorer/audio/voice-cat-finish-616b301640e3.mp3",
+      "bytes": 139223,
+      "sha256": "616b301640e32dd340dceae53ae5c6db5ddc09dd4cf208db01447b33ace18196"
+    },
+    "voice-delivery": {
+      "id": "voice-delivery",
+      "kind": "voice",
+      "speaker": "Noah · slightly lost student",
+      "caption": "Hey! I took the scenic route, and now I can’t find Engineering. Could you scout the way for me? No rush. Well… a little rush. Thank you!",
+      "voice": "bIHbv24MWmeRgasZH58o",
+      "file": "voice-delivery-e998dc61d145.mp3",
+      "url": "/explorer/audio/voice-delivery-e998dc61d145.mp3",
+      "bytes": 149672,
+      "sha256": "e998dc61d1457d74dc22a00e7a07a4be6602a21a8616ae5bb57151221e5ea3fa"
+    },
+    "voice-lost-found": {
+      "id": "voice-lost-found",
+      "kind": "voice",
+      "speaker": "Noah",
+      "caption": "My notebook, my scarf, and my water bottle! I was having a spectacularly disorganized day. Thanks for bringing everything home.",
+      "voice": "bIHbv24MWmeRgasZH58o",
+      "file": "voice-lost-found-04cc452c3ec5.mp3",
+      "url": "/explorer/audio/voice-lost-found-04cc452c3ec5.mp3",
+      "bytes": 136715,
+      "sha256": "04cc452c3ec5aa8de4b1fac7b89be9c9c355b67ead7dac7e4bce76795e76c063"
+    },
+    "voice-music": {
+      "id": "voice-music",
+      "kind": "voice",
+      "speaker": "Maya",
+      "caption": "Sun, wave, star. You found the campus melody. Sometimes the way forward is just three little notes.",
+      "voice": "EXAVITQu4vr4xnSDxMaL",
+      "file": "voice-music-6ef4a2c314ec.mp3",
+      "url": "/explorer/audio/voice-music-6ef4a2c314ec.mp3",
+      "bytes": 131700,
+      "sha256": "6ef4a2c314ec06c1a73d0850ee7091fddc807135fad67b8a9aa34248b95e9a14"
+    },
+    "voice-cosmo": {
+      "id": "voice-cosmo",
+      "kind": "voice",
+      "speaker": "Maya",
+      "caption": "There he is! The most enthusiastic person on campus. And somehow, always in three places at once.",
+      "voice": "EXAVITQu4vr4xnSDxMaL",
+      "file": "voice-cosmo-dd24f6aee516.mp3",
+      "url": "/explorer/audio/voice-cosmo-dd24f6aee516.mp3",
+      "bytes": 121251,
+      "sha256": "dd24f6aee5165f050250d9664fc39909d40a6555a7680d2a066b5e8d33a9dfae"
+    }
+  }
+}

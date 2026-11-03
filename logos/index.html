@@ -1,0 +1,645 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BYU Calendar — logo options</title>
+<style>
+  :root { --ink:#202124; --grey:#5f6368; --line:#dadce0; --blue:#1a73e8; --surface:#f8f9fa; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: Roboto, Arial, sans-serif; color: var(--ink); background:var(--surface); }
+  header { padding:28px 36px 10px; }
+  h1 { font-family: Arial, sans-serif; margin:0 0 6px; font-size:28px; }
+  header p { margin:0; color:var(--grey); max-width:70ch; }
+  .toggle { position:sticky; top:0; z-index:5; background:var(--surface); padding:10px 36px; border-bottom:1.5px solid var(--line); display:flex; gap:12px; align-items:center; }
+  .toggle button { font:600 13px Roboto,Arial; padding:7px 14px; border:1.5px solid var(--ink); background:#fff; border-radius:10px; cursor:pointer; box-shadow:2px 2px 0 var(--ink); }
+  .toggle button.active { background:var(--blue); color:#fff; border-color:var(--ink); }
+  .toggle span { color:var(--grey); font-size:13px; }
+  main { padding: 20px 36px 60px; }
+  h2 { font-family: Arial, sans-serif; font-size:15px; letter-spacing:.12em; text-transform:uppercase; color:var(--grey); margin:34px 0 12px; border-bottom:1.5px dotted var(--line); padding-bottom:6px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:22px; }
+  .card { margin:0; background:#fff; border:1.5px solid var(--ink); border-radius:12px; overflow:hidden; box-shadow:3px 3px 0 var(--ink); display:flex; flex-direction:column; }
+  .imgwrap { min-height:250px; display:flex; align-items:center; justify-content:center; padding:18px; background:
+     repeating-conic-gradient(#f1f3f4 0% 25%, #fff 0% 50%) 50% / 22px 22px; }
+  body.dark .imgwrap { background:
+     repeating-conic-gradient(#2a2b2f 0% 25%, #232427 0% 50%) 50% / 22px 22px; }
+  figcaption { padding:12px 14px 14px; border-top:1.5px dotted var(--line); }
+  .name { font-weight:700; font-size:14.5px; }
+  .num { display:inline-block; background:var(--blue); color:#fff; border-radius:6px; padding:1px 7px; font-family:'Roboto Mono',monospace; font-size:12.5px; margin-right:4px; }
+  .desc { color:var(--grey); font-size:12.5px; line-height:1.45; margin-top:5px; }
+  .files { margin-top:8px; font-size:10.5px; color:var(--grey); word-break:break-all; }
+  .files code { font-family:'Roboto Mono',monospace; background:var(--surface); border:1px solid var(--line); border-radius:4px; padding:1px 4px; margin:2px 3px 0 0; display:inline-block; }
+  img { max-width:100%; }
+</style>
+</head>
+<body>
+<header>
+  <h1>BYU Calendar — logo options</h1>
+  <p>Every option as vector SVG plus PNG exports, generated from the app palette (ink #202124, blue #1a73e8, green #188038, purple #7627bb, orange #e8710a, teal #00796b) with Archivo / Roboto / Roboto Mono text converted to outlines. Tell me the numbers you like and any tweaks.</p>
+</header>
+<div class="toggle">
+  <button id="light" class="active">Light preview</button>
+  <button id="dark">Dark preview</button>
+  <span>Checkerboard = transparent background. Numbers match the file names.</span>
+</div>
+<main>
+<h2>A · Y-tile</h2>
+<div class="grid">
+<figure class="card" id="01-mark-y-tile-blue">
+  <div class="imgwrap"><img src="png/marks/01-mark-y-tile-blue-512.png" loading="lazy" style="max-height:230px" alt="Y-tile — blue"></div>
+  <figcaption>
+    <div class="name"><span class="num">01</span> Y-tile — blue</div>
+    <div class="desc">White calendar card, blue header band, ink Y. Closest evolution of the current favicon.</div>
+    <div class="files"><code>svg/01-mark-y-tile-blue.svg</code> <code>png/marks/01-mark-y-tile-blue-512.png</code> <code>png/marks/01-mark-y-tile-blue-128.png</code></div>
+  </figcaption>
+</figure>
+<figure class="card" id="02-mark-y-tile-green">
+  <div class="imgwrap"><img src="png/marks/02-mark-y-tile-green-512.png" loading="lazy" style="max-height:230px" alt="Y-tile — green"></div>
+  <figcaption>
+    <div class="name"><span class="num">02</span> Y-tile — green</div>
+    <div class="desc">Green header accent variant.</div>
+    <div class="files"><code>svg/02-mark-y-tile-green.svg</code> <code>png/marks/02-mark-y-tile-green-512.png</code> <code>png/marks/02-mark-y-tile-green-128.png</code></div>
+  </figcaption>
+</figure>
+<figure class="card" id="03-mark-y-tile-purple">
+  <div class="imgwrap"><img src="png/marks/03-mark-y-tile-purple-512.png" loading="lazy" style="max-height:230px" alt="Y-tile — purple"></div>
+  <figcaption>
+    <div class="name"><span class="num">03</span> Y-tile — purple</div>
+    <div class="desc">Purple header accent variant.</div>
+    <div class="files"><code>svg/03-mark-y-tile-purple.svg</code> <code>png/marks/03-mark-y-tile-purple-512.png</code> <code>png/marks/03-mark-y-tile-purple-128.png</code></div>
+  </figcaption>
+</figure>
+<figure class="card" id="04-mark-y-tile-orange">
+  <div class="imgwrap"><img src="png/marks/04-mark-y-tile-orange-512.png" loading="lazy" style="max-height:230px" alt="Y-tile — orange"></div>
+  <figcaption>
+    <div class="name"><span class="num">04</span> Y-tile — orange</div>
+    <div class="desc">Orange header accent variant.</div>
+    <div class="files"><code>svg/04-mark-y-tile-orange.svg</code> <code>png/marks/04-mark-y-tile-orange-512.png</code> <code>png/marks/04-mark-y-tile-orange-128.png</code></div>
+  </figcaption>
+</figure>
+<figure class="card" id="05-mark-y-tile-teal">
+  <div class="imgwrap"><img src="png/marks/05-mark-y-tile-teal-512.png" loading="lazy" style="max-height:230px" alt="Y-tile — teal"></div>
+  <figcaption>
+    <div class="name"><span class="num">05</span> Y-tile — teal</div>
+    <div class="desc">Teal header accent variant.</div>
+    <div class="files"><code>svg/05-mark-y-tile-teal.svg</code> <code>png/marks/05-mark-y-tile-teal-512.png</code> <code>png/marks/05-mark-y-tile-teal-128.png</code></div>
+  </figcaption>
+</figure>
+<figure class="card" id="06-mark-y-tile-solid-blue">
+  <div class="imgwrap"><img src="png/marks/06-mark-y-tile-solid-blue-512.png" loading="lazy" style="max-height:230px" alt="Y-tile — solid blue"></div>
+  <figcaption>
+    <div class="name"><span class="num">06</span> Y-tile — solid blue</div>
+    <div class="desc">Full blue card with white Y. Direct refresh of today's favicon.</div>
+    <div class="files"><code>svg/06-mark-y-tile-solid-blue.svg</code> <code>png/marks/06-mark-y-tile-solid-blue-512.png</code> <code>png/marks/06-mark-y-tile-solid-blue-128.png</code></div>
+  </figcaption>
+</figure>
+<figure class="card" id="07-mark-y-tile-mono">
+  <div class="imgwrap"><img src="png/marks/07-mark-y-tile-mono-512.png" loading="lazy" style="max-height:230px" alt="Y-tile — mono"></div>
+  <figcaption>
+    <div class="name"><span class="num">07</span> Y-tile — mono</div>
+    <div class="desc">Single-color repro version: ink header, ink Y, ink shadow.</div>
+    <div class="files"><code>svg/07-mark-y-tile-mono.svg</code> <code>png/marks/07-mark-y-tile-mono-512.png</code> <code>png/marks/07-mark-y-tile-mono-128.png</code></div>
+  </figcaption>
+</figure>
+<figure class="card" id="08-mark-y-tile-dark">
+  <div class="imgwrap"><img src="png/marks/08-mark-y-tile-dark-512.png" loading="lazy" style="max-height:230px" alt="Y-tile — dark mode"></div>
+  <figcaption>
+    <div class="name"><span class="num">08</span> Y-tile — dark mode</div>
+    <div class="desc">Inverted card for dark backgrounds; blue header, white Y.</div>
+    <div class="files"><code>svg/08-mark-y-tile-dark.svg</code> <code>png/marks/08-mark-y-tile-dark-512.png</code> <code>png/marks/08-mark-y-tile-dark-128.png</code></div>
+  </figcaption>
+</figure>
+</div>
+<h2>B · Y-date</h2>
+<div class="grid">
+<figure class="card" id="09-mark-y-date-blue">
+  <div class="imgwrap"><img src="png/marks/09-mark-y-date-blue-512.png" loading="lazy" style="max-height:230px" alt="Y-date — blue"></div>
+  <figcaption>
+    <div class="name"><span class="num">09</span> Y-date — blue</div>
+    <div class="desc">Calendar page where the Y is the date; SEP header, event chip, notification dot.</div>
+    <div class="files"><code>svg/09-mark-y-date-blue.svg</code> <code>png/marks/09-mark-y-date-blue-512.png</code> <code>png/marks/09-mark-y-date-blue-128.png</code></div>
+  </figcaption>
+</figure>
+<figure class="card" id="10-mark-y-date-orange">
+  <div class="imgwrap"><img src="png/marks/10-mark-y-date-orange-512.png" loading="lazy" style="max-height:230px" alt="Y-date — orange"></div>
+  <figcaption>
+    <div class="name"><span class="num">10</span> Y-date — orange</div>
+    <div class="desc">Orange accent variant of the Y-date page.</div>
+    <div class="files"><code>svg/10-mark-y-date-orange.svg</code> <code>png/marks/10-mark-y-date-orange-512.png</code> <code>png/marks/10-mark-y-date-orange-128.png</code></div>
+  </figcaption>
+</figure>
+<figure class="card" id="11-mark-y-date-green">
+  <div class="imgwrap"><img src="png/marks/11-mark-y-date-green-512.png" loading="lazy" style="max-height:230px" alt="Y-date — green"></div>
+  <figcaption>
+    <div class="name"><span class="num">11</span> Y-date — green</div>
+    <div class="desc">Green accent variant of the Y-date page.</div>
+    <div class="files"><code>svg/11-mark-y-date-green.svg</code> <code>png/marks/11-mark-y-date-green-512.png</code> <code>png/marks/11-mark-y-date-green-128.png</code></div>
+  </figcaption>
+</figure>
+</div>
+<h2>C · Lettermark</h2>
+<div class="grid">
+<figure class="card" id="12-mark-bc-lettermark">
+  <div class="imgwrap"><img src="png/marks/12-mark-bc-lettermark-512.png" loading="lazy" style="max-height:230px" alt="BC lettermark"></div>
+  <figcaption>
+    <div class="name"><span class="num">12</span> BC lettermark</div>
+    <div class="desc">"BC" monogram on a page with folded calendar corner.</div>
+    <div class="files"><code>svg/12-mark-bc-lettermark.svg</code> <code>png/marks/12-mark-bc-lettermark-512.png</code> <code>png/marks/12-mark-bc-lettermark-128.png</code></div>
+  </figcaption>
+</figure>
+<figure class="card" id="13-mark-byu-lettermark">
+  <div class="imgwrap"><img src="png/marks/13-mark-byu-lettermark-512.png" loading="lazy" style="max-height:230px" alt="BYU lettermark"></div>
+  <figcaption>
+    <div class="name"><span class="num">13</span> BYU lettermark</div>
+    <div class="desc">"BYU" on a page with folded calendar corner.</div>
+    <div class="files"><code>svg/13-mark-byu-lettermark.svg</code> <code>png/marks/13-mark-byu-lettermark-512.png</code> <code>png/marks/13-mark-byu-lettermark-128.png</code></div>
+  </figcaption>
+</figure>
+</div>
+<h2>D · Event-dot Y</h2>
+<div class="grid">
+<figure class="card" id="14-mark-dot-y">
+  <div class="imgwrap"><img src="png/marks/14-mark-dot-y-512.png" loading="lazy" style="max-height:230px" alt="Event-dot Y"></div>
+  <figcaption>
+    <div class="name"><span class="num">14</span> Event-dot Y</div>
+    <div class="desc">Y assembled from calendar event dots in the five accent colors. Transparent background.</div>
+    <div class="files"><code>svg/14-mark-dot-y.svg</code> <code>png/marks/14-mark-dot-y-512.png</code> <code>png/marks/14-mark-dot-y-128.png</code></div>
+  </figcaption>
+</figure>
+<figure class="card" id="15-mark-dot-y-tile">
+  <div class="imgwrap"><img src="png/marks/15-mark-dot-y-tile-512.png" loading="lazy" style="max-height:230px" alt="Event-dot Y — on card"></div>
+  <figcaption>
+    <div class="name"><span class="num">15</span> Event-dot Y — on card</div>
+    <div class="desc">Dot-mosaic Y on a bordered white card.</div>
+    <div class="files"><code>svg/15-mark-dot-y-tile.svg</code> <code>png/marks/15-mark-dot-y-tile-512.png</code> <code>png/marks/15-mark-dot-y-tile-128.png</code></div>
+  </figcaption>
+</figure>
+</div>
+<h2>E · One-calendar stack</h2>
+<div class="grid">
+<figure class="card" id="16-mark-stack-pages">
+  <div class="imgwrap"><img src="png/marks/16-mark-stack-pages-512.png" loading="lazy" style="max-height:230px" alt="One-calendar stack"></div>
+  <figcaption>
+    <div class="name"><span class="num">16</span> One-calendar stack</div>
+    <div class="desc">Scattered event pages collapsing into one calendar card — the product story as a mark.</div>
+    <div class="files"><code>svg/16-mark-stack-pages.svg</code> <code>png/marks/16-mark-stack-pages-512.png</code> <code>png/marks/16-mark-stack-pages-128.png</code></div>
+  </figcaption>
+</figure>
+</div>
+<h2>F · Wordmark</h2>
+<div class="grid">
+<figure class="card" id="17-wordmark-byu-calendar">
+  <div class="imgwrap"><img src="png/wordmarks/17-wordmark-byu-calendar-1600.png" loading="lazy" style="max-height:230px" alt="Wordmark — two-tone"></div>
+  <figcaption>
+    <div class="name"><span class="num">17</span> Wordmark — two-tone</div>
+    <div class="desc">Archivo ExtraBold: ink "BYU" + blue "Calendar".</div>
+    <div class="files"><code>svg/17-wordmark-byu-calendar.svg</code> <code>png/wordmarks/17-wordmark-byu-calendar-1600.png</code></div>
+  </figcaption>
+</figure>
+<figure class="card" id="18-wordmark-byu-calendar-dark">
+  <div class="imgwrap"><img src="png/wordmarks/18-wordmark-byu-calendar-dark-1600.png" loading="lazy" style="max-height:230px" alt="Wordmark — dark mode"></div>
+  <figcaption>
+    <div class="name"><span class="num">18</span> Wordmark — dark mode</div>
+    <div class="desc">White/pale-blue wordmark for dark backgrounds.</div>
+    <div class="files"><code>svg/18-wordmark-byu-calendar-dark.svg</code> <code>png/wordmarks/18-wordmark-byu-calendar-dark-1600.png</code></div>
+  </figcaption>
+</figure>
+<figure class="card" id="19-wordmark-caps-period">
+  <div class="imgwrap"><img src="png/wordmarks/19-wordmark-caps-period-1600.png" loading="lazy" style="max-height:230px" alt="Wordmark — caps + period"></div>
+  <figcaption>
+    <div class="name"><span class="num">19</span> Wordmark — caps + period</div>
+    <div class="desc">Archivo Black caps with an orange full-stop.</div>
+    <div class="files"><code>svg/19-wordmark-caps-period.svg</code> <code>png/wordmarks/19-wordmark-caps-period-1600.png</code></div>
+  </figcaption>
+</figure>
+<figure class="card" id="20-wordmark-terminal">
+  <div class="imgwrap"><img src="png/wordmarks/20-wordmark-terminal-1600.png" loading="lazy" style="max-height:230px" alt="Wordmark — terminal"></div>
+  <figcaption>
+    <div class="name"><span class="num">20</span> Wordmark — terminal</div>
+    <div class="desc">Roboto Mono lowercase with a blue block cursor. Nods to the app's mono labels.</div>
+    <div class="files"><code>svg/20-wordmark-terminal.svg</code> <code>png/wordmarks/20-wordmark-terminal-1600.png</code></div>
+  </figcaption>
+</figure>
+<figure class="card" id="21-wordmark-stacked">
+  <div class="imgwrap"><img src="png/wordmarks/21-wordmark-stacked-1600.png" loading="lazy" style="max-height:230px" alt="Wordmark — stacked"></div>
+  <figcaption>
+    <div class="name"><span class="num">21</span> Wordmark — stacked</div>
+    <div class="desc">Big Archivo Black BYU over tracked-out mono CALENDAR with dotted rules.</div>
+    <div class="files"><code>svg/21-wordmark-stacked.svg</code> <code>png/wordmarks/21-wordmark-stacked-1600.png</code></div>
+  </figcaption>
+</figure>
+</div>
+<h2>G · Lockup</h2>
+<div class="grid">
+<figure class="card" id="22-lockup-horizontal">
+  <div class="imgwrap"><img src="png/lockups/22-lockup-horizontal-1600.png" loading="lazy" style="max-height:230px" alt="Horizontal lockup"></div>
+  <figcaption>
+    <div class="name"><span class="num">22</span> Horizontal lockup</div>
+    <div class="desc">Y-tile + two-tone wordmark + orange event dot. Primary header lockup candidate.</div>
+    <div class="files"><code>svg/22-lockup-horizontal.svg</code> <code>png/lockups/22-lockup-horizontal-1600.png</code></div>
+  </figcaption>
+</figure>
+<figure class="card" id="23-lockup-horizontal-dark">
+  <div class="imgwrap"><img src="png/lockups/23-lockup-horizontal-dark-1600.png" loading="lazy" style="max-height:230px" alt="Horizontal lockup — dark"></div>
+  <figcaption>
+    <div class="name"><span class="num">23</span> Horizontal lockup — dark</div>
+    <div class="desc">Solid-blue tile + light wordmark for dark surfaces.</div>
+    <div class="files"><code>svg/23-lockup-horizontal-dark.svg</code> <code>png/lockups/23-lockup-horizontal-dark-1600.png</code></div>
+  </figcaption>
+</figure>
+<figure class="card" id="24-lockup-stacked">
+  <div class="imgwrap"><img src="png/lockups/24-lockup-stacked-1600.png" loading="lazy" style="max-height:230px" alt="Stacked lockup"></div>
+  <figcaption>
+    <div class="name"><span class="num">24</span> Stacked lockup</div>
+    <div class="desc">Y-tile over centered wordmark. Square-ish footprint for splash screens.</div>
+    <div class="files"><code>svg/24-lockup-stacked.svg</code> <code>png/lockups/24-lockup-stacked-1600.png</code></div>
+  </figcaption>
+</figure>
+<figure class="card" id="25-lockup-stacked-pages">
+  <div class="imgwrap"><img src="png/lockups/25-lockup-stacked-pages-1600.png" loading="lazy" style="max-height:230px" alt="Stacked lockup — story mark"></div>
+  <figcaption>
+    <div class="name"><span class="num">25</span> Stacked lockup — story mark</div>
+    <div class="desc">One-calendar stack over big BYU + tracked CALENDAR.</div>
+    <div class="files"><code>svg/25-lockup-stacked-pages.svg</code> <code>png/lockups/25-lockup-stacked-pages-1600.png</code></div>
+  </figcaption>
+</figure>
+<figure class="card" id="26-lockup-mono">
+  <div class="imgwrap"><img src="png/lockups/26-lockup-mono-1600.png" loading="lazy" style="max-height:230px" alt="Mono lockup"></div>
+  <figcaption>
+    <div class="name"><span class="num">26</span> Mono lockup</div>
+    <div class="desc">All-ink version for single-color printing or embroidery.</div>
+    <div class="files"><code>svg/26-lockup-mono.svg</code> <code>png/lockups/26-lockup-mono-1600.png</code></div>
+  </figcaption>
+</figure>
+</div>
+<h2>H · Emblem</h2>
+<div class="grid">
+<figure class="card" id="27-emblem-badge">
+  <div class="imgwrap"><img src="png/emblem/27-emblem-badge-1024.png" loading="lazy" style="max-height:230px" alt="Badge emblem"></div>
+  <figcaption>
+    <div class="name"><span class="num">27</span> Badge emblem</div>
+    <div class="desc">Circular badge: Y-tile center, BYU CALENDAR around the ring, EST·2026 at bottom. Sticker/merch vibe.</div>
+    <div class="files"><code>svg/27-emblem-badge.svg</code> <code>png/emblem/27-emblem-badge-1024.png</code> <code>png/emblem/27-emblem-badge-256.png</code></div>
+  </figcaption>
+</figure>
+</div>
+<h2>I · Banner</h2>
+<div class="grid">
+<figure class="card" id="28-banner-og-refined">
+  <div class="imgwrap"><img src="png/banners/28-banner-og-refined-1200x630.png" loading="lazy" style="max-height:260px" alt="OG banner — product"></div>
+  <figcaption>
+    <div class="name"><span class="num">28</span> OG banner — product</div>
+    <div class="desc">1200×630 social preview: headline, URL chip, and a this-week calendar card with real fonts.</div>
+    <div class="files"><code>svg/28-banner-og-refined.svg</code> <code>png/banners/28-banner-og-refined-1200x630.png</code></div>
+  </figcaption>
+</figure>
+<figure class="card" id="29-banner-og-centered">
+  <div class="imgwrap"><img src="png/banners/29-banner-og-centered-1200x630.png" loading="lazy" style="max-height:260px" alt="OG banner — centered"></div>
+  <figcaption>
+    <div class="name"><span class="num">29</span> OG banner — centered</div>
+    <div class="desc">1200×630 framed centered lockup with dotted offset frame.</div>
+    <div class="files"><code>svg/29-banner-og-centered.svg</code> <code>png/banners/29-banner-og-centered-1200x630.png</code></div>
+  </figcaption>
+</figure>
+<figure class="card" id="30-banner-header">
+  <div class="imgwrap"><img src="png/banners/30-banner-header-1500x500.png" loading="lazy" style="max-height:260px" alt="Social header"></div>
+  <figcaption>
+    <div class="name"><span class="num">30</span> Social header</div>
+    <div class="desc">1500×500 centered wordmark with event-dot strip. Twitter/X or LinkedIn cover.</div>
+    <div class="files"><code>svg/30-banner-header.svg</code> <code>png/banners/30-banner-header-1500x500.png</code></div>
+  </figcaption>
+</figure>
+<figure class="card" id="66-banner-og-y-stacked">
+  <div class="imgwrap"><img src="png/banners/66-banner-og-y-stacked-1200x630.png" loading="lazy" style="max-height:260px" alt="OG — Y left + stacked"></div>
+  <figcaption>
+    <div class="name"><span class="num">66</span> OG — Y left + stacked</div>
+    <div class="desc">Simple OG: solid blue Y left, stacked BYU / Calendar., URL.</div>
+    <div class="files"><code>svg/66-banner-og-y-stacked.svg</code> <code>png/banners/66-banner-og-y-stacked-1200x630.png</code></div>
+  </figcaption>
+</figure>
+<figure class="card" id="67-banner-og-y-centered">
+  <div class="imgwrap"><img src="png/banners/67-banner-og-y-centered-1200x630.png" loading="lazy" style="max-height:260px" alt="OG — centered (LIVE)"></div>
+  <figcaption>
+    <div class="name"><span class="num">67</span> OG — centered (LIVE)</div>
+    <div class="desc">Simple OG: centered blue Y over one-line BYU Calendar + URL. Installed as public/og-image.png.</div>
+    <div class="files"><code>svg/67-banner-og-y-centered.svg</code> <code>png/banners/67-banner-og-y-centered-1200x630.png</code></div>
+  </figcaption>
+</figure>
+<figure class="card" id="68-banner-og-y-outline">
+  <div class="imgwrap"><img src="png/banners/68-banner-og-y-outline-1200x630.png" loading="lazy" style="max-height:260px" alt="OG — hollow Y left"></div>
+  <figcaption>
+    <div class="name"><span class="num">68</span> OG — hollow Y left</div>
+    <div class="desc">Variant A layout with the hollow outline Y.</div>
+    <div class="files"><code>svg/68-banner-og-y-outline.svg</code> <code>png/banners/68-banner-og-y-outline-1200x630.png</code></div>
+  </figcaption>
+</figure>
+</div>
+<h2>J · Favicon</h2>
+<div class="grid">
+<figure class="card" id="31-favicon-blue">
+  <div class="imgwrap"><img src="favicons/31-favicon-blue-16.png" loading="lazy" style="max-height:230px" alt="Favicon — blue"></div>
+  <figcaption>
+    <div class="name"><span class="num">31</span> Favicon — blue</div>
+    <div class="desc">Blue tile, white Y. The workhorse favicon. 16/32/48 PNG + SVG in favicons/.</div>
+    <div class="files"><code>svg/31-favicon-blue.svg</code> <code>favicons/31-favicon-blue-16.png</code> <code>favicons/31-favicon-blue-32.png</code> <code>favicons/31-favicon-blue-48.png</code></div>
+  </figcaption>
+</figure>
+<figure class="card" id="32-favicon-blue-rings">
+  <div class="imgwrap"><img src="favicons/32-favicon-blue-rings-16.png" loading="lazy" style="max-height:230px" alt="Favicon — blue + rings"></div>
+  <figcaption>
+    <div class="name"><span class="num">32</span> Favicon — blue + rings</div>
+    <div class="desc">Blue tile with calendar ring posts. 16/32/48 PNG + SVG in favicons/.</div>
+    <div class="files"><code>svg/32-favicon-blue-rings.svg</code> <code>favicons/32-favicon-blue-rings-16.png</code> <code>favicons/32-favicon-blue-rings-32.png</code> <code>favicons/32-favicon-blue-rings-48.png</code></div>
+  </figcaption>
+</figure>
+<figure class="card" id="33-favicon-ink">
+  <div class="imgwrap"><img src="favicons/33-favicon-ink-16.png" loading="lazy" style="max-height:230px" alt="Favicon — ink"></div>
+  <figcaption>
+    <div class="name"><span class="num">33</span> Favicon — ink</div>
+    <div class="desc">Dark tile with blue Y. 16/32/48 PNG + SVG in favicons/.</div>
+    <div class="files"><code>svg/33-favicon-ink.svg</code> <code>favicons/33-favicon-ink-16.png</code> <code>favicons/33-favicon-ink-32.png</code> <code>favicons/33-favicon-ink-48.png</code></div>
+  </figcaption>
+</figure>
+<figure class="card" id="34-favicon-light">
+  <div class="imgwrap"><img src="favicons/34-favicon-light-16.png" loading="lazy" style="max-height:230px" alt="Favicon — light"></div>
+  <figcaption>
+    <div class="name"><span class="num">34</span> Favicon — light</div>
+    <div class="desc">White tile, ink border, blue Y (light browser themes). 16/32/48 PNG + SVG in favicons/.</div>
+    <div class="files"><code>svg/34-favicon-light.svg</code> <code>favicons/34-favicon-light-16.png</code> <code>favicons/34-favicon-light-32.png</code> <code>favicons/34-favicon-light-48.png</code></div>
+  </figcaption>
+</figure>
+<figure class="card" id="35-favicon-headerline">
+  <div class="imgwrap"><img src="favicons/35-favicon-headerline-16.png" loading="lazy" style="max-height:230px" alt="Favicon — outline"></div>
+  <figcaption>
+    <div class="name"><span class="num">35</span> Favicon — outline</div>
+    <div class="desc">White tile, blue header band, rings, ink Y. 16/32/48 PNG + SVG in favicons/.</div>
+    <div class="files"><code>svg/35-favicon-headerline.svg</code> <code>favicons/35-favicon-headerline-16.png</code> <code>favicons/35-favicon-headerline-32.png</code> <code>favicons/35-favicon-headerline-48.png</code></div>
+  </figcaption>
+</figure>
+<figure class="card" id="36-favicon-ico">
+  <div class="imgwrap"><div style="font-size:12px;color:#5f6368">container file — see files below</div></div>
+  <figcaption>
+    <div class="name"><span class="num">36</span> favicon.ico (multi-size)</div>
+    <div class="desc">Classic multi-resolution ICO built from the blue favicon (16/32/48).</div>
+    <div class="files"><code>favicons/favicon.ico</code></div>
+  </figcaption>
+</figure>
+</div>
+<h2>K · App icon</h2>
+<div class="grid">
+<figure class="card" id="37-appicon-card">
+  <div class="imgwrap"><img src="app-icons/37-appicon-card-512.png" loading="lazy" style="max-height:230px" alt="App icon — calendar card"></div>
+  <figcaption>
+    <div class="name"><span class="num">37</span> App icon — calendar card</div>
+    <div class="desc">Full-bleed blue with white event-card mark (refined current style). 192/512.</div>
+    <div class="files"><code>svg/37-appicon-card.svg</code> <code>app-icons/37-appicon-card-512.png</code> <code>app-icons/37-appicon-card-192.png</code></div>
+  </figcaption>
+</figure>
+<figure class="card" id="38-appicon-card-maskable">
+  <div class="imgwrap"><img src="app-icons/38-appicon-card-maskable-512.png" loading="lazy" style="max-height:230px" alt="App icon — maskable"></div>
+  <figcaption>
+    <div class="name"><span class="num">38</span> App icon — maskable</div>
+    <div class="desc">Same card design inside the Android maskable safe zone. 512.</div>
+    <div class="files"><code>svg/38-appicon-card-maskable.svg</code> <code>app-icons/38-appicon-card-maskable-512.png</code></div>
+  </figcaption>
+</figure>
+<figure class="card" id="39-appicon-light">
+  <div class="imgwrap"><img src="app-icons/39-appicon-light-512.png" loading="lazy" style="max-height:230px" alt="App icon — light"></div>
+  <figcaption>
+    <div class="name"><span class="num">39</span> App icon — light</div>
+    <div class="desc">Y-tile mark on pale-blue field. Light-theme launcher icon. 192/512.</div>
+    <div class="files"><code>svg/39-appicon-light.svg</code> <code>app-icons/39-appicon-light-512.png</code> <code>app-icons/39-appicon-light-192.png</code></div>
+  </figcaption>
+</figure>
+<figure class="card" id="40-appicon-appletouch">
+  <div class="imgwrap"><img src="app-icons/40-appicon-appletouch-180.png" loading="lazy" style="max-height:230px" alt="App icon — Apple touch"></div>
+  <figcaption>
+    <div class="name"><span class="num">40</span> App icon — Apple touch</div>
+    <div class="desc">Y-tile on white, 180×180 for iOS home screens.</div>
+    <div class="files"><code>svg/40-appicon-appletouch.svg</code> <code>app-icons/40-appicon-appletouch-180.png</code></div>
+  </figcaption>
+</figure>
+</div>
+<h2>M · Big-Y glyph</h2>
+<div class="grid">
+<figure class="card" id="46-glyph-y-ink">
+  <div class="imgwrap"><img src="png/marks/46-glyph-y-ink-512.png" loading="lazy" style="max-height:230px" alt="Big Y — ink field"></div>
+  <figcaption>
+    <div class="name"><span class="num">46</span> Big Y — ink field</div>
+    <div class="desc">Chunky Archivo Y in white on a near-black rounded square. Favicon-proof at any size.</div>
+    <div class="files"><code>svg/46-glyph-y-ink.svg</code> <code>png/marks/46-glyph-y-ink-512.png</code> <code>png/marks/46-glyph-y-ink-128.png</code></div>
+  </figcaption>
+</figure>
+<figure class="card" id="47-glyph-y-blue">
+  <div class="imgwrap"><img src="png/marks/47-glyph-y-blue-512.png" loading="lazy" style="max-height:230px" alt="Big Y — blue field"></div>
+  <figcaption>
+    <div class="name"><span class="num">47</span> Big Y — blue field</div>
+    <div class="desc">White Y on the app blue. Simple, ownable, unmistakably an app icon.</div>
+    <div class="files"><code>svg/47-glyph-y-blue.svg</code> <code>png/marks/47-glyph-y-blue-512.png</code> <code>png/marks/47-glyph-y-blue-128.png</code></div>
+  </figcaption>
+</figure>
+<figure class="card" id="48-glyph-y-orange">
+  <div class="imgwrap"><img src="png/marks/48-glyph-y-orange-512.png" loading="lazy" style="max-height:230px" alt="Big Y — orange field"></div>
+  <figcaption>
+    <div class="name"><span class="num">48</span> Big Y — orange field</div>
+    <div class="desc">White Y on orange — the friendliest accent in the palette.</div>
+    <div class="files"><code>svg/48-glyph-y-orange.svg</code> <code>png/marks/48-glyph-y-orange-512.png</code> <code>png/marks/48-glyph-y-orange-128.png</code></div>
+  </figcaption>
+</figure>
+<figure class="card" id="49-glyph-y-teal">
+  <div class="imgwrap"><img src="png/marks/49-glyph-y-teal-512.png" loading="lazy" style="max-height:230px" alt="Big Y — teal field"></div>
+  <figcaption>
+    <div class="name"><span class="num">49</span> Big Y — teal field</div>
+    <div class="desc">White Y on teal. Cooler, calmer read than blue.</div>
+    <div class="files"><code>svg/49-glyph-y-teal.svg</code> <code>png/marks/49-glyph-y-teal-512.png</code> <code>png/marks/49-glyph-y-teal-128.png</code></div>
+  </figcaption>
+</figure>
+<figure class="card" id="50-glyph-y-outline">
+  <div class="imgwrap"><img src="png/marks/50-glyph-y-outline-512.png" loading="lazy" style="max-height:230px" alt="Big Y — hollow outline"></div>
+  <figcaption>
+    <div class="name"><span class="num">50</span> Big Y — hollow outline</div>
+    <div class="desc">Outlined Y, no fill. Sporty, light, works on photos.</div>
+    <div class="files"><code>svg/50-glyph-y-outline.svg</code> <code>png/marks/50-glyph-y-outline-512.png</code> <code>png/marks/50-glyph-y-outline-128.png</code></div>
+  </figcaption>
+</figure>
+<figure class="card" id="51-glyph-y-split">
+  <div class="imgwrap"><img src="png/marks/51-glyph-y-split-512.png" loading="lazy" style="max-height:230px" alt="Big Y — split tone"></div>
+  <figcaption>
+    <div class="name"><span class="num">51</span> Big Y — split tone</div>
+    <div class="desc">Y split straight down the middle: blue left, teal right.</div>
+    <div class="files"><code>svg/51-glyph-y-split.svg</code> <code>png/marks/51-glyph-y-split-512.png</code> <code>png/marks/51-glyph-y-split-128.png</code></div>
+  </figcaption>
+</figure>
+<figure class="card" id="52-glyph-y-gradient">
+  <div class="imgwrap"><img src="png/marks/52-glyph-y-gradient-512.png" loading="lazy" style="max-height:230px" alt="Big Y — gradient"></div>
+  <figcaption>
+    <div class="name"><span class="num">52</span> Big Y — gradient</div>
+    <div class="desc">Blue→teal diagonal gradient. Modern-SaaS take, furthest from collegiate.</div>
+    <div class="files"><code>svg/52-glyph-y-gradient.svg</code> <code>png/marks/52-glyph-y-gradient-512.png</code> <code>png/marks/52-glyph-y-gradient-128.png</code></div>
+  </figcaption>
+</figure>
+<figure class="card" id="65-glyph-y-blue-fill">
+  <div class="imgwrap"><img src="png/marks/65-glyph-y-blue-fill-512.png" loading="lazy" style="max-height:230px" alt="Big Y — blue fill"></div>
+  <figcaption>
+    <div class="name"><span class="num">65</span> Big Y — blue fill</div>
+    <div class="desc">The hollow Y filled solid blue — now the live favicon; its hollow sibling (50) is the header logo.</div>
+    <div class="files"><code>svg/65-glyph-y-blue-fill.svg</code> <code>png/marks/65-glyph-y-blue-fill-512.png</code> <code>png/marks/65-glyph-y-blue-fill-128.png</code></div>
+  </figcaption>
+</figure>
+</div>
+<h2>N · Constructed Y</h2>
+<div class="grid">
+<figure class="card" id="53-built-y-capsule">
+  <div class="imgwrap"><img src="png/marks/53-built-y-capsule-512.png" loading="lazy" style="max-height:230px" alt="Capsule Y"></div>
+  <figcaption>
+    <div class="name"><span class="num">53</span> Capsule Y</div>
+    <div class="desc">Y drawn as three fat rounded strokes — friendly, geometric, font-free.</div>
+    <div class="files"><code>svg/53-built-y-capsule.svg</code> <code>png/marks/53-built-y-capsule-512.png</code> <code>png/marks/53-built-y-capsule-128.png</code></div>
+  </figcaption>
+</figure>
+<figure class="card" id="54-built-y-eventbars">
+  <div class="imgwrap"><img src="png/marks/54-built-y-eventbars-512.png" loading="lazy" style="max-height:230px" alt="Event-bar Y"></div>
+  <figcaption>
+    <div class="name"><span class="num">54</span> Event-bar Y</div>
+    <div class="desc">The Y built from the app's own week-view event chips — pale cards with color tabs. Calendar-coded without drawing a calendar.</div>
+    <div class="files"><code>svg/54-built-y-eventbars.svg</code> <code>png/marks/54-built-y-eventbars-512.png</code> <code>png/marks/54-built-y-eventbars-128.png</code></div>
+  </figcaption>
+</figure>
+<figure class="card" id="55-built-y-rings">
+  <div class="imgwrap"><img src="png/marks/55-built-y-rings-512.png" loading="lazy" style="max-height:230px" alt="Binder-ring Y"></div>
+  <figcaption>
+    <div class="name"><span class="num">55</span> Binder-ring Y</div>
+    <div class="desc">Capsule Y with calendar binder rings riding the arm tips. Playful calendar cue.</div>
+    <div class="files"><code>svg/55-built-y-rings.svg</code> <code>png/marks/55-built-y-rings-512.png</code> <code>png/marks/55-built-y-rings-128.png</code></div>
+  </figcaption>
+</figure>
+<figure class="card" id="56-built-y-chip">
+  <div class="imgwrap"><img src="png/marks/56-built-y-chip-512.png" loading="lazy" style="max-height:230px" alt="Notification Y"></div>
+  <figcaption>
+    <div class="name"><span class="num">56</span> Notification Y</div>
+    <div class="desc">Giant ink Y with an orange notification chip riding its shoulder. Events live here.</div>
+    <div class="files"><code>svg/56-built-y-chip.svg</code> <code>png/marks/56-built-y-chip-512.png</code> <code>png/marks/56-built-y-chip-128.png</code></div>
+  </figcaption>
+</figure>
+<figure class="card" id="57-built-y-grid">
+  <div class="imgwrap"><img src="png/marks/57-built-y-grid-512.png" loading="lazy" style="max-height:230px" alt="Grid Y"></div>
+  <figcaption>
+    <div class="name"><span class="num">57</span> Grid Y</div>
+    <div class="desc">Y as a 7×7 grid of rounded tiles with three accent tiles — calendar cells forming the letter.</div>
+    <div class="files"><code>svg/57-built-y-grid.svg</code> <code>png/marks/57-built-y-grid-512.png</code> <code>png/marks/57-built-y-grid-128.png</code></div>
+  </figcaption>
+</figure>
+</div>
+<h2>O · Playful Y</h2>
+<div class="grid">
+<figure class="card" id="58-playful-y-sticker">
+  <div class="imgwrap"><img src="png/marks/58-playful-y-sticker-512.png" loading="lazy" style="max-height:230px" alt="Sticker Y"></div>
+  <figcaption>
+    <div class="name"><span class="num">58</span> Sticker Y</div>
+    <div class="desc">Tilted sticker with hard blue shadow and an orange sparkle. Laptop-sticker energy.</div>
+    <div class="files"><code>svg/58-playful-y-sticker.svg</code> <code>png/marks/58-playful-y-sticker-512.png</code> <code>png/marks/58-playful-y-sticker-128.png</code></div>
+  </figcaption>
+</figure>
+<figure class="card" id="59-playful-y-squiggle">
+  <div class="imgwrap"><img src="png/marks/59-playful-y-squiggle-512.png" loading="lazy" style="max-height:230px" alt="Squiggle Y"></div>
+  <figcaption>
+    <div class="name"><span class="num">59</span> Squiggle Y</div>
+    <div class="desc">Hand-drawn orange squiggle under the Y — a highlighter swipe.</div>
+    <div class="files"><code>svg/59-playful-y-squiggle.svg</code> <code>png/marks/59-playful-y-squiggle-512.png</code> <code>png/marks/59-playful-y-squiggle-128.png</code></div>
+  </figcaption>
+</figure>
+<figure class="card" id="60-playful-y-tricolor">
+  <div class="imgwrap"><img src="png/marks/60-playful-y-tricolor-512.png" loading="lazy" style="max-height:230px" alt="Tri-color capsule Y"></div>
+  <figcaption>
+    <div class="name"><span class="num">60</span> Tri-color capsule Y</div>
+    <div class="desc">Capsule Y in blue / green / orange — the event-palette as the letter itself.</div>
+    <div class="files"><code>svg/60-playful-y-tricolor.svg</code> <code>png/marks/60-playful-y-tricolor-512.png</code> <code>png/marks/60-playful-y-tricolor-128.png</code></div>
+  </figcaption>
+</figure>
+</div>
+<h2>P · Big-Y lockup</h2>
+<div class="grid">
+<figure class="card" id="61-lockup-y-mono">
+  <div class="imgwrap"><img src="png/lockups/61-lockup-y-mono-1600.png" loading="lazy" style="max-height:230px" alt="Lockup — capsule Y + mono"></div>
+  <figcaption>
+    <div class="name"><span class="num">61</span> Lockup — capsule Y + mono</div>
+    <div class="desc">Blue capsule Y over lowercase mono wordmark with dotted rule. Square-ish splash footprint.</div>
+    <div class="files"><code>svg/61-lockup-y-mono.svg</code> <code>png/lockups/61-lockup-y-mono-1600.png</code></div>
+  </figcaption>
+</figure>
+<figure class="card" id="62-lockup-y-unofficial">
+  <div class="imgwrap"><img src="png/lockups/62-lockup-y-unofficial-1600.png" loading="lazy" style="max-height:230px" alt="Lockup — “the unofficial one”"></div>
+  <figcaption>
+    <div class="name"><span class="num">62</span> Lockup — “the unofficial one”</div>
+    <div class="desc">Big Y + wordmark with an honest orange tag: THE UNOFFICIAL ONE. Directly answers “not BYU themselves”.</div>
+    <div class="files"><code>svg/62-lockup-y-unofficial.svg</code> <code>png/lockups/62-lockup-y-unofficial-1600.png</code></div>
+  </figcaption>
+</figure>
+<figure class="card" id="63-badge-y-circle">
+  <div class="imgwrap"><img src="png/marks/63-badge-y-circle-512.png" loading="lazy" style="max-height:230px" alt="Circle badge Y"></div>
+  <figcaption>
+    <div class="name"><span class="num">63</span> Circle badge Y</div>
+    <div class="desc">Thick ink ring, big blue Y, two accent dots. Minimal stamp-style badge.</div>
+    <div class="files"><code>svg/63-badge-y-circle.svg</code> <code>png/marks/63-badge-y-circle-512.png</code> <code>png/marks/63-badge-y-circle-128.png</code></div>
+  </figcaption>
+</figure>
+<figure class="card" id="64-lockup-y-horizontal">
+  <div class="imgwrap"><img src="png/lockups/64-lockup-y-horizontal-1600.png" loading="lazy" style="max-height:230px" alt="Lockup — capsule Y horizontal"></div>
+  <figcaption>
+    <div class="name"><span class="num">64</span> Lockup — capsule Y horizontal</div>
+    <div class="desc">Blue capsule Y, dotted divider, wordmark with quiet “unofficial” note and event dots.</div>
+    <div class="files"><code>svg/64-lockup-y-horizontal.svg</code> <code>png/lockups/64-lockup-y-horizontal-1600.png</code></div>
+  </figcaption>
+</figure>
+</div>
+<h2>L · 3D (Blender)</h2>
+<div class="grid">
+<figure class="card" id="41-3d-y-tile-tilt">
+  <div class="imgwrap"><img src="3d/41-3d-y-tile-tilt.png" loading="lazy" style="max-height:230px" alt="3D Y-tile — tilted"></div>
+  <figcaption>
+    <div class="name"><span class="num">41</span> 3D Y-tile — tilted</div>
+    <div class="desc">Blender render: calendar tile with beveled edges, blue band, ring posts, extruded Y, toon ink outlines.</div>
+    <div class="files"><code>3d/41-3d-y-tile-tilt.png</code></div>
+  </figcaption>
+</figure>
+<figure class="card" id="42-3d-y-tile-appicon">
+  <div class="imgwrap"><img src="3d/42-3d-y-tile-appicon.png" loading="lazy" style="max-height:230px" alt="3D Y-tile — app icon"></div>
+  <figcaption>
+    <div class="name"><span class="num">42</span> 3D Y-tile — app icon</div>
+    <div class="desc">Straight-on orthographic render: a modern, softly-lit app-icon take on the Y-tile.</div>
+    <div class="files"><code>3d/42-3d-y-tile-appicon.png</code></div>
+  </figcaption>
+</figure>
+<figure class="card" id="43-3d-stack-pages">
+  <div class="imgwrap"><img src="3d/43-3d-stack-pages.png" loading="lazy" style="max-height:230px" alt="3D — one-calendar stack"></div>
+  <figcaption>
+    <div class="name"><span class="num">43</span> 3D — one-calendar stack</div>
+    <div class="desc">Fanned calendar pages behind the front card; the product story in 3D.</div>
+    <div class="files"><code>3d/43-3d-stack-pages.png</code></div>
+  </figcaption>
+</figure>
+<figure class="card" id="44-3d-wordmark">
+  <div class="imgwrap"><img src="3d/44-3d-wordmark.png" loading="lazy" style="max-height:230px" alt="3D wordmark"></div>
+  <figcaption>
+    <div class="name"><span class="num">44</span> 3D wordmark</div>
+    <div class="desc">Extruded Archivo wordmark with a hard blue offset copy behind.</div>
+    <div class="files"><code>3d/44-3d-wordmark.png</code></div>
+  </figcaption>
+</figure>
+<figure class="card" id="45-3d-cube-y">
+  <div class="imgwrap"><img src="3d/45-3d-cube-y.png" loading="lazy" style="max-height:230px" alt="3D — event-cube Y"></div>
+  <figcaption>
+    <div class="name"><span class="num">45</span> 3D — event-cube Y</div>
+    <div class="desc">Isometric Y built from rounded palette cubes.</div>
+    <div class="files"><code>3d/45-3d-cube-y.png</code></div>
+  </figcaption>
+</figure>
+</div>
+</main>
+<script>
+  const b = document.body;
+  light.onclick = () => { b.classList.remove('dark'); light.classList.add('active'); dark.classList.remove('active'); };
+  dark.onclick = () => { b.classList.add('dark'); dark.classList.add('active'); light.classList.remove('active'); };
+</script>
+</body>
+</html>
