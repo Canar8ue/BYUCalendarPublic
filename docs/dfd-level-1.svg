@@ -1,0 +1,250 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2380 1470" width="2380" height="1470" role="img" aria-labelledby="t d" font-family="Archivo, 'Segoe UI', Roboto, system-ui, sans-serif">
+  <title id="t">DFD Level 1 — logical data flow</title>
+  <desc id="d">The context process opened into seven verb-and-noun processes with seven logical data stores. Same external entities and boundary flows as Level 0; technology names are deliberately absent.</desc>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#202124"/></marker>
+    <marker id="ao" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#e8710a"/></marker>
+  </defs>
+  <rect width="2380" height="1470" fill="#ffffff"/>
+  <text x="60" y="56" font-size="26" font-weight="800" fill="#202124">Level 1 — logical data flow</text>
+  <text x="60" y="84" font-size="12" font-weight="400" fill="#5f6368">Process 0 opened into seven processes. Data stores D1–D7 hold state; process names say what happens to the data, not which software does it.</text>
+  <line x1="1840" y1="52" x2="1892" y2="52" stroke="#3c4043" stroke-width="1.6" marker-end="url(#a)"/>
+  <text x="1902" y="56" font-size="10.5" font-weight="400" fill="#5f6368">running today</text>
+  <line x1="2060" y1="52" x2="2112" y2="52" stroke="#e8710a" stroke-width="1.6" stroke-dasharray="8 5" marker-end="url(#ao)"/>
+  <text x="2122" y="56" font-size="10.5" font-weight="400" fill="#5f6368">planned</text>
+  <g>
+    <rect x="45" y="625" width="280" height="130" rx="4" fill="#202124"/>
+    <rect x="40" y="620" width="280" height="130" rx="4" fill="#f1f3f4" stroke="#202124" stroke-width="1.6"/>
+    <text x="56" y="648" font-size="9.5" font-weight="700" fill="#5f6368" letter-spacing="0.8">E1</text>
+    <text x="56" y="672" font-size="14" font-weight="700" fill="#202124">Visitor / BYU member</text>
+    <text x="56" y="694" font-size="10" fill="#5f6368">browses, saves, posts, reports</text>
+  </g>
+  <g>
+    <rect x="45" y="1165" width="280" height="130" rx="4" fill="#202124"/>
+    <rect x="40" y="1160" width="280" height="130" rx="4" fill="#f1f3f4" stroke="#202124" stroke-width="1.6"/>
+    <text x="56" y="1188" font-size="9.5" font-weight="700" fill="#5f6368" letter-spacing="0.8">E2</text>
+    <text x="56" y="1212" font-size="14" font-weight="700" fill="#202124">Moderator</text>
+    <text x="56" y="1234" font-size="10" fill="#5f6368">reviews reports, answers mail</text>
+  </g>
+  <g>
+    <rect x="825" y="45" width="280" height="130" rx="4" fill="#202124"/>
+    <rect x="820" y="40" width="280" height="130" rx="4" fill="#f1f3f4" stroke="#202124" stroke-width="1.6"/>
+    <text x="836" y="68" font-size="9.5" font-weight="700" fill="#5f6368" letter-spacing="0.8">E3</text>
+    <text x="836" y="92" font-size="14" font-weight="700" fill="#202124">Calendar publishers</text>
+    <text x="836" y="114" font-size="10" fill="#5f6368">BYU, departments, clubs, exports</text>
+  </g>
+  <g>
+    <rect x="1965" y="615" width="280" height="130" rx="4" fill="#202124"/>
+    <rect x="1960" y="610" width="280" height="130" rx="4" fill="#f1f3f4" stroke="#202124" stroke-width="1.6"/>
+    <text x="1976" y="638" font-size="9.5" font-weight="700" fill="#5f6368" letter-spacing="0.8">E4</text>
+    <text x="1976" y="662" font-size="14" font-weight="700" fill="#202124">Email delivery service</text>
+    <text x="1976" y="684" font-size="10" fill="#5f6368">sends and receives member mail</text>
+  </g>
+  <g>
+    <rect x="1985" y="235" width="280" height="130" rx="4" fill="#202124"/>
+    <rect x="1980" y="230" width="280" height="130" rx="4" fill="#f1f3f4" stroke="#202124" stroke-width="1.6"/>
+    <text x="1996" y="258" font-size="9.5" font-weight="700" fill="#5f6368" letter-spacing="0.8">E5</text>
+    <text x="1996" y="282" font-size="14" font-weight="700" fill="#202124">Language model service</text>
+    <text x="1996" y="304" font-size="10" fill="#5f6368">interprets phrases, classifies text</text>
+  </g>
+  <g>
+    <rect x="824" y="254" width="250" height="110" rx="14" fill="#202124" opacity="0.9"/>
+    <rect x="820" y="250" width="250" height="110" rx="14" fill="#e8f0fe" stroke="#1a73e8" stroke-width="1.8"/>
+    <text x="836" y="272" font-size="10.5" font-weight="700" fill="#174ea6" letter-spacing="0.6">1.0</text>
+    <text x="945.0" y="304" font-size="14" font-weight="700" text-anchor="middle" fill="#202124">Fetch event sources</text>
+    <text x="945.0" y="348" font-size="9.5" text-anchor="middle" fill="#5f6368">retrieve, parse, normalize, merge</text>
+  </g>
+  <g>
+    <rect x="1244" y="254" width="250" height="110" rx="14" fill="#202124" opacity="0.9"/>
+    <rect x="1240" y="250" width="250" height="110" rx="14" fill="#fef0df" stroke="#e8710a" stroke-width="1.8" stroke-dasharray="8 5"/>
+    <text x="1256" y="272" font-size="10.5" font-weight="700" fill="#a94d00" letter-spacing="0.6">2.0</text>
+    <text x="1365.0" y="304" font-size="14" font-weight="700" text-anchor="middle" fill="#a94d00">Stage enriched drafts</text>
+    <text x="1365.0" y="348" font-size="9.5" text-anchor="middle" fill="#5f6368">clean, tag, de-duplicate; never publish</text>
+  </g>
+  <g>
+    <rect x="1604" y="254" width="250" height="110" rx="14" fill="#202124" opacity="0.9"/>
+    <rect x="1600" y="250" width="250" height="110" rx="14" fill="#e8f0fe" stroke="#1a73e8" stroke-width="1.8"/>
+    <text x="1616" y="272" font-size="10.5" font-weight="700" fill="#174ea6" letter-spacing="0.6">7.0</text>
+    <text x="1725.0" y="294" font-size="14" font-weight="700" text-anchor="middle" fill="#202124">Interpret text with a</text>
+    <text x="1725.0" y="315" font-size="14" font-weight="700" text-anchor="middle" fill="#202124">language model</text>
+    <text x="1725.0" y="348" font-size="9.5" text-anchor="middle" fill="#5f6368">phrase to intent, text to labels</text>
+  </g>
+  <g>
+    <rect x="404" y="624" width="250" height="110" rx="14" fill="#202124" opacity="0.9"/>
+    <rect x="400" y="620" width="250" height="110" rx="14" fill="#e8f0fe" stroke="#1a73e8" stroke-width="1.8"/>
+    <text x="416" y="642" font-size="10.5" font-weight="700" fill="#174ea6" letter-spacing="0.6">5.0</text>
+    <text x="525.0" y="664" font-size="14" font-weight="700" text-anchor="middle" fill="#202124">Manage member account</text>
+    <text x="525.0" y="685" font-size="14" font-weight="700" text-anchor="middle" fill="#202124">and email</text>
+    <text x="525.0" y="718" font-size="9.5" text-anchor="middle" fill="#5f6368">verify, save, opt in, send digest</text>
+  </g>
+  <g>
+    <rect x="904" y="624" width="250" height="110" rx="14" fill="#202124" opacity="0.9"/>
+    <rect x="900" y="620" width="250" height="110" rx="14" fill="#e8f0fe" stroke="#1a73e8" stroke-width="1.8"/>
+    <text x="916" y="642" font-size="10.5" font-weight="700" fill="#174ea6" letter-spacing="0.6">3.0</text>
+    <text x="1025.0" y="664" font-size="14" font-weight="700" text-anchor="middle" fill="#202124">Serve calendar and</text>
+    <text x="1025.0" y="685" font-size="14" font-weight="700" text-anchor="middle" fill="#202124">recommendations</text>
+    <text x="1025.0" y="718" font-size="9.5" text-anchor="middle" fill="#5f6368">merge, filter, search, export, score</text>
+  </g>
+  <g>
+    <rect x="404" y="1104" width="250" height="110" rx="14" fill="#202124" opacity="0.9"/>
+    <rect x="400" y="1100" width="250" height="110" rx="14" fill="#e8f0fe" stroke="#1a73e8" stroke-width="1.8"/>
+    <text x="416" y="1122" font-size="10.5" font-weight="700" fill="#174ea6" letter-spacing="0.6">4.0</text>
+    <text x="525.0" y="1154" font-size="14" font-weight="700" text-anchor="middle" fill="#202124">Publish community content</text>
+    <text x="525.0" y="1198" font-size="9.5" text-anchor="middle" fill="#5f6368">validate, store, send receipt</text>
+  </g>
+  <g>
+    <rect x="904" y="1104" width="250" height="110" rx="14" fill="#202124" opacity="0.9"/>
+    <rect x="900" y="1100" width="250" height="110" rx="14" fill="#e8f0fe" stroke="#1a73e8" stroke-width="1.8"/>
+    <text x="916" y="1122" font-size="10.5" font-weight="700" fill="#174ea6" letter-spacing="0.6">6.0</text>
+    <text x="1025.0" y="1154" font-size="14" font-weight="700" text-anchor="middle" fill="#202124">Review and moderate content</text>
+    <text x="1025.0" y="1198" font-size="9.5" text-anchor="middle" fill="#5f6368">queue, hide, correct, reply</text>
+  </g>
+  <g>
+    <rect x="820" y="440" width="210" height="66" fill="#ffffff"/>
+    <line x1="820" y1="440" x2="1030" y2="440" stroke="#5f6368" stroke-width="1.5"/>
+    <line x1="820" y1="506" x2="1030" y2="506" stroke="#5f6368" stroke-width="1.5"/>
+    <line x1="820" y1="440" x2="820" y2="506" stroke="#5f6368" stroke-width="1.5"/>
+    <text x="830" y="460" font-size="9.5" font-weight="700" fill="#5f6368" letter-spacing="0.6">D1</text>
+    <text x="830" y="482" font-size="12.5" font-weight="600" fill="#202124">Source snapshots</text>
+  </g>
+  <g>
+    <rect x="1240" y="440" width="210" height="66" fill="#ffffff"/>
+    <line x1="1240" y1="440" x2="1450" y2="440" stroke="#e8710a" stroke-width="1.5" stroke-dasharray="8 5"/>
+    <line x1="1240" y1="506" x2="1450" y2="506" stroke="#e8710a" stroke-width="1.5" stroke-dasharray="8 5"/>
+    <line x1="1240" y1="440" x2="1240" y2="506" stroke="#e8710a" stroke-width="1.5" stroke-dasharray="8 5"/>
+    <text x="1250" y="460" font-size="9.5" font-weight="700" fill="#a94d00" letter-spacing="0.6">D2</text>
+    <text x="1250" y="482" font-size="12.5" font-weight="600" fill="#202124">Enrichment drafts</text>
+  </g>
+  <g>
+    <rect x="400" y="790" width="210" height="66" fill="#ffffff"/>
+    <line x1="400" y1="790" x2="610" y2="790" stroke="#5f6368" stroke-width="1.5"/>
+    <line x1="400" y1="856" x2="610" y2="856" stroke="#5f6368" stroke-width="1.5"/>
+    <line x1="400" y1="790" x2="400" y2="856" stroke="#5f6368" stroke-width="1.5"/>
+    <text x="410" y="810" font-size="9.5" font-weight="700" fill="#5f6368" letter-spacing="0.6">D3</text>
+    <text x="410" y="832" font-size="12.5" font-weight="600" fill="#202124">Accounts and sessions</text>
+  </g>
+  <g>
+    <rect x="900" y="790" width="210" height="66" fill="#ffffff"/>
+    <line x1="900" y1="790" x2="1110" y2="790" stroke="#5f6368" stroke-width="1.5"/>
+    <line x1="900" y1="856" x2="1110" y2="856" stroke="#5f6368" stroke-width="1.5"/>
+    <line x1="900" y1="790" x2="900" y2="856" stroke="#5f6368" stroke-width="1.5"/>
+    <text x="910" y="810" font-size="9.5" font-weight="700" fill="#5f6368" letter-spacing="0.6">D4</text>
+    <text x="910" y="832" font-size="12.5" font-weight="600" fill="#202124">Member saves and profile</text>
+  </g>
+  <g>
+    <rect x="1200" y="900" width="210" height="66" fill="#ffffff"/>
+    <line x1="1200" y1="900" x2="1410" y2="900" stroke="#5f6368" stroke-width="1.5"/>
+    <line x1="1200" y1="966" x2="1410" y2="966" stroke="#5f6368" stroke-width="1.5"/>
+    <line x1="1200" y1="900" x2="1200" y2="966" stroke="#5f6368" stroke-width="1.5"/>
+    <text x="1210" y="920" font-size="9.5" font-weight="700" fill="#5f6368" letter-spacing="0.6">D7</text>
+    <text x="1210" y="942" font-size="12.5" font-weight="600" fill="#202124">Usage analytics</text>
+  </g>
+  <g>
+    <rect x="400" y="1280" width="210" height="66" fill="#ffffff"/>
+    <line x1="400" y1="1280" x2="610" y2="1280" stroke="#5f6368" stroke-width="1.5"/>
+    <line x1="400" y1="1346" x2="610" y2="1346" stroke="#5f6368" stroke-width="1.5"/>
+    <line x1="400" y1="1280" x2="400" y2="1346" stroke="#5f6368" stroke-width="1.5"/>
+    <text x="410" y="1300" font-size="9.5" font-weight="700" fill="#5f6368" letter-spacing="0.6">D5</text>
+    <text x="410" y="1322" font-size="12.5" font-weight="600" fill="#202124">Community content</text>
+  </g>
+  <g>
+    <rect x="900" y="1280" width="210" height="66" fill="#ffffff"/>
+    <line x1="900" y1="1280" x2="1110" y2="1280" stroke="#5f6368" stroke-width="1.5"/>
+    <line x1="900" y1="1346" x2="1110" y2="1346" stroke="#5f6368" stroke-width="1.5"/>
+    <line x1="900" y1="1280" x2="900" y2="1346" stroke="#5f6368" stroke-width="1.5"/>
+    <text x="910" y="1300" font-size="9.5" font-weight="700" fill="#5f6368" letter-spacing="0.6">D6</text>
+    <text x="910" y="1322" font-size="12.5" font-weight="600" fill="#202124">Moderation decisions</text>
+  </g>
+  <path d="M 320 660 L 400 660" fill="none" stroke="#3c4043" stroke-width="1.6" marker-end="url(#a)"/>
+  <rect x="282.0" y="588" width="156.0" height="16" rx="3" fill="#ffffff" opacity="0.94"/>
+  <text x="360" y="600" font-size="9.5" text-anchor="middle" fill="#3c4043">account, saves, digest choice</text>
+  <path d="M 300 620 L 300 560 L 860 560 L 860 660 L 900 660" fill="none" stroke="#3c4043" stroke-width="1.6" marker-end="url(#a)"/>
+  <rect x="484.2" y="534" width="231.5" height="16" rx="3" fill="#ffffff" opacity="0.94"/>
+  <text x="600" y="546" font-size="9.5" text-anchor="middle" fill="#3c4043">search, filters, view ⇄ calendar, ICS, picks</text>
+  <path d="M 320 740 L 320 1150 L 400 1150" fill="none" stroke="#3c4043" stroke-width="1.6" marker-end="url(#a)" marker-start="url(#a)"/>
+  <rect x="332.0" y="948" width="161.1" height="16" rx="3" fill="#ffffff" opacity="0.94"/>
+  <text x="332" y="960" font-size="9.5" text-anchor="start" fill="#3c4043">listing, tag, report ⇄ receipt</text>
+  <path d="M 320 1250 L 960 1250 L 960 1210" fill="none" stroke="#3c4043" stroke-width="1.6" marker-end="url(#a)"/>
+  <rect x="621.9" y="1224" width="196.3" height="16" rx="3" fill="#ffffff" opacity="0.94"/>
+  <text x="720" y="1236" font-size="9.5" text-anchor="middle" fill="#3c4043">decisions, corrections ⇄ queue, inbox</text>
+  <path d="M 900 170 L 900 250" fill="none" stroke="#3c4043" stroke-width="1.6" marker-end="url(#a)"/>
+  <rect x="772.3" y="202" width="115.7" height="16" rx="3" fill="#ffffff" opacity="0.94"/>
+  <text x="888" y="214" font-size="9.5" text-anchor="end" fill="#3c4043">feeds, pages, exports</text>
+  <path d="M 1000 250 L 1000 170" fill="none" stroke="#3c4043" stroke-width="1.6" marker-end="url(#a)"/>
+  <rect x="1012.0" y="204" width="100.6" height="16" rx="3" fill="#ffffff" opacity="0.94"/>
+  <text x="1012" y="216" font-size="9.5" text-anchor="start" fill="#3c4043">retrieval requests</text>
+  <path d="M 1100 100 L 1365 100 L 1365 250" fill="none" stroke="#e8710a" stroke-width="1.6" stroke-dasharray="8 5" marker-end="url(#ao)"/>
+  <rect x="1179.7" y="100" width="100.6" height="16" rx="3" fill="#ffffff" opacity="0.94"/>
+  <text x="1230" y="112" font-size="9.5" text-anchor="middle" fill="#a94d00">new source records</text>
+  <path d="M 1850 290 L 1980 290" fill="none" stroke="#3c4043" stroke-width="1.6" marker-end="url(#a)"/>
+  <rect x="1862.2" y="264" width="105.7" height="16" rx="3" fill="#ffffff" opacity="0.94"/>
+  <text x="1915" y="276" font-size="9.5" text-anchor="middle" fill="#3c4043">phrase, source text</text>
+  <path d="M 1980 335 L 1850 335" fill="none" stroke="#3c4043" stroke-width="1.6" marker-end="url(#a)"/>
+  <rect x="1874.8" y="337" width="80.5" height="16" rx="3" fill="#ffffff" opacity="0.94"/>
+  <text x="1915" y="349" font-size="9.5" text-anchor="middle" fill="#3c4043">intent, labels</text>
+  <path d="M 600 620 L 600 590 L 1900 590 L 1900 700 L 1960 700" fill="none" stroke="#3c4043" stroke-width="1.6" marker-end="url(#a)"/>
+  <rect x="1227.0" y="564" width="145.9" height="16" rx="3" fill="#ffffff" opacity="0.94"/>
+  <text x="1300" y="576" font-size="9.5" text-anchor="middle" fill="#3c4043">verification, reset, digest</text>
+  <path d="M 1150 1115 L 1930 1115 L 1930 730 L 1960 730" fill="none" stroke="#3c4043" stroke-width="1.6" marker-end="url(#a)"/>
+  <rect x="1317.0" y="1089" width="166.1" height="16" rx="3" fill="#ffffff" opacity="0.94"/>
+  <text x="1400" y="1101" font-size="9.5" text-anchor="middle" fill="#3c4043">inbound message ⇄ privacy reply</text>
+  <path d="M 900 360 L 900 440" fill="none" stroke="#3c4043" stroke-width="1.6" marker-end="url(#a)"/>
+  <rect x="912.0" y="392" width="171.1" height="16" rx="3" fill="#ffffff" opacity="0.94"/>
+  <text x="912" y="404" font-size="9.5" text-anchor="start" fill="#3c4043">normalized events, source status</text>
+  <path d="M 920 506 L 920 620" fill="none" stroke="#3c4043" stroke-width="1.6" marker-end="url(#a)"/>
+  <rect x="932.0" y="554" width="85.5" height="16" rx="3" fill="#ffffff" opacity="0.94"/>
+  <text x="932" y="566" font-size="9.5" text-anchor="start" fill="#3c4043">snapshot events</text>
+  <path d="M 1030 470 L 1080 470 L 1080 300 L 1240 300" fill="none" stroke="#e8710a" stroke-width="1.6" stroke-dasharray="8 5" marker-end="url(#ao)"/>
+  <rect x="1067.2" y="276" width="105.7" height="16" rx="3" fill="#ffffff" opacity="0.94"/>
+  <text x="1120" y="288" font-size="9.5" text-anchor="middle" fill="#a94d00">existing event keys</text>
+  <path d="M 1300 360 L 1300 440" fill="none" stroke="#e8710a" stroke-width="1.6" stroke-dasharray="8 5" marker-end="url(#ao)"/>
+  <rect x="1312.0" y="392" width="145.9" height="16" rx="3" fill="#ffffff" opacity="0.94"/>
+  <text x="1312" y="404" font-size="9.5" text-anchor="start" fill="#a94d00">enriched draft, de-dupe key</text>
+  <path d="M 1400 490 L 1500 490 L 1500 1195 L 1150 1195" fill="none" stroke="#e8710a" stroke-width="1.6" stroke-dasharray="8 5" marker-end="url(#ao)"/>
+  <rect x="1284.8" y="1169" width="70.4" height="16" rx="3" fill="#ffffff" opacity="0.94"/>
+  <text x="1320" y="1181" font-size="9.5" text-anchor="middle" fill="#a94d00">staged draft</text>
+  <path d="M 460 730 L 460 790" fill="none" stroke="#3c4043" stroke-width="1.6" marker-end="url(#a)"/>
+  <rect x="472.0" y="750" width="145.9" height="16" rx="3" fill="#ffffff" opacity="0.94"/>
+  <text x="472" y="762" font-size="9.5" text-anchor="start" fill="#3c4043">account, session, code hash</text>
+  <path d="M 470 856 L 470 1100" fill="none" stroke="#3c4043" stroke-width="1.6" marker-end="url(#a)"/>
+  <rect x="482.0" y="998" width="85.5" height="16" rx="3" fill="#ffffff" opacity="0.94"/>
+  <text x="482" y="1010" font-size="9.5" text-anchor="start" fill="#3c4043">verified member</text>
+  <path d="M 650 690 L 870 690 L 870 823 L 900 823" fill="none" stroke="#3c4043" stroke-width="1.6" marker-end="url(#a)"/>
+  <rect x="690.0" y="664" width="156.0" height="16" rx="3" fill="#ffffff" opacity="0.94"/>
+  <text x="690" y="676" font-size="9.5" text-anchor="start" fill="#3c4043">saves, filters, digest choice</text>
+  <path d="M 1000 790 L 1000 730" fill="none" stroke="#3c4043" stroke-width="1.6" marker-end="url(#a)"/>
+  <rect x="1012.0" y="752" width="166.1" height="16" rx="3" fill="#ffffff" opacity="0.94"/>
+  <text x="1012" y="764" font-size="9.5" text-anchor="start" fill="#3c4043">saved events, profile, activity</text>
+  <path d="M 1150 700 L 1330 700 L 1330 900" fill="none" stroke="#3c4043" stroke-width="1.6" marker-end="url(#a)"/>
+  <rect x="1180.0" y="674" width="120.8" height="16" rx="3" fill="#ffffff" opacity="0.94"/>
+  <text x="1180" y="686" font-size="9.5" text-anchor="start" fill="#3c4043">view and search counts</text>
+  <path d="M 1300 966 L 1300 1155 L 1150 1155" fill="none" stroke="#3c4043" stroke-width="1.6" marker-end="url(#a)"/>
+  <rect x="1312.0" y="1129" width="70.4" height="16" rx="3" fill="#ffffff" opacity="0.94"/>
+  <text x="1312" y="1141" font-size="9.5" text-anchor="start" fill="#3c4043">usage counts</text>
+  <path d="M 470 1210 L 470 1280" fill="none" stroke="#3c4043" stroke-width="1.6" marker-end="url(#a)"/>
+  <rect x="482.0" y="1234" width="120.8" height="16" rx="3" fill="#ffffff" opacity="0.94"/>
+  <text x="482" y="1246" font-size="9.5" text-anchor="start" fill="#3c4043">validated listing, tag</text>
+  <path d="M 650 1170 L 870 1170 L 870 1313 L 900 1313" fill="none" stroke="#3c4043" stroke-width="1.6" marker-end="url(#a)"/>
+  <rect x="700.0" y="1144" width="135.9" height="16" rx="3" fill="#ffffff" opacity="0.94"/>
+  <text x="700" y="1156" font-size="9.5" text-anchor="start" fill="#3c4043">report and event snapshot</text>
+  <path d="M 610 1313 L 900 1313" fill="none" stroke="#3c4043" stroke-width="1.6" marker-end="url(#a)"/>
+  <rect x="642.1" y="1287" width="115.7" height="16" rx="3" fill="#ffffff" opacity="0.94"/>
+  <text x="700" y="1299" font-size="9.5" text-anchor="middle" fill="#3c4043">posted listings, tags</text>
+  <path d="M 610 1290 L 720 1290 L 720 710 L 900 710" fill="none" stroke="#3c4043" stroke-width="1.6" marker-end="url(#a)"/>
+  <rect x="732.0" y="988" width="115.7" height="16" rx="3" fill="#ffffff" opacity="0.94"/>
+  <text x="732" y="1000" font-size="9.5" text-anchor="start" fill="#3c4043">public listings, tags</text>
+  <path d="M 1000 1280 L 1000 1210" fill="none" stroke="#3c4043" stroke-width="1.6" marker-end="url(#a)"/>
+  <rect x="1012.0" y="1234" width="70.4" height="16" rx="3" fill="#ffffff" opacity="0.94"/>
+  <text x="1012" y="1246" font-size="9.5" text-anchor="start" fill="#3c4043">open reports</text>
+  <path d="M 1080 1210 L 1080 1280" fill="none" stroke="#3c4043" stroke-width="1.6" marker-end="url(#a)"/>
+  <rect x="1092.0" y="1234" width="135.9" height="16" rx="3" fill="#ffffff" opacity="0.94"/>
+  <text x="1092" y="1246" font-size="9.5" text-anchor="start" fill="#3c4043">hide, restore, correction</text>
+  <path d="M 1600 330 L 1600 380 L 1200 380 L 1200 640 L 1150 640" fill="none" stroke="#3c4043" stroke-width="1.6" marker-end="url(#a)"/>
+  <rect x="1077.2" y="458" width="120.8" height="16" rx="3" fill="#ffffff" opacity="0.94"/>
+  <text x="1198" y="470" font-size="9.5" text-anchor="end" fill="#3c4043">filter intent, wording</text>
+  <path d="M 1650 250 L 1650 210 L 1420 210 L 1420 250" fill="none" stroke="#e8710a" stroke-width="1.6" stroke-dasharray="8 5" marker-end="url(#ao)"/>
+  <rect x="1472.1" y="184" width="115.7" height="16" rx="3" fill="#ffffff" opacity="0.94"/>
+  <text x="1530" y="196" font-size="9.5" text-anchor="middle" fill="#a94d00">classification labels</text>
+  <text x="60" y="1390" font-size="10" font-weight="400" fill="#5f6368">Every Level 0 flow appears here, split across the process that handles it, and no external entity was added. Store D2 only holds drafts: 6.0 decides</text>
+  <text x="60" y="1406" font-size="10" font-weight="400" fill="#5f6368">what becomes public. Dashed processes and stores are planned. A double-headed arrow is one conversation (request and response), not two flows.</text>
+</svg>

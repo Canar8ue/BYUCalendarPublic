@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1700 880" width="1700" height="880" role="img" aria-labelledby="t d" font-family="Archivo, 'Segoe UI', Roboto, system-ui, sans-serif">
+  <title id="t">DFD Level 0 — context diagram</title>
+  <desc id="d">The whole BYU Calendar product as one process, with every external entity and every data flow that crosses the system boundary.</desc>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#202124"/></marker>
+    <marker id="ao" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#e8710a"/></marker>
+  </defs>
+  <rect width="1700" height="880" fill="#ffffff"/>
+  <text x="60" y="56" font-size="26" font-weight="800" fill="#202124">Level 0 — context diagram</text>
+  <text x="60" y="84" font-size="12" font-weight="400" fill="#5f6368">The whole product as one process. Every external entity and every flow that crosses the boundary; no data stores at this level.</text>
+  <rect x="664" y="384" width="332" height="252" rx="18" fill="#202124"/>
+  <rect x="660" y="380" width="332" height="252" rx="18" fill="#ffffff" stroke="#202124" stroke-width="2"/>
+  <text x="688" y="410" font-size="13" font-weight="700" fill="#5f6368">0</text>
+  <text x="826" y="468" font-size="19" font-weight="800" text-anchor="middle" fill="#202124">Campus event calendar</text>
+  <text x="826" y="500" font-size="10.5" text-anchor="middle" fill="#5f6368">Fetch sources · serve views · publish and moderate listings</text>
+  <text x="826" y="518" font-size="10.5" text-anchor="middle" fill="#5f6368">Email members · planned: stage enriched drafts for review</text>
+  <text x="826" y="552" font-size="10" text-anchor="middle" fill="#5f6368">Includes the planned AI workflow automation</text>
+  <g>
+    <rect x="65" y="385" width="280" height="120" rx="4" fill="#202124"/>
+    <rect x="60" y="380" width="280" height="120" rx="4" fill="#f1f3f4" stroke="#202124" stroke-width="1.6"/>
+    <text x="76" y="408" font-size="9.5" font-weight="700" fill="#5f6368" letter-spacing="0.8">E1</text>
+    <text x="76" y="432" font-size="14" font-weight="700" fill="#202124">Visitor / BYU member</text>
+    <text x="76" y="454" font-size="10" fill="#5f6368">browses, saves, posts, reports</text>
+  </g>
+  <g>
+    <rect x="65" y="545" width="280" height="120" rx="4" fill="#202124"/>
+    <rect x="60" y="540" width="280" height="120" rx="4" fill="#f1f3f4" stroke="#202124" stroke-width="1.6"/>
+    <text x="76" y="568" font-size="9.5" font-weight="700" fill="#5f6368" letter-spacing="0.8">E2</text>
+    <text x="76" y="592" font-size="14" font-weight="700" fill="#202124">Moderator</text>
+    <text x="76" y="614" font-size="10" fill="#5f6368">reviews reports, answers mail</text>
+  </g>
+  <g>
+    <rect x="705" y="125" width="280" height="110" rx="4" fill="#202124"/>
+    <rect x="700" y="120" width="280" height="110" rx="4" fill="#f1f3f4" stroke="#202124" stroke-width="1.6"/>
+    <text x="716" y="148" font-size="9.5" font-weight="700" fill="#5f6368" letter-spacing="0.8">E3</text>
+    <text x="716" y="172" font-size="14" font-weight="700" fill="#202124">Calendar publishers</text>
+    <text x="716" y="194" font-size="10" fill="#5f6368">BYU, departments, clubs, exports</text>
+  </g>
+  <g>
+    <rect x="1325" y="365" width="280" height="120" rx="4" fill="#202124"/>
+    <rect x="1320" y="360" width="280" height="120" rx="4" fill="#f1f3f4" stroke="#202124" stroke-width="1.6"/>
+    <text x="1336" y="388" font-size="9.5" font-weight="700" fill="#5f6368" letter-spacing="0.8">E4</text>
+    <text x="1336" y="412" font-size="14" font-weight="700" fill="#202124">Email delivery service</text>
+    <text x="1336" y="434" font-size="10" fill="#5f6368">sends and receives member mail</text>
+  </g>
+  <g>
+    <rect x="1325" y="525" width="280" height="120" rx="4" fill="#202124"/>
+    <rect x="1320" y="520" width="280" height="120" rx="4" fill="#f1f3f4" stroke="#202124" stroke-width="1.6"/>
+    <text x="1336" y="548" font-size="9.5" font-weight="700" fill="#5f6368" letter-spacing="0.8">E5</text>
+    <text x="1336" y="572" font-size="14" font-weight="700" fill="#202124">Language model service</text>
+    <text x="1336" y="594" font-size="10" fill="#5f6368">interprets phrases, classifies text</text>
+  </g>
+  <path d="M 340 420 L 660 420" fill="none" stroke="#3c4043" stroke-width="1.6" marker-end="url(#a)"/>
+  <rect x="417.0" y="394" width="166.1" height="16" rx="3" fill="#ffffff" opacity="0.94"/>
+  <text x="500" y="406" font-size="9.5" text-anchor="middle" fill="#3c4043">account, saves, listing, report</text>
+  <path d="M 660 460 L 340 460" fill="none" stroke="#3c4043" stroke-width="1.6" marker-end="url(#a)"/>
+  <rect x="432.1" y="466" width="135.9" height="16" rx="3" fill="#ffffff" opacity="0.94"/>
+  <text x="500" y="478" font-size="9.5" text-anchor="middle" fill="#3c4043">calendar, picks, receipts</text>
+  <path d="M 340 580 L 660 580" fill="none" stroke="#3c4043" stroke-width="1.6" marker-end="url(#a)"/>
+  <rect x="399.3" y="554" width="201.3" height="16" rx="3" fill="#ffffff" opacity="0.94"/>
+  <text x="500" y="566" font-size="9.5" text-anchor="middle" fill="#3c4043">review decisions, corrections, replies</text>
+  <path d="M 660 620 L 340 620" fill="none" stroke="#3c4043" stroke-width="1.6" marker-end="url(#a)"/>
+  <rect x="409.4" y="630" width="181.2" height="16" rx="3" fill="#ffffff" opacity="0.94"/>
+  <text x="500" y="642" font-size="9.5" text-anchor="middle" fill="#3c4043">report queue, inbox, usage summary</text>
+  <path d="M 780 230 L 780 380" fill="none" stroke="#3c4043" stroke-width="1.6" marker-end="url(#a)"/>
+  <rect x="617.0" y="294" width="151.0" height="16" rx="3" fill="#ffffff" opacity="0.94"/>
+  <text x="768" y="306" font-size="9.5" text-anchor="end" fill="#3c4043">source feeds, pages, exports</text>
+  <path d="M 880 380 L 880 230" fill="none" stroke="#3c4043" stroke-width="1.6" marker-end="url(#a)"/>
+  <rect x="892.0" y="324" width="100.6" height="16" rx="3" fill="#ffffff" opacity="0.94"/>
+  <text x="892" y="336" font-size="9.5" text-anchor="start" fill="#3c4043">retrieval requests</text>
+  <path d="M 992 400 L 1320 400" fill="none" stroke="#3c4043" stroke-width="1.6" marker-end="url(#a)"/>
+  <rect x="1097.1" y="374" width="125.8" height="16" rx="3" fill="#ffffff" opacity="0.94"/>
+  <text x="1160" y="386" font-size="9.5" text-anchor="middle" fill="#3c4043">codes, digests, replies</text>
+  <path d="M 1320 440 L 992 440" fill="none" stroke="#3c4043" stroke-width="1.6" marker-end="url(#a)"/>
+  <rect x="1114.7" y="446" width="90.6" height="16" rx="3" fill="#ffffff" opacity="0.94"/>
+  <text x="1160" y="458" font-size="9.5" text-anchor="middle" fill="#3c4043">privacy messages</text>
+  <path d="M 992 560 L 1320 560" fill="none" stroke="#3c4043" stroke-width="1.6" marker-end="url(#a)"/>
+  <rect x="1082.0" y="534" width="156.0" height="16" rx="3" fill="#ffffff" opacity="0.94"/>
+  <text x="1160" y="546" font-size="9.5" text-anchor="middle" fill="#3c4043">phrase, classification prompt</text>
+  <path d="M 1320 600 L 992 600" fill="none" stroke="#3c4043" stroke-width="1.6" marker-end="url(#a)"/>
+  <rect x="1097.1" y="606" width="125.8" height="16" rx="3" fill="#ffffff" opacity="0.94"/>
+  <text x="1160" y="618" font-size="9.5" text-anchor="middle" fill="#3c4043">intent, labels, wording</text>
+  <text x="60" y="790" font-size="10" font-weight="400" fill="#5f6368">Every arrow is a data flow, not a call order: E1 and E2 are people, E3–E5 are outside services. The planned AI workflow sits inside process 0,</text>
+  <text x="60" y="806" font-size="10" font-weight="400" fill="#5f6368">so its traffic with E3 and E5 already appears here. Level 1 opens process 0 into numbered processes and adds the data stores.</text>
+</svg>
