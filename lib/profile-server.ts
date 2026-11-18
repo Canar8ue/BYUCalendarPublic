@@ -123,8 +123,10 @@ export async function profileActivityRequest(request: Request) {
       const existing = known.get(signal.kind + '|' + signal.value);
       const score = existing ? nextActivityScore(existing.score, existing.updated_at, weight) : weight;
       return db.prepare(`INSERT INTO profile_activity(user_id,kind,value,score,updated_at) VALUES(?,?,?,?,?)
-        ON CONFLICT(user_id,kind,value) DO UPDATE SET score=excluded.score,updated_at=excluded.updated_at`)
-        .bind(user.id, signal.kind, signal.value, score, now);
+        ON CONFLICT(user_id,kind,value) DO UPDATE SET
+          score=CASE WHEN abs(julianday(excluded.updated_at)-julianday(profile_activity.updated_at))*86400<60 THEN profile_activity.score+? ELSE excluded.score END,
+          updated_at=excluded.updated_at`)
+        .bind(user.id, signal.kind, signal.value, score, now, weight);
     }));
     return json({ok: true});
   } catch (error) { return errorResponse(error); }
@@ -136,7 +138,7 @@ export async function recommendationsRequest(request: Request) {
     const db = database();
     const [profile, activity, preferenceRow] = await Promise.all([
       readProfile(user.id),
-      db.prepare('SELECT kind,value,score FROM profile_activity WHERE user_id=?').bind(user.id).all<{kind: string; value: string; score: number}>(),
+      db.prepare('SELECT kind,value,score,updated_at FROM profile_activity WHERE user_id=?').bind(user.id).all<{kind: string; value: string; score: number; updated_at: string}>(),
       db.prepare('SELECT payload FROM user_preferences WHERE user_id=?').bind(user.id).first<{payload: string}>(),
     ]);
     let savedIds: string[] = [];

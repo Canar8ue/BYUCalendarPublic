@@ -1,4 +1,5 @@
 import {database} from '../../../../db';
+import {invalidateCalendar} from '../../../../lib/calendar-server';
 import {readAccount, authConfiguration} from '../../../../lib/auth';
 import {requestStaffStatus} from '../../../../lib/staff-server.mjs';
 import {json, errorResponse, readJSON, requireSameOrigin} from '../../../../lib/http.mjs';
@@ -12,6 +13,8 @@ export async function POST(request: Request) {
     const account = await readAccount(request);
     requireSameOrigin(request, authConfiguration().origin);
     const input = await readJSON(request, 2048);
-    return json(await requestStaffStatus(database(), account, input));
+    const result = await requestStaffStatus(database(), account, input);
+    if (result.status === 'verified') invalidateCalendar();
+    return json(result);
   } catch (error) { return errorResponse(error); }
 }

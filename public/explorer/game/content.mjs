@@ -1,9 +1,10 @@
 // Gameplay anchors are deliberately OUTSIDE source building footprints. They are
 // candidate outdoor arrival positions, not the rooftop pins in coordinates.json.
 // World collision/ground checks remain authoritative at runtime.
+import {SKATE_BOARDS} from './skate-boards.mjs?v=20261105rider6';
+
 export const UNIT = 0.044571444392204285;
 export const SPAWN = Object.freeze({x: 2.85, z: -1});
-export const SCOOTER_STAND = Object.freeze({x: 5.45, z: 2.8});
 
 const place = (id, name, code, x, z, description, district) => Object.freeze({id, name, code, x, z, radius: .8, description, district});
 export const LOCATIONS = Object.freeze([
@@ -67,7 +68,7 @@ export const PHOTO_SPOTS = Object.freeze([
 export const SECRETS = Object.freeze([
   {id: 'page-zero', name: 'The missing zero', x: 2.85, z: -2.1},
   {id: 'candy-break', name: 'A very important candy break', x: -9.5, z: -.4},
-  {id: 'tiny-parking', name: 'Parking for tiny scooters', x: 5.6, z: 2.9},
+  {id: 'tiny-parking', name: 'Parking for tiny skateboards', x: 5.6, z: 2.9},
   {id: 'cat-sticker', name: 'Cat person confirmed', x: 1.6, z: 10.2},
   {id: 'bell-secret', name: 'A note in the sky', x: 10.1, z: -13.65},
   {id: 'paper-plane', name: 'An excellent paper airplane', x: 7.7, z: -5.85},
@@ -115,18 +116,11 @@ export const OUTFITS = Object.freeze([
   {id:'racer',name:'Track jacket',gold:1,jacket:'#e5ae4e',pack:'#244e64'},
   {id:'cookiecrew',name:'Cookie crew',activity:'cookie-stand',jacket:'#3d78b2',pack:'#f3d79c'},
 ]);
-export const DECKS = Object.freeze([
-  {id:'classic',name:'Campus blue',level:1,color:'#275b9c'},
-  {id:'sea',name:'Sea glass',level:2,color:'#377e78'},
-  {id:'gold',name:'Golden ticket',level:4,color:'#bd862e'},
-  {id:'cosmo',name:'Cougar spirit',quest:'cosmo',color:'#f2eee0'},
-  {id:'comet',name:'Comet',gold:3,color:'#ebba51'},
-  {id:'workshop',name:'Nora’s workshop',activity:'scooter-school',color:'#65b8aa'},
-]);
+export const DECKS = SKATE_BOARDS;
 export const SECRET_STORIES = Object.freeze({
   'page-zero':'Found: the missing zero from the 404. It was taking a personal day.',
   'candy-break':'The Tanner candy economy appears to be thriving. Your research is complete.',
-  'tiny-parking':'Reserved for one extremely small scooter. The parking attendant is a ladybug.',
+  'tiny-parking':'Reserved for one extremely small skateboard. The parking attendant is a ladybug.',
   'cat-sticker':'Membership in the campus cat appreciation society: approved by the cat.',
   'bell-secret':'The bell sends a note out over the rooftops. For a moment, the whole campus listens.',
   'paper-plane':'A tiny paper pilot has logged more campus miles than most freshmen.',
@@ -139,4 +133,4 @@ export const SECRET_STORIES = Object.freeze({
 });
 
 // Routes and anchor availability are fiction within the game. No real-world
-// access, scooter permission, building entrance, or current-event claim is made.
+// access, skating permission, building entrance, or current-event claim is made.

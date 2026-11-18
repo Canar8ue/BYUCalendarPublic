@@ -16,9 +16,9 @@ let searchTimer: ReturnType<typeof setTimeout> | null = null;
 // every intermediate keystroke.
 export function trackSearch(query: string, results: number) {
   const text = query.trim();
+  if (searchTimer) { clearTimeout(searchTimer); searchTimer = null; }
   if (text.length < 2) return;
-  if (searchTimer) clearTimeout(searchTimer);
-  searchTimer = setTimeout(() => track({type: 'search', name: text.slice(0, 120), detail: String(results)}), 1200);
+  searchTimer = setTimeout(() => { searchTimer = null; track({type: 'search', name: text.slice(0, 120), detail: String(results)}); }, 1200);
 }
 
 // Personal-picks beacons: the same fire-and-forget posture as the aggregate

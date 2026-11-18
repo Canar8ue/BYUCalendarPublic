@@ -46,7 +46,7 @@ export default function SubscribeDialog({filterSummary, feedPath, signedIn}: Pro
   return <div className="subscribe-dialog">
     <span className="empty-icon"><CalendarPlus size={28}/></span>
     <h2>Put this calendar in your calendar.</h2>
-    <p className="modal-intro">Subscribe once and your calendar app keeps it current on its own — new events, moved times, and cancellations appear without opening this site.</p>
+    <p className="modal-intro">Add it once and your calendar app keeps it current on its own — new events, moved times, and cancellations appear without opening this site.</p>
 
     <section className="subscribe-block">
       <p className="section-label">WHAT YOU ARE LOOKING AT</p>
@@ -58,7 +58,7 @@ export default function SubscribeDialog({filterSummary, feedPath, signedIn}: Pro
         </button>
         {filterUrl && <a className="outline-button" href={webcal(filterUrl)}>Open in my calendar app</a>}
       </div>
-      <p className="subscribe-hint">This link follows the filters on screen. Change the filters and copy a new link, or clear them to subscribe to everything.</p>
+      <p className="subscribe-hint">This link follows the filters on screen. Change the filters and copy a new link, or clear them to include everything.</p>
     </section>
 
     {signedIn && <section className="subscribe-block">
@@ -87,6 +87,6 @@ export default function SubscribeDialog({filterSummary, feedPath, signedIn}: Pro
       <p><span>Outlook</span> Add calendar → Subscribe from web, then paste.</p>
     </section>
 
-    <p className="subscribe-note">Subscribed calendars refresh on the app&rsquo;s own schedule, usually every few hours. Need a one-time copy instead? Close this and use <b>Export these events</b> under the calendar.</p>
+    <p className="subscribe-note">Added calendars refresh on the app&rsquo;s own schedule, usually every few hours. Need a one-time copy instead? Close this and use <b>Export these events</b> under the calendar.</p>
   </div>;
 }

@@ -41,16 +41,6 @@
       "bytes": 257087,
       "sha256": "d7da9c67d927b5b2f142182b166966daef3005cea785b196e6c83e4eb479dbc1"
     },
-    "scooter": {
-      "id": "scooter",
-      "kind": "effect",
-      "seconds": 5,
-      "loop": true,
-      "file": "scooter-51ceb8f24bc6.mp3",
-      "url": "/explorer/audio/scooter-51ceb8f24bc6.mp3",
-      "bytes": 81127,
-      "sha256": "51ceb8f24bc6c11f2e00068f72159ad1fe8bcc2921c12a930b9c951fdf243f05"
-    },
     "step": {
       "id": "step",
       "kind": "effect",
@@ -135,7 +125,7 @@
       "id": "voice-intro",
       "kind": "voice",
       "speaker": "Maya",
-      "caption": "I’m Maya. Four pieces of your lost page are somewhere out here. Start with the library. Follow the gold marker.",
+      "caption": "I\u2019m Maya. Four pieces of your lost page are somewhere out here. Start with the library. Follow the gold marker.",
       "voice": "EXAVITQu4vr4xnSDxMaL",
       "file": "voice-intro-954cf98fd007.mp3",
       "url": "/explorer/audio/voice-intro-954cf98fd007.mp3",
@@ -147,22 +137,11 @@
         "end": 9.97
       }
     },
-    "voice-fragment-orientation": {
-      "id": "voice-fragment-orientation",
-      "kind": "voice",
-      "speaker": "Maya",
-      "caption": "Your first piece! The library, the student center, and a little curiosity. That’s a pretty good start. Next stop: the science district. Your scooter is always one tap away.",
-      "voice": "EXAVITQu4vr4xnSDxMaL",
-      "file": "voice-fragment-orientation-9005f1efe725.mp3",
-      "url": "/explorer/audio/voice-fragment-orientation-9005f1efe725.mp3",
-      "bytes": 195647,
-      "sha256": "9005f1efe725a83b6a1fc582c982aa8254128acbc32e2ba67f2a715901cf7d3f"
-    },
     "voice-fragment-long-way": {
       "id": "voice-fragment-long-way",
       "kind": "voice",
       "speaker": "Maya",
-      "caption": "Two pieces. Nicely wandered! Now head east. Someone left a melody between the Arts Building and the Music Building. There’s a whole different rhythm over there.",
+      "caption": "Two pieces. Nicely wandered! Now head east. Someone left a melody between the Arts Building and the Music Building. There\u2019s a whole different rhythm over there.",
       "voice": "EXAVITQu4vr4xnSDxMaL",
       "file": "voice-fragment-long-way-e45bc010d972.mp3",
       "url": "/explorer/audio/voice-fragment-long-way-e45bc010d972.mp3",
@@ -211,7 +190,7 @@
       "id": "voice-cat-start",
       "kind": "voice",
       "speaker": "Maya",
-      "caption": "Well, hello there. That cat looks like it knows exactly where it’s going. Which is more than we can say. Follow the little paw prints.",
+      "caption": "Well, hello there. That cat looks like it knows exactly where it\u2019s going. Which is more than we can say. Follow the little paw prints.",
       "voice": "EXAVITQu4vr4xnSDxMaL",
       "file": "voice-cat-start-112ab0d2b934.mp3",
       "url": "/explorer/audio/voice-cat-start-112ab0d2b934.mp3",
@@ -222,7 +201,7 @@
       "id": "voice-cat-finish",
       "kind": "voice",
       "speaker": "Maya",
-      "caption": "Mystery solved. It wasn’t a secret passage. It was a very carefully selected napping spot. I think you’ve made a friend.",
+      "caption": "Mystery solved. It wasn\u2019t a secret passage. It was a very carefully selected napping spot. I think you\u2019ve made a friend.",
       "voice": "EXAVITQu4vr4xnSDxMaL",
       "file": "voice-cat-finish-616b301640e3.mp3",
       "url": "/explorer/audio/voice-cat-finish-616b301640e3.mp3",
@@ -232,8 +211,8 @@
     "voice-delivery": {
       "id": "voice-delivery",
       "kind": "voice",
-      "speaker": "Noah · slightly lost student",
-      "caption": "Hey! I took the scenic route, and now I can’t find Engineering. Could you scout the way for me? No rush. Well… a little rush. Thank you!",
+      "speaker": "Noah \u00b7 slightly lost student",
+      "caption": "Hey! I took the scenic route, and now I can\u2019t find Engineering. Could you scout the way for me? No rush. Well\u2026 a little rush. Thank you!",
       "voice": "bIHbv24MWmeRgasZH58o",
       "file": "voice-delivery-e998dc61d145.mp3",
       "url": "/explorer/audio/voice-delivery-e998dc61d145.mp3",

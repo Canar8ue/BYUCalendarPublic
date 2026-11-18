@@ -1,4 +1,4 @@
-import {UNIT, LOCATIONS, CAT_TRAIL, TRIALS} from './content.mjs?v=20261102polish6';
+import {UNIT, LOCATIONS, CAT_TRAIL, TRIALS} from './content.mjs?v=20261105rider6';
 
 // Authored game scenes. These are fictional students and a fictional promotion,
 // never real calendar listings or a claim about present-day giveaways.
@@ -12,7 +12,7 @@ export const DISTRICT_POINTS = Object.freeze({
   music:point('music','Music approach',location('music-building')),
   moa:point('moa','Museum of Art approach',location('moa')),
   lane:point('lane','Library Lane',CAT_TRAIL[2]),
-  nora:point('nora','Nora’s scooter workshop',CAT_TRAIL[1]),
+  nora:point('nora','Nora’s skate workshop',CAT_TRAIL[1]),
   pennants:Object.freeze([
     point('library','Library pennant',location('hbll')),
     point('arts','Arts pennant',location('arts-building')),
@@ -32,7 +32,7 @@ const character = (id,name,role,color,accessory,home,work,leisure,bio) => Object
 export const NPC_DEFINITIONS = Object.freeze([
   character('maya','Maya','Cookie stand host','#3d78b2','apron',DISTRICT_POINTS.stand,DISTRICT_POINTS.stand,DISTRICT_POINTS.arts,'The organizer with a tray of cookies, a football pennant and a plan for making strangers feel welcome.'),
   character('eli','Eli','New student','#d9a64e','map',DISTRICT_POINTS.library,DISTRICT_POINTS.jkb,DISTRICT_POINTS.stand,'He can remember a whole story; a string of building acronyms is another matter.'),
-  character('nora','Nora','Scooter tinkerer','#427d70','tools',DISTRICT_POINTS.nora,DISTRICT_POINTS.nora,DISTRICT_POINTS.lane,'A careful rider who treats a clean stop as a more impressive trick than a fast lap.'),
+  character('nora','Nora','Skateboard tinkerer','#427d70','tools',DISTRICT_POINTS.nora,DISTRICT_POINTS.nora,DISTRICT_POINTS.lane,'A careful rider who treats a clean stop as a more impressive trick than a fast lap.'),
   character('jun','Jun','Music student','#7b649f','case',DISTRICT_POINTS.arts,DISTRICT_POINTS.music,DISTRICT_POINTS.stand,'Carries a music case and hears rhythms in ordinary campus sounds. Happy to rehearse without sound.'),
   character('sofia','Sofia','Student photographer','#be795d','camera',DISTRICT_POINTS.moa,DISTRICT_POINTS.moa,DISTRICT_POINTS.stand,'Her final project is about the people who make familiar buildings feel like home.'),
 ]);
@@ -40,7 +40,7 @@ export const NPC_DEFINITIONS = Object.freeze([
 export const ACTIVITIES = Object.freeze([
   {id:'cookie-stand',npcId:'maya',title:'Maya’s cookie stand',description:'Choose a cookie, arrange three pennants and invite the district to Maya’s fictional football booth.',xp:60,reward:'60 XP and Cookie Crew colors',total:5},
   {id:'newcomer',npcId:'eli',title:'Help Eli find Jesse Knight',description:'Walk with Eli to Jesse Knight, then bring back a welcome card from Maya.',xp:50,reward:'50 XP',total:5},
-  {id:'scooter-school',npcId:'nora',title:'Scooter practice',description:'Learn a controlled brake, ride three practice gates, then try Nora’s careful-turning challenge.',xp:60,reward:'60 XP and the workshop deck',total:5},
+  {id:'scooter-school',npcId:'nora',title:'Skate practice',description:'Learn a controlled brake, ride three practice gates, then try Nora’s careful-turning challenge.',xp:60,reward:'60 XP and the workshop deck',total:5},
   {id:'campus-duet',npcId:'jun',title:'Jun’s rehearsal',description:'Meet Jun at Music, play a visual call-and-response and invite Maya to a small gathering.',xp:50,reward:'50 XP',total:4},
   {id:'photo-board',npcId:'sofia',title:'Sofia’s photo board',description:'Help Sofia compose two campus photographs and exhibit them at the stand.',xp:50,reward:'50 XP',total:3},
 ].map(Object.freeze));

@@ -1,8 +1,8 @@
 import * as THREE from '/campus/vendor/three.module.js';
-import {UNIT} from './content.mjs?v=20261102polish6';
-import {CAMPUS_NPCS,CAMPUS_STANDS,CAMPUS_ACTIVITIES} from './campus-content.mjs?v=20261102polish6';
-import {createDistrictArt} from './district-art.mjs?v=20261102polish6';
-import {clipDistrictMotion} from './district-collision.mjs?v=20261102polish6';
+import {UNIT} from './content.mjs?v=20261105rider6';
+import {CAMPUS_NPCS,CAMPUS_STANDS,CAMPUS_ACTIVITIES} from './campus-content.mjs?v=20261105rider6';
+import {createDistrictArt} from './district-art.mjs?v=20261105rider6';
+import {clipDistrictMotion} from './district-collision.mjs?v=20261105rider6';
 
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.z-b.z);
 const valid=p=>p&&Number.isFinite(p.x)&&Number.isFinite(p.z);

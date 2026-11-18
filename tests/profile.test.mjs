@@ -253,3 +253,23 @@ test('recommendations rank, cap, exclude saved events, and stay quiet without si
   // General fill says so honestly instead of claiming a match.
   assert.deepEqual(activityOnly.find(p=>p.id==='d').reasons,['Campus pick']);
 });
+
+test('free-text acronym mining keeps lowercase cs out and category activity decays with time',()=>{
+  assert.deepEqual(canonicalFreeText('i study cs and data science'),[]);
+  assert.deepEqual(canonicalFreeText('I study CS and IS').sort(),['Computer Science','IS']);
+  const staleAt=new Date(now.getTime()-90*86400000).toISOString();
+  const recentAt=now.toISOString();
+  const picks=recommendEvents([
+    event({id:'cat-match',title:'Campus Mixer',category:'Campus life',tags:[],start:'2026-09-30T18:00:00.000Z'}),
+  ],{profile:null,activityRows:[{kind:'category',value:'Campus life',score:6,updated_at:recentAt}],savedIds:[],now});
+  assert.equal(picks[0].id,'cat-match');
+  assert.deepEqual(picks[0].reasons,['Campus life']);
+  const stalePicks=recommendEvents([
+    event({id:'stale-cat',title:'Quiet reading',category:'Faith & learning',tags:[],start:'2026-09-30T18:00:00.000Z'}),
+  ],{profile:null,activityRows:[{kind:'category',value:'Faith & learning',score:2,updated_at:staleAt}],savedIds:[],now});
+  const freshPicks=recommendEvents([
+    event({id:'fresh-cat',title:'Quiet reading',category:'Faith & learning',tags:[],start:'2026-09-30T18:00:00.000Z'}),
+  ],{profile:null,activityRows:[{kind:'category',value:'Faith & learning',score:2,updated_at:recentAt}],savedIds:[],now});
+  assert.ok(freshPicks[0].score>stalePicks[0].score);
+  assert.equal(scoreEvent(event({start:'not-a-date'}),{profile:{interests:['IS'],categories:[],details:[]},now}),null);
+});

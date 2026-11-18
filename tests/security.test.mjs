@@ -63,9 +63,10 @@ test('source and request size limits also apply when content-length is absent or
   }), {headers: {'content-length': '1'}}));
   await assert.rejects(remoteText('https://calendar.byu.edu/start'), /too large/);
   assert.equal(cancelled, true);
-  for (const headers of [{'Content-Type': 'application/json'}, {'Content-Type': 'application/json', 'Content-Length': '1'}]) {
+  for (const headers of [{'Content-Type': 'application/json'}, {'Content-Type': 'Application/JSON; charset=utf-8'}, {'Content-Type': 'application/json', 'Content-Length': '1'}]) {
     await assert.rejects(readJSON(new Request('https://byucalendar.com/api/listings', {method: 'POST', headers, body: JSON.stringify({description: 'a'.repeat(100)})}), 50), error => error.status === 413);
   }
+  assert.deepEqual(await readJSON(new Request('https://byucalendar.com/api/listings', {method: 'POST', headers: {'Content-Type': 'Application/JSON; charset=utf-8'}, body: JSON.stringify({ok: true})})), {ok: true});
 });
 
 test('calendar export keeps CR/LF payloads inside text and excludes unsafe URL fields', () => {

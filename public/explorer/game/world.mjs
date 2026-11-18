@@ -2,14 +2,21 @@
  * Native GLB coordinates are retained: 0.044571444392204285 units = one meter.
  * This module has no eager renderer imports so its geometry rules are testable.
  */
-import {stabilizeMountainY} from './valley-rendering.mjs?v=20261102polish6';
-import {applyCampusPaving,createCampusFixtures} from './place-art.mjs?v=20261102polish6';
+import {stabilizeMountainY} from './valley-rendering.mjs?v=20261105rider6';
+import {applyCampusPaving,createCampusFixtures} from './place-art.mjs?v=20261105rider6';
+import {groundCampusTrees} from './campus-tree-contact.mjs?v=20261105rider6';
 
 const UNIT = 0.044571444392204285;
 const CELL = 1;
 const HEIGHT = 1.75 * UNIT;
 const STEP_HEIGHT = .45 * UNIT;
+const CURB_STEP = .24 * UNIT;
+const CURB_LIP = .38 * UNIT;
 const EPS = 1e-7;
+const WALL_PROFILE = Symbol('wall face profile');
+const TERRAIN_FACE = Symbol('terrain face');
+const PROFILE_SIZE = 5;
+const PROFILE_PAGE_SIZE = 8192;
 
 /** Lazy optional-zone lifecycle. A cancelled request cannot activate scenery
  * after return/reset/Exit, and failed requests remain retryable. */
@@ -34,6 +41,11 @@ export function createHikeManager({load,mask=()=>()=>{}}){
   return {loadHike,unloadHike,getHike:()=>active,refreshMask,dispose(){disposed=true;unloadHike();}};
 }
 
+export function isPavingTransition(source, target) {
+  const paved = surface => surface === 2 || surface === 3;
+  return source > 0 && target > 0 && source !== target && source !== 7 && target !== 7 && (paved(source) || paved(target));
+}
+
 function key(x, z) { return `${Math.floor(x / CELL)},${Math.floor(z / CELL)}`; }
 function eachCell(minX, minZ, maxX, maxZ, callback) {
   for (let x = Math.floor(minX / CELL); x <= Math.floor(maxX / CELL); x++) {
@@ -43,24 +55,40 @@ function eachCell(minX, minZ, maxX, maxZ, callback) {
 function closestPoint(x, z, ax, az, bx, bz) {
   const dx = bx - ax, dz = bz - az, length = dx * dx + dz * dz;
   const t = length ? Math.max(0, Math.min(1, ((x - ax) * dx + (z - az) * dz) / length)) : 0;
-  return {x: ax + dx * t, z: az + dz * t};
+  return {x: ax + dx * t, z: az + dz * t, t};
 }
 
 /** Triangle inputs use arrays in world space and kind 'ground' or 'wall'. */
 export function createCollisionIndex(triangles) {
   const grounds = new Map(), walls = new Map();
-  const wallKeys=new Set();
+  const wallKeys=new Map(), wallProfiles=[];
+  let profileCount = 0;
   // Packed 64-bit coordinate pages avoid three arrays and nine boxed numbers
   // per ground triangle. Stream directly from the decoder, without a second
   // complete copy of the campus geometry in JavaScript objects.
   let groundPage=new Float64Array(9*4096),groundOffset=0;
   let groundCount = 0, wallCount = 0;
-  function addWall(wall) {
+  function addWall(wall, face) {
     if (Math.hypot(wall.bx - wall.ax, wall.bz - wall.az) < .008) return;
     const ends=[[wall.ax,wall.az],[wall.bx,wall.bz]].sort((a,b)=>a[0]-b[0]||a[1]-b[1]);
-    const signature=[...ends[0],...ends[1],wall.minY,wall.maxY].map(v=>Math.round(v*100000)).join(',');
-    if(wallKeys.has(signature))return;
-    wallKeys.add(signature);
+    const signature=[...ends[0],...ends[1],wall.minY,wall.maxY,wall[TERRAIN_FACE]?1:0].map(v=>Math.round(v*100000)).join(',');
+    const existing = wallKeys.get(signature);
+    if (face) {
+      const edge = existing || wall;
+      const [p, q, c] = face;
+      const forward = Math.abs(p[0] - edge.ax) < EPS && Math.abs(p[2] - edge.az) < EPS;
+      const pageIndex = Math.floor(profileCount / PROFILE_PAGE_SIZE);
+      const offset = (profileCount % PROFILE_PAGE_SIZE) * PROFILE_SIZE;
+      const page = wallProfiles[pageIndex] ??= new Float32Array(PROFILE_PAGE_SIZE * PROFILE_SIZE);
+      page[offset] = forward ? p[1] : q[1];
+      page[offset + 1] = forward ? q[1] : p[1];
+      page[offset + 2] = c[1];
+      page[offset + 3] = closestPoint(c[0], c[2], edge.ax, edge.az, edge.bx, edge.bz).t;
+      page[offset + 4] = edge[WALL_PROFILE] ?? -1;
+      edge[WALL_PROFILE] = profileCount++;
+    }
+    if (existing) return;
+    wallKeys.set(signature, wall);
     const minX=Math.min(wall.ax,wall.bx),maxX=Math.max(wall.ax,wall.bx);
     const minZ=Math.min(wall.az,wall.bz),maxZ=Math.max(wall.az,wall.bz);
     eachCell(minX-.1,minZ-.1,maxX+.1,maxZ+.1,cell=>{
@@ -69,7 +97,7 @@ export function createCollisionIndex(triangles) {
     });
     wallCount++;
   }
-  for (const {a, b, c, kind, surface = 0} of triangles) {
+  for (const {a, b, c, kind, surface = 0, terrain = false} of triangles) {
     if (![...a, ...b, ...c].every(Number.isFinite)) continue;
     const minX = Math.min(a[0], b[0], c[0]), maxX = Math.max(a[0], b[0], c[0]);
     const minZ = Math.min(a[2], b[2], c[2]), maxZ = Math.max(a[2], b[2], c[2]);
@@ -92,7 +120,10 @@ export function createCollisionIndex(triangles) {
       const pairs = [[a, b], [b, c], [c, a]];
       pairs.sort((p, q) => Math.hypot(q[0][0] - q[1][0], q[0][2] - q[1][2]) - Math.hypot(p[0][0] - p[1][0], p[0][2] - p[1][2]));
       const [p, q] = pairs[0];
-      addWall({ax:p[0],az:p[2],bx:q[0],bz:q[2],minY:Math.min(a[1],b[1],c[1]),maxY:Math.max(a[1],b[1],c[1])});
+      const other = p === a ? c : p === b ? a : b;
+      const wall={ax:p[0],az:p[2],bx:q[0],bz:q[2],minY:Math.min(a[1],b[1],c[1]),maxY:Math.max(a[1],b[1],c[1])};
+      if(terrain)wall[TERRAIN_FACE]=true;
+      addWall(wall, [p, q, other]);
     }
   }
   function groundHeight(x, z, referenceY, surfaceOnly=false) {
@@ -127,7 +158,7 @@ export function createCollisionIndex(triangles) {
     if(center===null)return null;
     let height=center;
     // Shoes and wheels occupy an area. Sampling only the origin leaves their
-    // edges inside uphill paving, especially on a scooter at a curb.
+    // edges inside uphill paving, especially near an uphill curb.
     for(const [dx,dz]of[[radius,0],[-radius,0],[0,radius],[0,-radius]]){
       const sample=groundHeight(x+dx,z+dz,referenceY);
       if(sample!==null&&sample-center<=STEP_HEIGHT)height=Math.max(height,sample);
@@ -151,7 +182,31 @@ export function createCollisionIndex(triangles) {
     });
     return result;
   }
-  function move(position, delta, radius = .32 * UNIT, {grounded=true}={}) {
+  // A diagonal curb face can have a high endpoint well away from the wheels.
+  // Sample only the section of its projected edge within the board's reach.
+  function localWallTop(wall, t, radius, top) {
+    let profile = wall[WALL_PROFILE];
+    if (profile === undefined) return wall.maxY;
+    const length = Math.hypot(wall.bx - wall.ax, wall.bz - wall.az);
+    if (length < EPS) return wall.maxY;
+    const low = Math.max(0, t - radius / length), high = Math.min(1, t + radius / length);
+    let maxY = -Infinity;
+    while (profile >= 0) {
+      const page = wallProfiles[Math.floor(profile / PROFILE_PAGE_SIZE)];
+      const offset = (profile % PROFILE_PAGE_SIZE) * PROFILE_SIZE;
+      const ay = page[offset], by = page[offset + 1], cy = page[offset + 2], c = page[offset + 3];
+      const edgeY = point => ay + (by - ay) * point;
+      const faceY = point => point < c
+        ? ay + (cy - ay) * point / c
+        : c < 1 ? cy + (by - cy) * (point - c) / (1 - c) : cy;
+      const a = edgeY(low), b = edgeY(high), cLow = faceY(low), cHigh = faceY(high);
+      const cornerY = c >= low && c <= high ? cy : a;
+      if (Math.min(a, b, cLow, cHigh, cornerY) <= top) maxY = Math.max(maxY, a, b, cLow, cHigh, cornerY);
+      profile = page[offset + 4];
+    }
+    return maxY;
+  }
+  function move(position, delta, radius = .32 * UNIT, {grounded=true, skating=false, rolling=false}={}) {
     const result = {x:position.x,y:position.y,z:position.z};
     if (![position.x,position.y,position.z,delta.x,delta.z,radius].every(Number.isFinite) || radius <= 0) return result;
     const count = Math.max(1, Math.min(160, Math.ceil(Math.hypot(delta.x,delta.z)/(radius*.6))));
@@ -164,6 +219,23 @@ export function createCollisionIndex(triangles) {
           const p=closestPoint(x,z,wall.ax,wall.az,wall.bx,wall.bz);
           let nx=x-p.x,nz=z-p.z,distance=Math.hypot(nx,nz);
           if(distance>=radius)continue;
+          if (skating) {
+            const top = localWallTop(wall, p.t, Math.sqrt(radius * radius - distance * distance), result.y + HEIGHT);
+            if (top < result.y + .012) continue;
+            if (rolling && top <= result.y + CURB_LIP && wall[WALL_PROFILE] !== undefined && distance > EPS) {
+              // A mesh lip may be offset from the paving edge. Check support
+              // on both sides within wheel reach before treating it as a curb.
+              const acrossX = nx / distance * radius, acrossZ = nz / distance * radius;
+              const nearX = p.x + acrossX, nearZ = p.z + acrossZ, farX = p.x - acrossX, farZ = p.z - acrossZ;
+              const nearY = groundHeight(nearX, nearZ, result.y), farY = groundHeight(farX, farZ, result.y);
+              if (nearY !== null && farY !== null && Math.abs(farY - nearY) <= CURB_STEP && Math.abs(farY - result.y) <= CURB_STEP) {
+                const nearSurface=groundHeight(nearX,nearZ,result.y,true),farSurface=groundHeight(farX,farZ,result.y,true);
+                // The batched ground mesh also contains narrow vertical skirts
+                // over continuous grass. These have no authored obstacle.
+                if(isPavingTransition(nearSurface,farSurface)||(wall[TERRAIN_FACE]&&nearSurface===1&&farSurface===1))continue;
+              }
+            }
+          }
           if(distance < 1e-8) {
             const old=closestPoint(result.x,result.z,wall.ax,wall.az,wall.bx,wall.bz);
             nx=result.x-old.x;nz=result.z-old.z;distance=Math.hypot(nx,nz);
@@ -203,7 +275,7 @@ export function createCollisionIndex(triangles) {
     return last;
   }
   wallKeys.clear();
-  return {groundHeight,groundSurface:(x,z,y)=>groundHeight(x,z,y,true),supportHeight,groundPose,move,cameraPosition:obstructedCamera,addWall,
+  return {groundHeight,groundSurface:(x,z,y)=>groundHeight(x,z,y,true),supportHeight,groundPose,move,cameraPosition:obstructedCamera,addWall:wall=>addWall(wall),wallsNear:(x,z,radius)=>[...candidates(x,z,radius)],
     get stats(){return {groundTriangles:groundCount,wallTriangles:wallCount,groundCells:grounds.size,wallCells:walls.size};}};
 }
 
@@ -245,12 +317,13 @@ export async function createWorld({scene,renderer,onProgress=()=>{}}) {
   const loader=new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
   onProgress('Downloading campus',.08);
   const [gltf,catalog]=await Promise.all([
-    loader.loadAsync('/explorer/campus/campus_web.glb?v=20261102buildings2',event=>{
+    loader.loadAsync('/explorer/campus/campus_web.glb?v=20261116mapui1',event=>{
       if(event.total)onProgress('Downloading campus',.08+.52*event.loaded/event.total);
     }),
-    fetch('/explorer/campus/coordinates.json?v=20261102buildings2').then(response=>{if(!response.ok)throw new Error('Campus locations could not load');return response.json();})
+    fetch('/explorer/campus/coordinates.json?v=20261116mapui1').then(response=>{if(!response.ok)throw new Error('Campus locations could not load');return response.json();})
   ]);
   const model=gltf.scene;model.updateMatrixWorld(true);
+  groundCampusTrees(model);
   const types=new Map(catalog.features.map(f=>[f.featureIndex,f.category]));
   const a=new THREE.Vector3(),b=new THREE.Vector3(),c=new THREE.Vector3();
   const ab=new THREE.Vector3(),ac=new THREE.Vector3(),normal=new THREE.Vector3();
@@ -272,7 +345,7 @@ export async function createWorld({scene,renderer,onProgress=()=>{}}) {
       let kind;
       if((surfaces?surface>0:background)&&up>.60)kind='ground';
       else if(Math.abs(up)<.62&&type!=='water')kind='wall';
-      if(kind)yield {a:a.toArray(),b:b.toArray(),c:c.toArray(),kind,surface};
+      if(kind)yield {a:a.toArray(),b:b.toArray(),c:c.toArray(),kind,surface,terrain:background&&surface===0};
     }
   }}
   await new Promise(resolve=>setTimeout(resolve,0));
@@ -307,22 +380,36 @@ export async function createWorld({scene,renderer,onProgress=()=>{}}) {
     if(renderer){renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=p.exposure;renderer.outputColorSpace=THREE.SRGBColorSpace;}
   }
   setTime();
-  let valley,hikeModule;
+  let valley,hikeModule,courseView=false;
   const hiking=createHikeManager({
     async load(options){
-      hikeModule=await import('./hike-world.mjs?v=20261102polish6');
+      hikeModule=await import('./hike-world.mjs?v=20261105rider6');
       return hikeModule.loadHikingWorld({scene,THREE,...options});
     },
     mask(controller){if(!valley)return()=>{};controller.matchBoundary?.(valley);return hikeModule.maskValleyForHike(valley,controller.bounds,THREE);}
   });
+  function disposeObject3D(root){
+    if(!root)return;
+    root.traverse(object=>{
+      if(object.isInstancedMesh)object.dispose?.();
+      if(object.isMesh){
+        object.geometry?.dispose?.();
+        for(const material of Array.isArray(object.material)?object.material:object.material?[object.material]:[]){
+          for(const texKey of ['map','normalMap','roughnessMap','metalnessMap','emissiveMap','aoMap','alphaMap'])material[texKey]?.dispose?.();
+          material.dispose?.();
+        }
+      }
+    });
+  }
   // Optional horizon scenery does not delay ready or replace the game sky.
   loader.loadAsync('/campus/valley_lod.glb?v=20261027mapsplit1').then(result=>{
-    if(disposed){result.scene.traverse(object=>{if(object.isMesh){object.geometry.dispose();object.material.dispose();}});return;}
-    valley=result.scene;valley.name='Explorer distant valley';stabilizeMountainY(valley);hiking.refreshMask();scene.add(valley);
+    if(disposed){disposeObject3D(result.scene);return;}
+    valley=result.scene;valley.name='Explorer distant valley';valley.visible=!courseView;stabilizeMountainY(valley);hiking.refreshMask();scene.add(valley);
   }).catch(()=>{/* The explorable campus remains playable without distant scenery. */});
   onProgress('Campus ready',1);
   return {
     model,bounds,features:catalog.features,stats:collision.stats,
+    wallsNear:collision.wallsNear,
     loadHike:hiking.loadHike,unloadHike:hiking.unloadHike,getHike:hiking.getHike,
     groundHeight(x,z,referenceY){const h=hiking.getHike();return h?.contains(x,z)?h.groundHeight(x,z,referenceY):collision.groundHeight(x,z,referenceY);},
     groundSurface(x,z,referenceY){return hiking.getHike()?.contains(x,z)?'trail':collision.groundSurface(x,z,referenceY);},
@@ -331,6 +418,7 @@ export async function createWorld({scene,renderer,onProgress=()=>{}}) {
     move(position,delta,radius,options){const h=hiking.getHike(),index=h?.contains(position.x,position.z)?h:collision;const p=index.move(position,delta,radius,options);return new THREE.Vector3(p.x,p.y,p.z);},
     cameraPosition(target,desired){const h=hiking.getHike(),index=h?.contains(target.x,target.z)?h:collision;const p=index.cameraPosition(target,desired);return new THREE.Vector3(p.x,p.y,p.z);},
     setTime,
+    setCourseView(value){courseView=!!value;model.visible=fixtures.root.visible=!courseView;if(valley)valley.visible=!courseView;scene.fog.near=courseView?5:80;scene.fog.far=courseView?38:1100;},
     setQuality(quality){if(renderer?.shadowMap){renderer.shadowMap.enabled=quality!=='low';renderer.shadowMap.type=THREE.PCFSoftShadowMap;}},
     setShadowTarget(point){sun.target.position.copy(point);sun.position.copy(point).addScaledVector(shadowDirection,20);},
     setCycle(value){cycle=!!value;cycleStart=null;cycleBase=currentTime;},getTime(){return currentTime;},
@@ -338,7 +426,7 @@ export async function createWorld({scene,renderer,onProgress=()=>{}}) {
     dispose(){
       disposed=true;
       hiking.dispose();
-      for(const object of [model,fixtures.root,valley,sky])if(object){scene.remove(object);object.traverse(child=>{if(child.isMesh){if(child.isInstancedMesh)child.dispose();child.geometry.dispose();for(const material of Array.isArray(child.material)?child.material:[child.material])material.dispose();}});}
+      for(const object of [model,fixtures.root,valley,sky])if(object){scene.remove(object);disposeObject3D(object);}
       scene.remove(hemi,sun,sun.target);hemi.dispose?.();sun.dispose?.();
     }
   };

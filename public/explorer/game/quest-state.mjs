@@ -1,6 +1,6 @@
-import {SPAWN, LOCATIONS, MAIN_CHAPTERS, FRAGMENTS, CAT_TRAIL, COSMO_SPOTS, LOST_ITEMS, TUNE_NOTES, PHOTO_SPOTS, QUESTS} from './content.mjs?v=20261102polish6';
-import {activityTarget, activityStatus} from './activities.mjs?v=20261102polish6';
-import {campusActivityTarget,campusActivityStatus} from './campus-state.mjs?v=20261102polish6';
+import {SPAWN, LOCATIONS, MAIN_CHAPTERS, FRAGMENTS, CAT_TRAIL, COSMO_SPOTS, LOST_ITEMS, TUNE_NOTES, PHOTO_SPOTS, QUESTS} from './content.mjs?v=20261105rider6';
+import {activityTarget, activityStatus} from './activities.mjs?v=20261105rider6';
+import {campusActivityTarget,campusActivityStatus} from './campus-state.mjs?v=20261105rider6';
 
 export function questTarget(progress, selected = 'main') {
   if (selected.startsWith('campus:')) return campusActivityTarget(progress.campusActivities, selected.slice(7));

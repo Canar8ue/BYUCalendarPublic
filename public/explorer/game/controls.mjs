@@ -19,8 +19,14 @@ export function normalizeMoveInput(x, z) {
   return {x, z, magnitude: length};
 }
 
+// A held speed modifier is independent of movement intent. Both physical
+// Shift keys can be released independently without toggling camera modes.
+export function speedModifierHeld(keys) {
+  return keys.has('ShiftLeft') || keys.has('ShiftRight');
+}
+
 // Camera-forward is +Z at zero yaw, so a rightward mouse drag decreases yaw.
-// Shared by drag, pointer lock and touch to keep all three inputs consistent.
+// Shared by mouse drag and touch to keep both inputs consistent.
 export function lookDirection(yaw, pitch, dx, dy, {sensitivity = 1, invertY = false} = {}) {
   const finite = value => Number.isFinite(value) ? value : 0;
   const factor = Number.isFinite(sensitivity) ? Math.max(.5, Math.min(2, sensitivity)) : 1;

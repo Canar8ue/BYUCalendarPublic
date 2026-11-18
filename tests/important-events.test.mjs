@@ -29,7 +29,12 @@ test('devotionals and forums with senior speakers are important; ordinary ones a
 
 test('the Utah vs BYU football game is important; other football is not',()=>{
   assert.equal(importantLabel(event({title:'BYU Football vs. Utah Utes',category:'Sports & recreation'})),'Utah vs BYU football');
+  assert.equal(importantLabel(event({title:'Football vs. Utah',sourceId:'byucougars',category:'Sports & recreation'})),'Utah vs BYU football');
   assert.equal(importantLabel(event({title:'Utah Utes at BYU Cougars Football'})),'Utah vs BYU football');
+  assert.equal(importantLabel(event({title:'BYU Football vs. Utah State',sourceId:'byucougars',category:'Sports & recreation'})),'');
+  assert.equal(importantLabel(event({title:'Football vs. Utah Tech',sourceId:'byucougars',category:'Sports & recreation'})),'');
+  assert.equal(importantLabel(event({title:'Football vs. Utah Valley',sourceId:'byucougars',category:'Sports & recreation'})),'');
+  assert.equal(importantLabel(event({title:'Football vs. Southern Utah',sourceId:'byucougars',category:'Sports & recreation'})),'');
   assert.equal(importantLabel(event({title:'BYU Football vs. Gonzaga'})),'');
   assert.equal(importantLabel(event({title:'Utah Jazz watch party'})),'');
 });

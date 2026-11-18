@@ -119,7 +119,7 @@ export function applyHikeAction(state, action, context = {}, route) {
   const changed = (message, extra = {}) => ({changed:true, message, rewards:completedHikeRewards(state, route).filter(reward => !before.includes(reward.id)), ...extra});
   if (action === 'decline') return unchanged('The trail will be here when you are ready.');
   if (action === 'start') {
-    if (checkpoints.length < 2 || !near(context, trailhead, 8)) return unchanged('Park the scooter and meet Caleb on foot at the trailhead.');
+    if (checkpoints.length < 2 || !near(context, trailhead, 8)) return unchanged('Put away the skateboard and meet Caleb on foot at the trailhead.');
     const fresh = !state.started;
     state.started = true;state.metCaleb = true;state.inHike = true;state.terrainRevision = revisionOf(route);state.checkpointOrder = [...order];state.lastCheckpoint = trailhead.id;
     if (!state.reached.length) state.reached.push(trailhead.id);
@@ -210,7 +210,7 @@ export function hikeObjectives(state, route) {
 
 export function calebConversation(state, checkpoint, route) {
   const checkpoints = hikeCheckpoints(route), index = checkpoints.findIndex(point => point.id === checkpoint);
-  if (index === 0) return state.returned ? 'A climb, a way down, and a new story. I think that’s a good afternoon.' : state.summitSeen ? 'Almost home. The trailhead feels different when you’ve seen it from up there.' : 'I’m Caleb. I like a walk with room for a conversation. Park your scooter here; we’ll follow the trail on foot.';
+  if (index === 0) return state.returned ? 'A climb, a way down, and a new story. I think that’s a good afternoon.' : state.summitSeen ? 'Almost home. The trailhead feels different when you’ve seen it from up there.' : 'I’m Caleb. I like a walk with room for a conversation. Leave your skateboard here; we’ll follow the trail on foot.';
   if (index === checkpoints.length - 1) return state.summitSeen ? 'There’s no timer for this view. A photograph, a long breath, and then the same trail home.' : 'There it is—the whole valley. Look how the familiar campus has become one small part of the picture.';
   const lines = [
     'At a bend I look back for a second. A small stretch of trail can hold a surprising amount of progress.',

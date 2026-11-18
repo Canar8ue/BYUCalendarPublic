@@ -1,7 +1,7 @@
 'use client';
-import {useState} from 'react';
+import {useRef,useState} from 'react';
 import {ArrowRight, ShieldCheck} from 'lucide-react';
-import {COMMUNITY_TAGS, REPORT_REASONS} from '../lib/community.mjs';
+import {COMMUNITY_TAGS, REPORT_REASONS, listingInputDates, changeListingDateMode} from '../lib/community.mjs';
 import {CATEGORIES} from '../lib/catalog.mjs';
 import {postJSON} from './account-client';
 import type {AccountState, CampusEvent} from './types';
@@ -10,15 +10,31 @@ export function ContributionGate({account, action, returnTo, error}: {account: A
   return <div className="contribution-gate"><ShieldCheck size={27}/><h3>Help shape the calendar.</h3><p>{error || (!account ? 'Loading your account…' : `Sign in with a verified BYU email to ${action}.`)}</p>{account && <a className="primary-button" href={'/signin?returnTo=' + encodeURIComponent(returnTo)}>Sign in with BYU email <ArrowRight size={15}/></a>}{account && !account.emailReady && <small>Email verification is coming soon. You can browse events now.</small>}</div>;
 }
 
-export function NewListingForm({onPublished}: {onPublished: (event: CampusEvent) => void}) {
-  const [busy, setBusy] = useState(false), [error, setError] = useState(''), [allDay, setAllDay] = useState(false);
+function useListingDates(event?: CampusEvent) {
+  const [allDay,setAllDay]=useState(event?.allDay||false);
+  const [dates,setDates]=useState<{start:string;end:string}>(()=>listingInputDates(event));
+  const previous=useRef<{allDay:boolean;start:string;end:string}|null>(null);
+  function changeAllDay(next:boolean){
+    const prior=previous.current;
+    const converted=prior?changeListingDateMode(prior,allDay):null;
+    const restored=prior&&prior.allDay===next&&converted?.start===dates.start&&converted?.end===dates.end;
+    previous.current={allDay,...dates};
+    setDates(restored?{start:prior.start,end:prior.end}:changeListingDateMode(dates,next));
+    setAllDay(next);
+  }
+  return {allDay,changeAllDay,dates,setDates};
+}
+
+export function NewListingForm({onPublished}: {onPublished: (event: CampusEvent, first: boolean) => void}) {
+  const [busy, setBusy] = useState(false), [error, setError] = useState('');
+  const {allDay,changeAllDay,dates,setDates}=useListingDates();
   const [submissionId] = useState(() => crypto.randomUUID());
   async function submit(form: HTMLFormElement) {
     const values = new FormData(form);
     setBusy(true); setError('');
     try {
-      const result = await postJSON<{event: CampusEvent}>('/api/listings', {...Object.fromEntries(values), submissionId, allDay});
-      onPublished(result.event);
+      const result = await postJSON<{event: CampusEvent; first?: boolean}>('/api/listings', {...Object.fromEntries(values), submissionId, allDay});
+      onPublished(result.event, Boolean(result.first));
     } catch (err) { setError(err instanceof Error ? err.message : 'Could not publish your listing.'); setBusy(false); }
   }
   return <form className="community-form" onSubmit={e => {e.preventDefault(); void submit(e.currentTarget);}}><fieldset disabled={busy}>
@@ -26,8 +42,8 @@ export function NewListingForm({onPublished}: {onPublished: (event: CampusEvent)
     <label>Organizer or club<input name="organizer" required minLength={2} maxLength={120} placeholder="Who is hosting?"/></label>
     <label>Description<textarea name="description" required minLength={20} maxLength={5000} rows={5} placeholder="What’s happening, who can attend, and what should people know?"/><small>Include only details you can confirm. Your listing and description will be public.</small></label>
     <div className="form-two-columns"><label>Category<select name="category">{CATEGORIES.map(c => <option key={c.id}>{c.id}</option>)}</select></label><label>Location<input name="location" required minLength={2} maxLength={240} placeholder="Building and room, or Online"/></label></div>
-    <label className="form-checkbox"><input type="checkbox" checked={allDay} onChange={e => setAllDay(e.target.checked)}/> All-day event</label>
-    <div className="form-two-columns" key={String(allDay)}><label>{allDay ? 'First day' : 'Starts'}<input name="start" type={allDay ? 'date' : 'datetime-local'} required/></label><label>{allDay ? 'Last day (optional)' : 'Ends (optional)'}<input name="end" type={allDay ? 'date' : 'datetime-local'}/></label></div>
+    <label className="form-checkbox"><input type="checkbox" checked={allDay} onChange={e => changeAllDay(e.target.checked)}/> All-day event</label>
+    <div className="form-two-columns" key={String(allDay)}><label>{allDay ? 'First day' : 'Starts'}<input name="start" type={allDay ? 'date' : 'datetime-local'} required value={dates.start} onChange={e=>setDates(current=>({...current,start:e.target.value}))}/></label><label>{allDay ? 'Last day (optional)' : 'Ends (optional)'}<input name="end" type={allDay ? 'date' : 'datetime-local'} value={dates.end} onChange={e=>setDates(current=>({...current,end:e.target.value}))}/></label></div>
     <p className="form-help">All dates and times are in Mountain Time (Provo). For an all-day event, the last day is included.</p>
     <label>Event or organizer link<input name="url" type="url" pattern="https://.*" required maxLength={2000} placeholder="https://…"/><small>Link to the announcement or organizer so people can check the details.</small></label>
     {error && <p className="form-error" role="alert">{error}</p>}
@@ -36,17 +52,9 @@ export function NewListingForm({onPublished}: {onPublished: (event: CampusEvent)
   </fieldset></form>;
 }
 
-// Stored community events carry ISO instants (timed) or inclusive/exclusive
-// dates (all-day); form inputs need Mountain Time civil strings instead.
-const civilMountainTime = new Intl.DateTimeFormat('sv-SE', {timeZone: 'America/Denver', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23'});
-function formStart(event: CampusEvent): string {return event.allDay ? event.start : civilMountainTime.format(new Date(event.start)).replace(' ', 'T');}
-function formEnd(event: CampusEvent): string {
-  if (!event.end) return '';
-  return event.allDay ? new Date(Date.parse(event.end) - 86400000).toISOString().slice(0, 10) : civilMountainTime.format(new Date(event.end)).replace(' ', 'T');
-}
-
 export function EditListingForm({event, onComplete, moderator}: {event: CampusEvent; onComplete: (message: string) => Promise<void>; moderator?: boolean}) {
-  const [busy, setBusy] = useState(false), [error, setError] = useState(''), [allDay, setAllDay] = useState(event.allDay);
+  const [busy, setBusy] = useState(false), [error, setError] = useState('');
+  const {allDay,changeAllDay,dates,setDates}=useListingDates(event);
   async function submit(form: HTMLFormElement) {
     const values = new FormData(form);
     setBusy(true); setError('');
@@ -60,8 +68,8 @@ export function EditListingForm({event, onComplete, moderator}: {event: CampusEv
     <label>Organizer or club<input name="organizer" required minLength={2} maxLength={120} defaultValue={event.organizer}/></label>
     <label>Description<textarea name="description" required minLength={20} maxLength={5000} rows={5} defaultValue={event.description}/><small>Include only details you can confirm. Your listing and description will be public.</small></label>
     <div className="form-two-columns"><label>Category<select name="category" defaultValue={event.category}>{CATEGORIES.map(c => <option key={c.id}>{c.id}</option>)}</select></label><label>Location<input name="location" required minLength={2} maxLength={240} defaultValue={event.location}/></label></div>
-    <label className="form-checkbox"><input type="checkbox" checked={allDay} onChange={e => setAllDay(e.target.checked)}/> All-day event</label>
-    <div className="form-two-columns" key={String(allDay)}><label>{allDay ? 'First day' : 'Starts'}<input name="start" type={allDay ? 'date' : 'datetime-local'} required defaultValue={formStart(event)}/></label><label>{allDay ? 'Last day (optional)' : 'Ends (optional)'}<input name="end" type={allDay ? 'date' : 'datetime-local'} defaultValue={formEnd(event)}/></label></div>
+    <label className="form-checkbox"><input type="checkbox" checked={allDay} onChange={e => changeAllDay(e.target.checked)}/> All-day event</label>
+    <div className="form-two-columns" key={String(allDay)}><label>{allDay ? 'First day' : 'Starts'}<input name="start" type={allDay ? 'date' : 'datetime-local'} required value={dates.start} onChange={e=>setDates(current=>({...current,start:e.target.value}))}/></label><label>{allDay ? 'Last day (optional)' : 'Ends (optional)'}<input name="end" type={allDay ? 'date' : 'datetime-local'} value={dates.end} onChange={e=>setDates(current=>({...current,end:e.target.value}))}/></label></div>
     <p className="form-help">All dates and times are in Mountain Time (Provo). For an all-day event, the last day is included.</p>
     <label>Event or organizer link<input name="url" type="url" pattern="https://.*" required maxLength={2000} defaultValue={event.url}/><small>Link to the announcement or organizer so people can check the details.</small></label>
     {error && <p className="form-error" role="alert">{error}</p>}

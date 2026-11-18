@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {UNIT, SPAWN, SCOOTER_STAND, LOCATIONS, CAT_TRAIL, COSMO_SPOTS, SECRETS, TRIALS, QUESTS, MAIN_CHAPTERS, LOST_ITEMS, TUNE_NOTES, PHOTO_SPOTS} from '../public/explorer/game/content.mjs';
+import {UNIT, SPAWN, LOCATIONS, CAT_TRAIL, COSMO_SPOTS, SECRETS, TRIALS, QUESTS, MAIN_CHAPTERS, LOST_ITEMS, TUNE_NOTES, PHOTO_SPOTS} from '../public/explorer/game/content.mjs';
 import {SAVE_KEY, createProgress, validateProgress, loadProgress, saveProgress, claimReward, discover, advanceCat, findCosmo, completeQuest, collectSecret, recordTrial, collectQuestItem, getLevel, getSummary, recoverFragment, finishAdventure, equipCosmetic, getAchievements} from '../public/explorer/game/progress.mjs';
 
 const memoryStorage = () => {
@@ -118,7 +118,7 @@ test('belongings need returning, photographs finish their quest, and notes unloc
   assert.equal(getSummary(validateProgress(state)).xp, 180);
 });
 
-test('secret replay and improved scooter times cannot farm XP', () => {
+test('secret replay and improved skateboard times cannot farm XP', () => {
   const state = createProgress();
   assert.equal(collectSecret(state, SECRETS[0].id), true);
   assert.equal(collectSecret(state, SECRETS[0].id), false);
@@ -131,12 +131,14 @@ test('secret replay and improved scooter times cannot farm XP', () => {
 });
 
 test('save validation filters invented IDs, caps step counts, and distrusts aggregate XP', () => {
-  const raw = {version: 1, xp: 9999999, visited: ['hbll', 'hbll', 'moon'], claims: {'visit:hbll': 999, 'visit:moon': 10, 'secret:page-zero': 15}, catStep: 999, cosmoStep: -4, deliveryStep: 999, items: ['blue-notebook', 'unknown'], secrets: ['page-zero', 'unknown']};
+  const raw = {version: 1, xp: 9999999, visited: ['hbll', 'hbll', 'moon'], claims: {'visit:hbll': 999, 'visit:moon': 10, 'quest:main': 100, 'trial:central-loop': 30, 'secret:page-zero': 15}, catStep: 999, cosmoStep: -4, deliveryStep: 999, items: ['blue-notebook', 'unknown'], secrets: ['page-zero', 'unknown']};
   const state = validateProgress(raw);
   assert.deepEqual(state.visited, ['hbll']);
   assert.deepEqual(state.items, ['blue-notebook']);
   assert.equal(state.claims['visit:hbll'], 10);
   assert.equal(Object.hasOwn(state.claims, 'visit:moon'), false);
+  assert.equal(Object.hasOwn(state.claims, 'quest:main'), false);
+  assert.equal(Object.hasOwn(state.claims, 'trial:central-loop'), false);
   assert.equal(state.catStep, CAT_TRAIL.length);
   assert.equal(state.cosmoStep, 0);
   assert.equal(state.deliveryStep, 2);
@@ -243,13 +245,13 @@ test('content has stable unique identities and complete finite quest geometry', 
   assert.equal(QUESTS.filter(quest => quest.id !== 'main').length, 6);
   assert.equal(UNIT, .044571444392204285);
   for (const list of [LOCATIONS, CAT_TRAIL, COSMO_SPOTS, SECRETS, TRIALS, QUESTS, LOST_ITEMS, TUNE_NOTES, PHOTO_SPOTS]) assert.equal(new Set(list.map(value => value.id)).size, list.length);
-  for (const anchor of [SPAWN, SCOOTER_STAND, ...LOCATIONS, ...CAT_TRAIL, ...COSMO_SPOTS, ...SECRETS, ...LOST_ITEMS, ...TUNE_NOTES, ...PHOTO_SPOTS, ...TRIALS.flatMap(trial => trial.points)]) assert.ok(Number.isFinite(anchor.x) && Number.isFinite(anchor.z));
+  for (const anchor of [SPAWN, ...LOCATIONS, ...CAT_TRAIL, ...COSMO_SPOTS, ...SECRETS, ...LOST_ITEMS, ...TUNE_NOTES, ...PHOTO_SPOTS, ...TRIALS.flatMap(trial => trial.points)]) assert.ok(Number.isFinite(anchor.x) && Number.isFinite(anchor.z));
 });
 
 test('outdoor gameplay anchors do not reuse rooftop pins or enter source building bounds', () => {
   const catalog = JSON.parse(readFileSync(new URL('../public/campus/coordinates.json', import.meta.url), 'utf8'));
   const buildings = catalog.features.filter(feature => ['campus_building', 'campus_structure'].includes(feature.category) && feature.status === 'modeled');
-  const points = [SPAWN, SCOOTER_STAND, ...LOCATIONS, ...CAT_TRAIL, ...COSMO_SPOTS, ...SECRETS, ...LOST_ITEMS, ...TUNE_NOTES, ...PHOTO_SPOTS, ...TRIALS.flatMap(trial => trial.points)];
+  const points = [SPAWN, ...LOCATIONS, ...CAT_TRAIL, ...COSMO_SPOTS, ...SECRETS, ...LOST_ITEMS, ...TUNE_NOTES, ...PHOTO_SPOTS, ...TRIALS.flatMap(trial => trial.points)];
   for (const point of points) {
     const blocked = buildings.find(feature => point.x >= feature.bounds.min[0] - .04 && point.x <= feature.bounds.max[0] + .04 && point.z >= feature.bounds.min[2] - .04 && point.z <= feature.bounds.max[2] + .04);
     assert.equal(blocked, undefined, `${point.id ?? 'spawn/stand'} is inside ${blocked?.name}`);

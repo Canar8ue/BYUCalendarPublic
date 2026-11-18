@@ -22,3 +22,4 @@ export async function PUT(request: Request) {
     return json(await writePublicProfile(database(), user.id, input));
   } catch (error) { return errorResponse(error); }
 }
+export {PUT as POST};

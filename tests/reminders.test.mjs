@@ -34,11 +34,14 @@ test('selection keeps only saved events still happening on the digest day', () =
   assert.deepEqual(selectDigestEvents(events, [], day, now), []);
 });
 
-test('time labels use Mountain Time and all-day events stay worded plainly', () => {
+test('time labels use Mountain Time and all-day or TBA events stay worded plainly', () => {
   assert.equal(digestTimeLabel(event({start: '2026-09-29T17:00:00.000Z', end: '2026-09-29T18:30:00.000Z'})), '11:00 AM–12:30 PM');
   assert.equal(digestTimeLabel(event({start: '2026-09-29T17:00:00.000Z'})), '11:00 AM');
   assert.equal(digestTimeLabel(event({allDay: true, start: day})), 'All day');
+  assert.equal(digestTimeLabel(event({timeTba: true, start: '2026-09-29T17:19:00.000Z'})), 'Time TBA');
+  assert.equal(digestTimeLabel(event({start: 'not-a-date', end: 'bad'})), '');
   assert.equal(digestDayLabel(day), 'Tuesday, September 29');
+  assert.equal(digestDayLabel('not-a-day'), 'not-a-day');
 });
 
 test('the digest email renders plain and HTML versions with escaped source text', () => {
@@ -75,4 +78,12 @@ test('unsubscribe tokens are URL-safe HMACs that reject tampering', async () => 
   assert.equal(await verifyUnsubscribeToken('user-123', token.slice(0, -1) + (token.endsWith('a') ? 'b' : 'a'), 'test-secret-value-at-least-32-chars-long!'), false);
   assert.equal(await verifyUnsubscribeToken('user-123', 'short', 'test-secret-value-at-least-32-chars-long!'), false);
   assert.equal(await verifyUnsubscribeToken('user-123', token, 'another-secret-value-at-least-32-chars!!'), false);
+});
+
+test('digest selection drops already-started timed events without a published end time', () => {
+  const picked = selectDigestEvents([
+    event({id: 'byu:started-no-end', start: '2026-09-29T12:30:00.000Z', end: null}),
+    event({id: 'byu:upcoming-no-end', start: '2026-09-29T17:00:00.000Z', end: null}),
+  ], ['byu:started-no-end', 'byu:upcoming-no-end'], day, now);
+  assert.deepEqual(picked.map(e => e.id), ['byu:upcoming-no-end']);
 });

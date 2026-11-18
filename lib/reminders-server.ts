@@ -74,15 +74,20 @@ export async function dispatchDigests(force = false) {
   if (!pending.length) return {day: window.day, eligible: 0, sent: 0};
   const calendar = await readCalendar();
   let sent = 0;
-  for (let offset = 0; offset < pending.length && sent < SEND_CAP; offset += 100) {
-    const chunk = pending.slice(offset, offset + 100);
+  for (let offset = 0; offset < pending.length && sent < SEND_CAP; offset += 50) {
+    const chunk = pending.slice(offset, offset + 50);
     const placeholders = chunk.map(() => '?').join(',');
     const prefs = new Map((await db.prepare(`SELECT user_id, payload FROM user_preferences WHERE user_id IN (${placeholders})`)
       .bind(...chunk.map(member => member.user_id)).all<{user_id: string; payload: string}>()).results
       .map(row => [row.user_id, row.payload]));
     for (const member of chunk) {
       if (sent >= SEND_CAP) break;
-      const saved = JSON.parse(prefs.get(member.user_id) || 'null')?.saved;
+      let saved: unknown;
+      try {
+        saved = JSON.parse(prefs.get(member.user_id) || 'null')?.saved;
+      } catch {
+        continue;
+      }
       if (!Array.isArray(saved) || !saved.length) continue;
       const events = selectDigestEvents(calendar.events, saved, window.day, now);
       if (!events.length) continue;
@@ -90,6 +95,13 @@ export async function dispatchDigests(force = false) {
     }
   }
   return {day: window.day, eligible: pending.length, sent};
+}
+
+function sameSecret(a: string, b: string) {
+  const bytesA = new TextEncoder().encode(a), bytesB = new TextEncoder().encode(b);
+  let diff = bytesA.length ^ bytesB.length;
+  for (let i = 0; i < Math.max(bytesA.length, bytesB.length); i++) diff |= (bytesA[i] ?? 0) ^ (bytesB[i] ?? 0);
+  return diff === 0;
 }
 
 let dispatching = false;
@@ -100,7 +112,7 @@ export async function dispatchRequest(request: Request) {
     const token = env.REMINDERS_DISPATCH_TOKEN || '';
     // Origin alone is not authentication; the cron additionally holds a shared
     // secret, so this endpoint is inert to anyone without it.
-    if (!token || request.headers.get('authorization') !== `Bearer ${token}`) throw new RequestError(403, 'Not authorized.');
+    if (!token || !sameSecret(request.headers.get('authorization') || '', `Bearer ${token}`)) throw new RequestError(403, 'Not authorized.');
     if (dispatching) return json({skipped: 'A dispatch is already running.'});
     dispatching = true;
     try { return json(await dispatchDigests(new URL(request.url).searchParams.get('force') === '1')); }

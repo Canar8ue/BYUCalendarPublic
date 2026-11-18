@@ -18,10 +18,9 @@ function profile(surface) {
 }
 
 /** Distance is measured by the controller after collision, in meters. */
-export function createFoley({context, noise, effects, ambience, register, stepSample, roll}) {
+export function createFoley({context, noise, effects, ambience, register, stepSample}) {
   let stride = 0, still = 0, alternate = false;
-  let rolling = false, rollTimer = 0, surfaceTimer = 0, wheelProfile = PAVING;
-  let chatterCooldown = 0;
+  let chatterCooldown = 0, skateTimer = 0;
 
   function burst({frequency, tail, level, delay = 0, tone = 0, pan = 0, bus = effects, sharp = false}) {
     const at = context.currentTime + .008 + delay;
@@ -63,26 +62,33 @@ export function createFoley({context, noise, effects, ambience, register, stepSa
       burst({frequency: crash ? 280 : 340, tail: .19, level: .25 + amount * .29});
       if (crash) burst({frequency: 1810, tail: .26, level: .15 + amount * .16, delay: .03, sharp: true});
       burst({frequency: material.step, tail: .15, level: .12 + amount * .13, delay: .09});
+    } else if (kind === 'skatePush') {
+      // The shoe meets the pavement at the controller's actual drive event.
+      burst({frequency: material.step * .8, tail: .12, level: .09 + amount * .09});
+      burst({frequency: 1600, tail: .15, level: .025 + amount * .025, delay: .018});
+    } else if(kind === 'skatePop' || kind === 'skateLand') {
+      const landing = kind === 'skateLand';
+      burst({frequency:landing?740:1100,tail:landing?.105:.065,level:.10+amount*.18,sharp:true});
+      burst({frequency:landing?180:380,tail:landing?.16:.09,level:.08+amount*.13,delay:landing?.022:.012});
     } else if (kind === 'land') {
       stride = 0;
       burst({frequency: material.step * .7, tail: material.tail + .07, level: .12 + amount * .20});
     }
   }
 
-  function update(dt, {enabled = true, grounded = false, riding = false, speed = 0, braking = false, distance = 0,
+  function update(dt, {enabled = true, grounded = false, riding = false, skating = false, grinding = false, speed = 0, braking = false, distance = 0,
     surface = () => null, x = 0, z = 0, yaw = 0, unit = 1, characters = [], effectsOn = true, ambienceOn = true} = {}) {
     if (!enabled) {reset(); return;}
     const canRoll = effectsOn && riding && grounded && speed > .3;
-    if (canRoll) {
-      surfaceTimer -= dt;
-      if (surfaceTimer <= 0) {wheelProfile = profile(surface()); surfaceTimer = .22;}
-      rollTimer -= dt;
-      if (!rolling || rollTimer <= 0) {roll(speed, wheelProfile.wheel, braking); rollTimer = .075;}
-    } else if (rolling) {
-      roll(0);
-      surfaceTimer = rollTimer = 0;
+    if(skating){
+      skateTimer-=dt;
+      if(effectsOn&&skateTimer<=0&&(canRoll||grinding||speed>12)){
+        const air=!grounded&&!grinding;
+        burst({frequency:grinding?2150:braking?1800:air?700:1050+Math.min(28,speed)*75,
+          tail:air?.24:.13,level:Math.min(.17,.012+speed*.004)*(air?.4:1),sharp:grinding||braking});
+        skateTimer=.10;
+      }
     }
-    rolling = canRoll;
 
     if (!effectsOn || !grounded || riding) {stride = still = 0;}
     else if (distance > 0) {
@@ -125,9 +131,7 @@ export function createFoley({context, noise, effects, ambience, register, stepSa
   }
 
   function reset() {
-    if (rolling) roll(0);
-    rolling = false;
-    stride = still = rollTimer = surfaceTimer = chatterCooldown = 0;
+    stride = still = chatterCooldown = skateTimer = 0;
   }
 
   return {update, play, reset};

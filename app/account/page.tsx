@@ -1,6 +1,6 @@
 'use client';
 import {useEffect, useState} from 'react';
-import {ShieldCheck, LogOut, Plus, Flag, Copy, Check, GraduationCap} from 'lucide-react';
+import {ShieldCheck, LogOut, Plus, Flag, Copy, Check, GraduationCap, ClipboardList} from 'lucide-react';
 import AccountShell from '../account-shell';
 import {postJSON, useAccount, getJSON} from '../account-client';
 import {STAFF_AREAS} from '../../lib/staff.mjs';
@@ -38,10 +38,12 @@ export default function AccountPage() {
     if (!file) return;
     // Resize locally, before anything leaves the browser.
     const reader = new FileReader();
+    reader.onerror = () => setError('Could not read that picture.');
     reader.onload = () => {
       const image = new Image();
       image.onerror = () => setError('Choose a PNG, JPEG, or WebP picture.');
       image.onload = () => {
+        if (!image.width || !image.height) { setError('Choose a PNG, JPEG, or WebP picture.'); return; }
         const size = 256, canvas = document.createElement('canvas');
         canvas.width = size; canvas.height = size;
         const context = canvas.getContext('2d');
@@ -58,13 +60,21 @@ export default function AccountPage() {
   // here: send it once a verified session exists, then refresh the account.
   useEffect(() => {
     if (!account?.user?.emailVerified || account.staff) return;
-    let stash: {area?: string} | null = null;
+    let stash: {area?: string; email?: string} | null = null;
     try { stash = JSON.parse(localStorage.getItem(STAFF_REQUEST_STASH) || 'null'); } catch { stash = null; }
     if (!stash?.area) return;
+    if ((stash.email && stash.email !== account.user.email) || !STAFF_AREAS.some(area => area.id === stash.area)) {
+      try { localStorage.removeItem(STAFF_REQUEST_STASH); } catch {}
+      return;
+    }
     postJSON('/api/staff/request', {area: stash.area}, 15000)
       .then(() => { try { localStorage.removeItem(STAFF_REQUEST_STASH); } catch {} void reload(); })
-      .catch(() => {/* surfaced when the request form below is used */});
-  }, [account?.user?.emailVerified, account?.staff, reload]);
+      .catch(err => {
+        try { localStorage.removeItem(STAFF_REQUEST_STASH); } catch {}
+        setStaffAreaId(current => current || stash?.area || '');
+        setError(err instanceof Error ? err.message : 'Could not send the staff request.');
+      });
+  }, [account?.user?.email, account?.user?.emailVerified, account?.staff, reload]);
   async function requestStaff() {
     if (!staffAreaId) return;
     setStaffBusy(true);
@@ -84,7 +94,11 @@ export default function AccountPage() {
     setBusy(true);
     // A full navigation discards the previous account's client state.
     // eslint-disable-next-line @next/next/no-location-assign-relative-destination
-    try { await postJSON('/api/auth/sign-out', {}); window.location.assign('/'); }
+    try {
+      try { localStorage.removeItem(STAFF_REQUEST_STASH); } catch {}
+      await postJSON('/api/auth/sign-out', {});
+      window.location.assign('/');
+    }
     catch (err) { setError(err instanceof Error ? err.message : 'Could not sign out.'); setBusy(false); }
   }
   useEffect(() => {
@@ -127,14 +141,14 @@ export default function AccountPage() {
   return <AccountShell><section className="account-card account-single"><span className="account-icon"><ShieldCheck size={28}/></span><div className="eyebrow">YOUR ACCOUNT</div><h1>Made for <span>you.</span></h1>
     {(accountError || error) && <p className="form-error" role="alert">{accountError || error}</p>}
     {!account && !accountError && <p role="status">Loading your account…</p>}
-    {account?.user ? <><p className="account-email">{account.user.email}</p><span className="community-badge">{account.permissions.addListings ? 'Verified BYU email' : 'Email verification required'}</span><p className="account-description">Your saved events and filters belong to this account. Verified members can publish listings, add tags, and report issues.</p><div className="account-actions"><a className="primary-button" href="/listings/new"><Plus size={16}/> Add a listing</a>{account.permissions.reviewReports && <a className="outline-button" href="/moderation"><Flag size={16}/> Review reports</a>}<button className="outline-button" disabled={busy} onClick={signOut}><LogOut size={16}/> {busy ? 'Signing out…' : 'Sign out'}</button></div>
+    {account?.user ? <><p className="account-email">{account.user.email}</p><span className="community-badge">{account.permissions.addListings ? 'Verified BYU email' : 'Email verification required'}</span><p className="account-description">Your saved events and filters belong to this account. Verified members can publish listings, add tags, and report issues.</p><div className="account-actions"><a className="primary-button" href="/listings/new"><Plus size={16}/> Add a listing</a><a className="outline-button" href="/listings/mine"><ClipboardList size={16}/> Your listings</a>{account.permissions.reviewReports && <a className="outline-button" href="/moderation"><Flag size={16}/> Review reports</a>}<button className="outline-button" disabled={busy} onClick={signOut}><LogOut size={16}/> {busy ? 'Signing out…' : 'Sign out'}</button></div>
       <div className="account-digest">
         <div className="eyebrow">PUBLIC PROFILE</div>
         <p className="account-description">Saving an event adds you to its RSVP list so classmates can see who is going — your picture and first initial for everyone, your name and BYU email for signed-in members. You can hide yourself at any time.</p>
         <div className="profile-editor">
           <span className="profile-editor-avatar">{avatar.url ? <img src={avatar.url} alt="Your profile picture"/> : (account.user.name || account.user.email).charAt(0).toUpperCase()}</span>
           <div className="profile-editor-actions">
-            <label className="outline-button">{avatar.busy ? 'Saving…' : avatar.url ? 'Change picture' : 'Add a picture'}<input type="file" accept="image/png,image/jpeg,image/webp" hidden disabled={avatar.busy} onChange={e => onAvatarChange(e.target.files?.[0])}/></label>
+            <label className="outline-button">{avatar.busy ? 'Saving…' : avatar.url ? 'Change picture' : 'Add a picture'}<input type="file" accept="image/png,image/jpeg,image/webp" hidden disabled={avatar.busy} onChange={e => { const file = e.target.files?.[0]; e.target.value = ''; onAvatarChange(file); }}/></label>
             {avatar.url && <button className="outline-button" disabled={avatar.busy} onClick={() => void saveProfile({avatar: null})}>Remove picture</button>}
             <button className="outline-button" disabled={avatar.busy} onClick={() => void saveProfile({hidden: !avatar.hidden})}>{avatar.hidden ? 'Show me on RSVP lists' : 'Hide me from RSVP lists'}</button>
           </div>

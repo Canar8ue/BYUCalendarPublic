@@ -1,8 +1,8 @@
 import * as THREE from '/campus/vendor/three.module.js';
-import {createPlayer,createScooter} from './actors.mjs?v=20261102polish6';
-import {UNIT} from './content.mjs?v=20261102polish6';
-import {createHikeUI} from './hike-ui.mjs?v=20261102polish6';
-import {validateHikeState,applyHikeAction,completedHikeRewards,hikeStatus,buildHikeActivities} from './hike-state.mjs?v=20261102polish6';
+import {createPlayer} from './actors.mjs?v=20261105rider6';
+import {UNIT} from './content.mjs?v=20261105rider6';
+import {createHikeUI} from './hike-ui.mjs?v=20261105rider6';
+import {validateHikeState,applyHikeAction,completedHikeRewards,hikeStatus,buildHikeActivities} from './hike-state.mjs?v=20261105rider6';
 
 // Owns physical evidence and the lifetime of optional mountain content. The
 // campus checkpoint never receives coordinates from a streamed hiking tile.
@@ -201,7 +201,6 @@ function createHikeArt(scene,zone){
   const activities=buildHikeActivities(zone.data),litter=[];
   for(const p of activities.cleanup||[])litter.push({id:p.id,mesh:box(.16,.08,.24,paper,p.x,p.y+.07*UNIT,p.z)});
   const caleb=createPlayer(group);caleb.setStyle({level:1,jacket:'#657950',backpack:'#c6864a'});
-  const parked=createScooter(group),head=zone.checkpoints[0];parked.setStyle({level:1,color:'#427a92'});parked.group.position.set(head.x-.65*UNIT,head.y,head.z);parked.group.rotation.y=.8;
   // Reuse one geometry/material for the near-player route trail.
   const hintGeo=new THREE.RingGeometry(.05*UNIT,.1*UNIT,8);geometries.push(hintGeo);
   const hintMat=material('#f5d98f');hintMat.side=THREE.DoubleSide;
@@ -215,6 +214,6 @@ function createHikeArt(scene,zone){
       const path=zone.routes?.find(path=>path.id===nearest?.routeId)?.points||zone.route;
       for(let i=-6;i<24;i++){const d=distance+i*1.4;if(d<0||d>path.at(-1).distanceMeters)continue;const p=routePoint(path,d);dummy.position.set(p.x,(zone.terrainHeight?.(p.x,p.z)??p.y)+.025*UNIT,p.z);dummy.rotation.set(-Math.PI/2,0,0);dummy.updateMatrix();hints.setMatrixAt(hints.count++,dummy.matrix);}hints.instanceMatrix.needsUpdate=true;
     },
-    dispose(){caleb.dispose();parked.dispose();group.removeFromParent();for(const g of geometries)g.dispose();for(const m of materials)m.dispose();for(const t of textures)t.dispose();},
+    dispose(){caleb.dispose();group.removeFromParent();for(const g of geometries)g.dispose();for(const m of materials)m.dispose();for(const t of textures)t.dispose();},
   };
 }

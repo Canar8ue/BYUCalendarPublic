@@ -1,9 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {medalFor,formatTime,stepBoost,crossedCheckpoint,createGhostRecorder,recordGhost,validateGhost,ghostAt,MAX_GHOST_POINTS} from '../public/explorer/game/racing.mjs';
+import {medalFor,formatTime,crossedCheckpoint,createGhostRecorder,recordGhost,validateGhost,ghostAt,MAX_GHOST_POINTS} from '../public/explorer/game/racing.mjs';
 import {createProgress,recordTrial,getSummary,validateProgress,equipCosmetic} from '../public/explorer/game/progress.mjs';
 import {TRIALS,MAIN_CHAPTERS,LOST_ITEMS,TUNE_NOTES,PHOTO_SPOTS,SPAWN} from '../public/explorer/game/content.mjs';
 import {questTarget,questStatus} from '../public/explorer/game/quest-state.mjs';
+import {raceResultPanel} from '../public/explorer/game/field-guide.mjs';
 
 test('medals include exact thresholds and race clocks carry rounded minutes',()=>{
  assert.equal(medalFor(32,32),'gold');assert.equal(medalFor(43.2,32),'silver');assert.equal(medalFor(43.21,32),'bronze');
@@ -11,16 +12,7 @@ test('medals include exact thresholds and race clocks carry rounded minutes',()=
  assert.equal(formatTime(59.99),'1:00.0');assert.equal(formatTime(0),'0:00.0');assert.equal(formatTime(92.3),'1:32.3');
 });
 
-test('boost runs out, stays empty while held, and recharges on release',()=>{
- let charge=1;
- for(let i=0;i<240;i++)charge=stepBoost(charge,true,true,1/60).charge;
- assert.equal(charge,0);assert.equal(stepBoost(charge,true,true,1/60).active,false);
- assert.equal(stepBoost(charge,true,true,1).charge,0);
- const restored=stepBoost(charge,false,true,3);assert.equal(restored.active,false);assert.ok(restored.charge>.5);
- assert.equal(stepBoost(1,false,false,10).charge,1);
-});
-
-test('swept checkpoints catch boost-speed crossings but reject nearby parallel rides',()=>{
+test('swept checkpoints catch downhill skateboard crossings but reject nearby parallel rides',()=>{
  const point={x:0,z:0};
  assert.equal(crossedCheckpoint({x:-1,z:0},{x:1,z:0},point,.1),true);
  assert.equal(crossedCheckpoint({x:-1,z:.2},{x:1,z:.2},point,.1),false);
@@ -43,6 +35,13 @@ test('ghost interpolation follows the short turn across the angle seam',()=>{
  assert.equal(validateGhost([[0,0,1,0,0,1],[0,0,1,0,0,1]],1),null);
  assert.equal(validateGhost([[0,0,1,0,0,1],[1,1000,1,0,0,1]],1),null);
  assert.equal(validateGhost(points,2),null,'a ghost must end at its recorded finish time');
+});
+
+test('skateboard ghosts retain fast downhill speeds and old six-value recordings',()=>{
+ const fast=[[0,0,1,0,0,0],[1,0,1,1,0,38]];
+ assert.deepEqual(validateGhost(fast,1),fast);
+ assert.equal(ghostAt(fast,.5).speed,19);
+ assert.equal(validateGhost([[0,0,1,0,0,0],[1,0,1,1,0,41]],1),null);
 });
 
 test('a personal best keeps its matching ghost; slower and malformed imports cannot replace it',()=>{
@@ -89,4 +88,14 @@ test('free roam, quest tracking, route hints, and ghost preferences round-trip o
  assert.equal(validateProgress({...state,trackedQuest:'moon'}).trackedQuest,'main');
  assert.equal(validateProgress({version:1,visited:['hbll']}).settings.showGhost,true);
  assert.equal(validateProgress({...state,trackedQuest:'cat'}).trackedQuest,'cat');
+});
+
+test('ghost recording clamps speeds above 40 and null medals render cleanly',()=>{
+ const r=createGhostRecorder();
+ recordGhost(r,0,{x:2,y:1,z:3},0,0,true);
+ recordGhost(r,0.00001,{x:2,y:1,z:3},0,5,false);
+ recordGhost(r,1.5,{x:2,y:1,z:3},0,65,true);
+ assert.equal(r.points.length,2);
+ assert.deepEqual(validateGhost(r.points,1.5),r.points);
+ assert.match(raceResultPanel({raceResult:{id:'central-loop',name:'Central Loop',seconds:30,targetSeconds:30,medal:null,xp:0}}),/Race finished/);
 });

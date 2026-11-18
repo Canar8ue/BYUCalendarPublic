@@ -1,5 +1,5 @@
-import {UNIT} from './content.mjs?v=20261102polish6';
-import {NPC_DEFINITIONS,ACTIVITIES,ACTIVITY_REWARDS,DISTRICT_POINTS,COOKIE_CHOICES,RHYTHM_SEQUENCE,INTERACTION_DISTANCE} from './district-content.mjs?v=20261102polish6';
+import {UNIT} from './content.mjs?v=20261105rider6';
+import {NPC_DEFINITIONS,ACTIVITIES,ACTIVITY_REWARDS,DISTRICT_POINTS,COOKIE_CHOICES,RHYTHM_SEQUENCE,INTERACTION_DISTANCE} from './district-content.mjs?v=20261105rider6';
 
 const object = value => !!value&&typeof value==='object'&&!Array.isArray(value);
 const integer = (value,max) => Number.isInteger(value)?Math.max(0,Math.min(max,value)):0;
@@ -100,7 +100,7 @@ export function activityStatus(s,id){
       'Eli knows his way around and has his welcome card.',
     ],
     'scooter-school':[
-      'Meet Nora at the Library Lane scooter workshop.',
+      'Meet Nora at the Library Lane skate workshop.',
       'Ride above 2 m/s, then brake to under 1.2 m/s near Nora.',
       `Ride the practice gates in order (${s.nora.gate}/3). Keep below 6.5 m/s.`,
       'Return to Nora for the careful-turning challenge.',

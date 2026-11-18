@@ -1,7 +1,7 @@
 import * as THREE from '/campus/vendor/three.module.js';
-import {UNIT} from './content.mjs?v=20261102polish6';
-import {NPC_DEFINITIONS,DISTRICT_POINTS} from './district-content.mjs?v=20261102polish6';
-import {createDistrictArt} from './district-art.mjs?v=20261102polish6';
+import {UNIT} from './content.mjs?v=20261105rider6';
+import {NPC_DEFINITIONS,DISTRICT_POINTS} from './district-content.mjs?v=20261105rider6';
+import {createDistrictArt} from './district-art.mjs?v=20261105rider6';
 
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.z-b.z);

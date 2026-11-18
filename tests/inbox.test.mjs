@@ -49,6 +49,8 @@ test('inbound payloads are normalized and mail for other addresses is refused', 
   assert.equal(normalizeInboundEmail(null, inbox), null);
   const fallback = normalizeInboundEmail({...data, created_at: 'not-a-date'}, inbox);
   assert.ok(!Number.isNaN(new Date(fallback.receivedAt).getTime()), 'unparsable dates fall back to now');
+  const injected = normalizeInboundEmail({...data, message_id: '<msg-1@example.com>\r\nBcc: evil@example.com'}, inbox);
+  assert.ok(!/[\r\n]/.test(injected.messageId));
 });
 
 test('HTML bodies reduce to readable plain text', () => {

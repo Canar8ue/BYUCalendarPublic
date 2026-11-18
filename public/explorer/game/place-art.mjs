@@ -1,4 +1,4 @@
-import {UNIT} from './content.mjs?v=20261102polish6';
+import {UNIT} from './content.mjs?v=20261105rider6';
 
 // Rectangles in native campus coordinates. They cover the mapped paths near
 // the listed OSM ways; the mesh surface attribute clips them to rendered paths.

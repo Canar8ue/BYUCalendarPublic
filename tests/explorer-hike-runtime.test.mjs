@@ -13,7 +13,6 @@ let harness;
 export function setHarness(value){harness=value;}
 export function createHikeUI(options){harness.emit=options.onAction;harness.uiOptions=options;harness.notify=options.onOpenChange;return harness.ui;}
 export function createPlayer(scene){return harness.actor(scene,'caleb');}
-export function createScooter(scene){return harness.actor(scene,'scooter');}
 `).toString('base64');
 const adapter=await import(adapterURL);
 let source=await readFile(new URL('../public/explorer/game/hike-runtime.mjs',import.meta.url),'utf8');
@@ -141,7 +140,7 @@ test('a saved hiking checkpoint remains dormant on campus until an explicit stre
 test('three hiking enter/exit cycles dispose every authored actor and retain the same reward ledger',async()=>{
   const h=harness(),checkpoint={...h.progress.checkpoint};
   for(let i=0;i<3;i++){
-    await h.runtime.travel();assert.equal(h.actors.length,(i+1)*2);h.runtime.leave({notify:false});assert.equal(h.runtime.active,false);assert.equal(h.scene.children.length,0);assert.ok(h.actors.every(actor=>actor.disposed===1));
+    await h.runtime.travel();assert.equal(h.actors.length,i+1);h.runtime.leave({notify:false});assert.equal(h.runtime.active,false);assert.equal(h.scene.children.length,0);assert.ok(h.actors.every(actor=>actor.disposed===1));
   }
   assert.equal(h.loads,3);assert.equal(h.unloads,3);assert.deepEqual(h.progress.checkpoint,checkpoint);assert.deepEqual(h.progress.claims,{});h.cleanup();
 });

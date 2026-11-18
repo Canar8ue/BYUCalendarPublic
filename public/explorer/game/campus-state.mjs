@@ -1,5 +1,5 @@
-import {UNIT} from './content.mjs?v=20261102polish6';
-import {CAMPUS_ACTIVITIES, CAMPUS_NPCS, CAMPUS_DISTRICTS} from './campus-content.mjs?v=20261102polish6';
+import {UNIT} from './content.mjs?v=20261105rider6';
+import {CAMPUS_ACTIVITIES, CAMPUS_NPCS, CAMPUS_DISTRICTS} from './campus-content.mjs?v=20261105rider6';
 
 const object = value => !!value && typeof value === 'object' && !Array.isArray(value);
 const finitePoint = point => object(point) && Number.isFinite(point.x) && Number.isFinite(point.z);
@@ -200,7 +200,7 @@ export function applyCampusActivityAction(state, action, context = {}) {
     return {changed: true, message: activity.outcome, reward: {id: 'campus:' + activity.id, xp: activity.xp}};
   }
   const step = currentCampusStep(state, id);
-  if (!step || !onFoot) return unchanged('Park the scooter and continue on foot.');
+  if (!step || !onFoot) return unchanged('Put away the skateboard and continue on foot.');
   if (step.type === 'deliver') {
     if (!talkTo(step.npcId) || !hasCarriedItem(activity, record, step)) return unchanged('Carry the supplies to their recipient and speak nearby.');
   } else if (!nearby(context.position, step.point)) return unchanged('Follow the story to its next outdoor stop.');

@@ -1,10 +1,10 @@
 import * as THREE from '/campus/vendor/three.module.js';
-import {UNIT, LOCATIONS} from './content.mjs?v=20261102polish6';
-import {NPC_DEFINITIONS, ACTIVITIES, DISTRICT_POINTS, RHYTHM_SEQUENCE, RHYTHM_NOTES} from './district-content.mjs?v=20261102polish6';
-import {applyCampusAction, activityObjectives, activityTarget, activityStatus} from './activities.mjs?v=20261102polish6';
-import {getConversation} from './dialogue.mjs?v=20261102polish6';
-import {createDistrict} from './npcs.mjs?v=20261102polish6';
-import {createDistrictUI} from './district-ui.mjs?v=20261102polish6';
+import {UNIT, LOCATIONS} from './content.mjs?v=20261105rider6';
+import {NPC_DEFINITIONS, ACTIVITIES, DISTRICT_POINTS, RHYTHM_SEQUENCE, RHYTHM_NOTES} from './district-content.mjs?v=20261105rider6';
+import {applyCampusAction, activityObjectives, activityTarget, activityStatus} from './activities.mjs?v=20261105rider6';
+import {getConversation} from './dialogue.mjs?v=20261105rider6';
+import {createDistrict} from './npcs.mjs?v=20261105rider6';
+import {createDistrictUI} from './district-ui.mjs?v=20261105rider6';
 
 // Runtime owns physical evidence; the pure state engine owns the story rules.
 export function createCampusLifeRuntime({scene,world,navigation,getProgress,getPlayer,pause,resume,track,persist,reward,toast,playNote,openPhoto}={}) {

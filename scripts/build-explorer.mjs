@@ -11,7 +11,7 @@ const result=await build({configFile:false,root,publicDir:false,logLevel:'warn',
 const results=Array.isArray(result)?result:[result];
 const entry=results.flatMap(item=>item.output||[]).find(item=>item.type==='chunk'&&item.isEntry);
 if(!entry)throw new Error('Game build did not produce an entry module.');
-const css=Buffer.from((await Promise.all(['game.css','play.css','district.css','hike.css'].map(name=>readFile(resolve(root,'public/explorer/game',name),'utf8')))).join('\n'));
+const css=Buffer.from((await Promise.all(['game.css','play.css','district.css','hike.css','skate.css'].map(name=>readFile(resolve(root,'public/explorer/game',name),'utf8')))).join('\n'));
 const cssName='game-'+createHash('sha256').update(css).digest('hex').slice(0,12)+'.css';
 await mkdir(destination,{recursive:true});await writeFile(resolve(destination,cssName),css);
 let html=await readFile(resolve(root,'public/explorer/index.html'),'utf8');
@@ -19,6 +19,7 @@ html=html.replace(/\.\/game\/game\.mjs\?v=[^"']+/,'./runtime/'+entry.fileName).r
 html=html.replace(/\s*<link rel="stylesheet" href="\.\/game\/play\.css\?v=[^"']+">/,'');
 html=html.replace(/\s*<link rel="stylesheet" href="\.\/game\/district\.css\?v=[^"']+">/,'');
 html=html.replace(/\s*<link rel="stylesheet" href="\.\/game\/hike\.css\?v=[^"']+">/,'');
+html=html.replace(/\s*<link rel="stylesheet" href="\.\/game\/skate\.css\?v=[^"']+">/,'');
 await writeFile(resolve(root,'dist/client/explorer/index.html'),html);
 await copyFile(resolve(root,'public/explorer/CREDITS.md'),resolve(root,'dist/client/explorer/CREDITS.md'));
 console.log('Explorer production entry: '+entry.fileName);

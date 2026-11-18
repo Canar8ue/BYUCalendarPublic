@@ -2,6 +2,14 @@
 
 A calendar app inspired by the CareerLaunchpad design system: Archivo, Roboto, Roboto Mono, Material colors, and hard bordered cards.
 
+## November 10 bug audit — published
+
+The audit and its verification record are in [BUG_AUDIT_2026-11-10.md](BUG_AUDIT_2026-11-10.md). This work needs no migration or environment change. Calendar URL restoration accepts all four views and supported filter values, grids use campus dates and Sunday-first columns, and resizing preserves the chosen view. Initial account/event/preference reads have finite timeouts. A preference queue applies changes to the last acknowledged state; the server commits preferences and RSVP rows atomically and returns canonical preferences. Separate tabs/devices retain last-write-wins behavior.
+
+Search keyword fallback keeps dates/hours and explicit categories; interpretations expire at Mountain midnight. BYU's known 17:19 UTC sentinel stays TBA in winter, TBA records do not match after-hour predicates, floating ICS starts/ends share the calendar timezone, and suspect long contest ends are withheld at classification time so older snapshots benefit too. Source wording/provenance remains available; no replacement time is invented.
+
+The game touch fix versions the host/entry/changed UI import as `20261110bugs1`; unrelated imports/styles, models, hike data and navigation remain pinned. Both saved-filter forms now use inline required-name errors and unblurred dim backdrops, avoiding the native validation-popup/blur combination reported on iOS. The exact physical-iOS rendering was not independently reproduced. Published code commit `2d13eca`; rollback `release-backup-20261111T055158Z-96532`. Local and live verification is recorded in the audit report.
+
 ## What is connected
 
 `lib/catalog.mjs` defines the source registry; live adapters use a public source allowlist. Twenty live sources are configured: BYU Events; nine Marriott feeds; AIS; Accounting Society; Engineering; Mathematics; Computer Science; ACME; Life Sciences; Kennedy Center; BYU Law; and Marketing Association. Fourteen currently publish upcoming events. A separate, clearly labeled BYU Student Organizations snapshot adds 119 listings from 48 clubs collected on September 14, 2026. A reviewed Handshake snapshot adds 227 event listings imported September 14, 2026 (224 additional calendar entries after merging). AIS Slack, social account imports, and Beta Alpha Psi remain unconnected.
@@ -40,11 +48,19 @@ My calendar shows a "Picked for you" panel (added September 28, 2026) backed by 
 
 ## Search engine visibility
 
+The November 5, 2026 search-visibility changes are published at https://byucalendar.com. The current rollback is `release-backup-20261105T160939Z-2785`; no database migration, environment, or cron change was needed. `/about` credits Tanner Abbott, Jarin Canar (linked to jarin.dev), Nelson Lunt, and Austin Pence, distinguishes website maintenance from source-calendar/community contributions, and exposes source retrieval/import dates. Shared calendar/event/topic footers put About us immediately after Privacy in the same style.
+
+About us reuses Privacy's `AccountShell` and `policy-*` typography/section classes. `SiteFooter` accepts the existing `account-footer` class for that shared shell, keeping Privacy and About links consistent across calendar, event, topic, privacy, and account pages.
+
+Three existing calendar searches (`/?q=Events+today`, `/?q=Events+this+week`, and `/?q=Events+this+weekend`) receive their own canonical metadata and server-rendered initial results; they are listed in the sitemap and linked from About us. Only these unfiltered queries are promoted; arbitrary searches and filter combinations retain ordinary homepage metadata. The first response sends only the selected date window, and the browser then loads the full calendar for subsequent searches. Mountain date boundaries, known event ends, and multi-day overlap determine the results; Sunday weekend searches stop on Sunday. Event titles remain dialog triggers on an ordinary click and are also real links to their stable event pages.
+
+`lib/event-presentation.mjs` shares source-backed date/time/venue formatting and Event JSON-LD. Unknown hours are date-only in markup, placeholder end hours are suppressed, and only unambiguous campus venues receive a Provo address. Unknown venues stay unspecified and off-campus names retain source wording. Old snapshots recover the importers' explicit TBA evidence at classification time. Free admission does not imply ticket stock; publisher names are not invented organizers; generic artwork is not asserted as an event image. Event and topic dates include years. Source retrieval time and organizer modification time are labeled separately, with snapshot and failed-refresh status retained. See `docs/AI_SEARCH_AUDIT.md` for the original findings and implementation evidence.
+
 The app ships SEO basics from `app/layout.tsx` and static files in `public/`: a canonical URL, Open Graph and Twitter card metadata, `robots.txt` (which also excludes the sign-in, account, moderation, listing, and API paths), `sitemap.xml` for the homepage, `site.webmanifest`, PNG icons, a 1200×630 `og-image.png`, and JSON-LD structured data (Organization + WebSite with a search action pointing at `/?q={term}`). Regenerate only the social preview with `node scripts/generate-og-image.mjs`; its path-only vector master is `logos/svg/69-banner-og-campus.svg`, rendered with Sharp at exactly 1200×630 without installed fonts. The September 16 design uses bold typography and a weekly calendar illustration. `node scripts/generate-seo-images.mjs` calls the same OG renderer and also regenerates the icon fallbacks. The metadata assumes the production origin `https://byucalendar.com`. Search Console ownership verification and indexing happen outside the repository.
 
 ## Saved calendars
 
-The account implementation uses Better Auth with BYU email verification through Resend. Bookmarks and saved filters use the verified account’s stable ID in D1. Mock sign-in is disabled; legacy identity headers are not trusted. Existing preferences under old identity IDs are not automatically reassigned. The account release is active on the self-hosted server. See [account setup](ACCOUNTS.md) for permissions, the required migration, and activation steps. Source records that disappear entirely from a feed may cease to appear in saved calendars; the app does not maintain a historical archive of removed records. Downloads are ordinary `.ics` snapshots, not live external subscriptions.
+The account implementation uses Better Auth with BYU email verification through Resend. Bookmarks and saved filters use the verified account’s stable ID in D1. Mock sign-in is disabled; legacy identity headers are not trusted. Existing preferences under old identity IDs are not automatically reassigned. The account release and the current security, privacy, and event-dialog refinements are deployed on the self-hosted server as of November 5, 2026. See [account setup](ACCOUNTS.md) for permissions, the required migration, and activation steps. Source records that disappear entirely from a feed may cease to appear in saved calendars; the app does not maintain a historical archive of removed records. Downloads are ordinary `.ics` snapshots, not live external subscriptions.
 
 ## Security review
 
@@ -97,7 +113,7 @@ node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js d1
 
 A fresh database also needs `drizzle/0001_byu_accounts_community.sql` using the same command with that filename. Existing databases need only migrations not already applied. Do not replay applied production migrations. The account preview uses separate `.wrangler/accounts-preview` state. Production runs on the self-hosted server; see the account guide before deploying schema changes.
 
-Checks: `npm test`, `node node_modules/typescript/bin/tsc --noEmit`, the production build, then `npm run test:worker`. Account tests use isolated D1; the built Worker tests intercept Resend and never email a real inbox. The tests cover Denver offsets, rescheduling identity, recurrence exceptions, multi-day overlap, missing/negated details, search, club tagging, duplicate provenance, website imports with stale URL dates, origin bounds, partial source failures, snapshot dates, Handshake date/URL validation, ambiguous locations, stable IDs, field allowlisting, valid exports, bounded redirects, request sizes, export injection, authorization races.
+Checks: `npm test`, `node node_modules/typescript/bin/tsc --noEmit`, the production build, then `npm run test:worker`. Account tests use isolated D1; the built Worker tests intercept Resend and never email a real inbox. The tests cover Denver offsets, rescheduling identity, recurrence exceptions, multi-day overlap, missing/negated details, search, club tagging, duplicate provenance, website imports with stale URL dates, origin bounds, partial source failures, snapshot dates, Handshake date/URL validation, ambiguous locations, stable IDs, field allowlisting, valid exports, bounded redirects, request sizes, export injection, and authorization races.
 
 
 ## Lost on Campus game — live play refinement, October 28, 2026
@@ -106,9 +122,28 @@ The opt-in game is live at `/explore` and on real 404 pages. Use the framework w
 
 Local save payload version 2 retains the existing byucalendar-explorer-v1 key and migrates older earned progress. The October 28 play refinement adds validated `trackedQuest`, `bestRuns` (max 240 samples/course), route-trail/ghost preferences and one-time medal rewards without changing the save version. This data is separate from account/calendar preferences and remains local/editable. No D1 migration or production environment variable is needed. Stop a local preview Worker before rebuilding on Windows if it holds dist open.
 
-`racing.mjs` owns boost/medals/checkpoint/ghost rules; `quest-state.mjs` owns next-objective resolution. `play.css` refines the game HUD and race screens; `build-explorer.mjs` combines it with `game.css` and `district.css` into one hashed stylesheet. Always use the framework wrapper for a full release build.
+`racing.mjs` owns medals, checkpoints and ghosts; `quest-state.mjs` owns next-objective resolution. `play.css` refines the game HUD and race screens; `build-explorer.mjs` combines `game.css`, `play.css`, `district.css`, `hike.css` and `skate.css` into one hashed stylesheet. Always use the framework wrapper for a full release build.
 
-The local October 28 expansion Part 1 introduced revision `20261028movement1`; the current local source revision is `20261102district3`; the deployed revision remains `20261027play3` until publication. `locomotion.mjs` owns meter-based impact/recovery/acceleration rules, and `controls.mjs` owns the shared keyboard/touch basis, camera look and wheel limits. Local controls now use Shift for optional mouse lock, C for sprint/faster riding and F for braking. Falls are transient and do not change the save schema. No geometry/collision-index/navigation changes are included. Keep fictional NPC/booth promotions distinct from real calendar events.
+The November 6 skating release is live at https://byucalendar.com/explore and on 404 pages. Native host/import revision `20261105rider6` and compiled entry `game-C7E-XD5b.mjs` were built from commit `d7e7333`. Rollback is `release-backup-20261107T062056Z-4415`. `skateboard.mjs` owns the 120 Hz meter-based controller, contact-phased push forces, load/landing compression, tricks, lines and validated `skate` records in the existing version-2 save. `skate-pose.mjs` shares board transforms and shoe contacts with the articulated player; keep actual foot/wheel contact regressions alongside physics tests when tuning motion. `skate-runtime.mjs` captures push contacts on physics ticks and integrates campus movement, course contact and lifecycle; `skate-ragdoll.mjs` uses pinned, self-hosted cannon-es rigid bodies and constrained joints during bails. Anonymous ambient walkers are removed; named activity characters remain. Keep the physics engine's MIT license in `public/explorer/vendor/`. The authored skate yard/downhill are fictional and separate from surveyed campus/model/hike assets. Changing those procedural courses does not change the campus navigation graph. No migration or external runtime service is needed.
+
+Earlier movement/district increments used revisions `20261028movement1` and `20261102district3`, later superseded by the published `20261102polish6` game. `locomotion.mjs` owns on-foot acceleration and trip recovery, and `controls.mjs` owns camera look and wheel limits. Shift or C sprints on foot. While skating, Shift pushes harder, C powerslides and F brakes. Falls are transient and do not change the save version. Keep fictional quests/courses distinct from real calendar events and surveyed campus references.
+
+The game grounds mapped trees with a small offset table tied to the decoded campus mesh. Run `node scripts/bake-explorer-tree-contact.mjs <path-to-campus_refined.glb>` with the detailed Blender export from the matching model to audit the table. Pass `--write` to regenerate the current table from those same inputs. Review the mesh binding and fingerprint when replacing the game GLB.
+
+`skate-boards.mjs` owns the selectable board catalog. Keep `DECKS` and the
+existing `cosmetics.deck` save field backed by that catalog. Performance
+factors apply in `skateboard.mjs`, while `skate-runtime.mjs` and the riding
+art reuse the selected design through bails and resets. Races and ghosts use
+skateboards. The old motor asset and outdated orientation voice were removed
+from the audio manifest. The revised orientation scene currently uses text.
+The published audio manifest revision is `20261105boards5`.
+
+The rider-continuity update binds the existing player joints directly to the
+ragdoll bodies. `actors.mjs` supplies the current limb pose, joint anchors and
+worn-item collider transforms, then pauses ordinary animation while physics
+drives those joints. Recovery restores the saved local transforms. Keep
+`explorer-skate-ragdoll.test.mjs` coverage for outfit materials, exact handoff
+poses, wardrobe changes, retries, automatic recovery and resource ownership.
 
 The local Part 2 rendering increment uses `valley-rendering.mjs` to split the existing Y into a depth-biased material group only in the game. Keep depth testing/writing and front-face culling; do not change the shared valley asset or its normal-map token for this runtime-only correction. It adds one game draw call. `scripts/audit-explorer-y.mjs` and `tests/explorer-y.test.mjs` check actual decoded geometry and material preservation. Preserve the latest master and intentional HBLL openings when making subsequent reference-supported repairs.
 
@@ -127,3 +162,7 @@ after changing student anchors, path following, furniture or collision rules.
 It checks the actual decoded model and NPC transit, including the furniture
 wrapper. No D1 migration, external service or new audio key.
 
+
+### October 27 game publication
+
+The expanded game is now live at https://byucalendar.com/explore and on real 404 pages. Rollback: release-backup-20261027T152427Z-1777. No DB migration or new runtime environment variable was required. On this Windows machine, invoke the helper from Git Bash with MSYS_NO_PATHCONV=1 and BYUC_KEY in Windows form (for example C:/Users/your-user/.ssh/id_rsa) so a native SSH binary cannot convert the remote /home path. The October 26 local-only note above records the pre-publication state.

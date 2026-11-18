@@ -123,3 +123,13 @@ test('analyticsSummary aggregates traffic, zero-result searches, inventory, and 
   assert.equal(summary.community.listings, 1);
   assert.equal(summary.community.reportsOpen, 1);
 });
+
+test('analytics daysBack never repeats calendar dates across Mountain DST fallback', async () => {
+  const dstNow = new Date('2026-11-02T18:00:00Z');
+  const summary = await analyticsSummary(db, {events: [], sources: []}, dstNow);
+  const dates = summary.days.map(d => d.day);
+  assert.equal(dates.length, 30);
+  assert.equal(new Set(dates).size, 30);
+  assert.equal(dates.at(-1), '2026-11-02');
+  assert.ok(dates.includes('2026-11-01'));
+});

@@ -55,3 +55,23 @@ test('identical queries hit the short-lived cache and the cache is bounded',()=>
  for(let i=0;i<350;i++)rememberInterpretation('query '+i,{intent:{tags:[],categories:[],start:null,end:null,after:null,words:[]},summary:''},Date.now());
  assert.equal(cachedInterpretation('I want to go to a ballet'),null,'oldest entries are evicted past the cap');
 });
+
+test('interpretations reject impossible dates and distant ends but accept midnight',()=>{
+ for(const start of ['2026-02-30','2026-11-31'])assert.equal(interpretAssist(JSON.stringify({start}),now),null);
+ const range=interpretAssist(JSON.stringify({start:'2026-09-25',end:'2199-12-31'}),now);
+ assert.equal(range.intent.end,null);
+ assert.equal(interpretAssist(JSON.stringify({afterMinutes:0}),now).intent.after,0);
+});
+
+test('date-relative interpretations expire when the Mountain calendar day changes',()=>{
+ const before=Date.parse('2026-11-11T06:59:00Z'),after=Date.parse('2026-11-11T07:01:00Z');
+ rememberInterpretation('something interesting tomorrow',{intent:{start:'2026-11-11'}},before);
+ assert.ok(cachedInterpretation('something interesting tomorrow',before+30000));
+ assert.equal(cachedInterpretation('something interesting tomorrow',after),null);
+});
+
+test('extractJSON isolates the first balanced JSON object even when trailing prose has braces',()=>{
+ const extracted=extractJSON('Here is the JSON: {"summary":"Clubs this week","tags":["Clubs"]} Note: {unrelated trailing note}');
+ assert.deepEqual(extracted,{summary:'Clubs this week',tags:['Clubs']});
+ assert.deepEqual(extractJSON('Output: {"summary":"Literal \\"}\\" inside string","tags":["IS"]} end {x}'),{summary:'Literal "}" inside string',tags:['IS']});
+});

@@ -18,7 +18,6 @@
 .dock button{padding:10px 13px}.dock{bottom:max(17px,env(safe-area-inset-bottom));gap:1px}
 .mini-map{left:18px;bottom:22px;width:124px;height:143px;padding:3px 3px 17px;background:#f3f2e3d9}.mini-map svg{width:116px;height:116px}.mini-map-north{left:56px}
 .location-pill{bottom:82px;font-size:10px}.speedometer{bottom:29px;right:22px;min-width:118px}.speedometer b{font-size:33px;font-weight:650}.speedometer p{font:9px monospace;margin-top:8px}
-.boost-track{margin-top:7px;background:#183b367a;border:1px solid #f3efd080;border-radius:5px;height:7px;overflow:hidden}.boost-track i{display:block;background:#f4cd75;height:100%;width:100%}.boosting{color:#ffe3a0}.boosting .boost-track i{background:#fff1b4}
 .toast-stack{top:auto;bottom:147px;left:50%;width:min(380px,86vw);gap:6px;z-index:4}.toast{padding:11px 15px;border-radius:10px;box-shadow:0 4px 17px #142d2520;gap:9px}.toast b{font-size:12px}.toast p{font-size:10px;margin-top:3px}
 .interaction{top:auto;bottom:101px;z-index:3;font-size:12px;white-space:normal;text-align:left}
 .game-dialog{width:min(780px,calc(100vw - 36px));border-radius:18px;max-height:calc(100dvh - 32px)}.dialog-head{padding:20px 24px 17px}.dialog-head h2{font-size:23px}.dialog-head .eyebrow{font-size:9px}.dialog-content{padding:20px 24px 24px;max-height:calc(100dvh - 135px)}
@@ -47,4 +46,4 @@
  .result-time{font-size:52px}.result-stats{gap:25px}.race-result h3{font-size:27px}.in-race .race-hud{top:62px;left:12px;width:calc(100vw - 24px);padding:11px 14px}.race-timing{margin:7px 0}.race-timing>strong{font-size:29px}.in-race .mini-map{display:none}.race-countdown{top:51%}.checkpoint-flash{top:50%}.race-result .button-row{flex-direction:column}.photo-mode .touch-look{top:85px}.voice-caption{bottom:200px;width:90vw}
 }
 @media(pointer:coarse){.objective-card{top:76px}.dock{bottom:12px}.dock [data-action="mount"]{display:none}.touch-stick{bottom:92px;left:20px;width:112px;height:112px}.touch-actions{right:14px;bottom:91px;gap:8px}.touch-actions button{min-height:44px;min-width:52px;font-size:11px}.touch-look{bottom:85px}.interaction{bottom:222px;max-width:85vw}.location-pill{display:none}.speedometer{bottom:255px;right:16px;min-width:95px}.toast-stack{bottom:286px}.voice-caption{bottom:224px}.in-race .toast-stack{bottom:286px}}
-@media(prefers-reduced-motion:reduce){.race-countdown,.checkpoint-flash{animation:none}.boosting{text-shadow:none}}
+@media(prefers-reduced-motion:reduce){.race-countdown,.checkpoint-flash{animation:none}}

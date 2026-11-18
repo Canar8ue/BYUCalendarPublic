@@ -2,6 +2,10 @@
 
 This is a broad discovery pass, not a claim that every BYU event is public or included. Source event counts overlap; the app merges matching listings.
 
+## November 10, 2026 normalization review — published
+
+The project bug audit examined retained seed records, not a new discovery/import pass. It found BYU's known 17:19 UTC TBA sentinel displaying as 10:19 AM in winter and a football source record whose October 31 start had a November 14 end. Classification now preserves the TBA meaning and withholds suspect ends over 24 hours for individual named team contests (general timed records keep the 31-day guard; all-day ranges and multiday tournament formats remain supported). Floating ICS end times inherit the same calendar timezone as starts, and directions retain explicit off-campus address text. No source inventories were manually refreshed or coverage claims expanded. Published in `2d13eca`; the post-deploy API returned 2,703 events / 28 source entries at verification time. Evidence: [BUG_AUDIT_2026-11-10.md](BUG_AUDIT_2026-11-10.md).
+
 ## Newly integrated
 
 | Official source | Import method | Upcoming records observed | Coverage |

@@ -7,15 +7,18 @@ type Props={groups:CampusEventGroup[];unmappedCount:number;focus:CampusLocation|
 export default function CampusMap({groups,unmappedCount,focus,focusToken,filterKey,onLocation,onFocused,onUnmapped}:Props){
  const frame=useRef<HTMLIFrameElement>(null);
  const [status,setStatus]=useState<'loading'|'ready'|'error'>('loading');
+ const [expanded,setExpanded]=useState(false);
  const message={channel:'byu-calendar-map',type:'update',groups:groups.map(g=>({location:g.location,count:g.events.length,colors:g.colors})),focus,focusToken,filterKey};
  const latest=useRef({message,onLocation,onFocused});
- useEffect(()=>{latest.current={message,onLocation,onFocused};frame.current?.contentWindow?.postMessage(message,location.origin);});
+ useEffect(()=>{latest.current={message,onLocation,onFocused};});
+ useEffect(()=>{frame.current?.contentWindow?.postMessage(latest.current.message,location.origin);},[groups,focus,focusToken,filterKey]);
  useEffect(()=>{
   const listener=(event:MessageEvent)=>{
    if(event.origin!==location.origin||event.source!==frame.current?.contentWindow||event.data?.channel!=='byu-calendar-map')return;
    if(event.data.type==='ready'){setStatus('ready');frame.current?.contentWindow?.postMessage(latest.current.message,location.origin);}
    if(event.data.type==='error')setStatus('error');
    if(event.data.type==='focused')latest.current.onFocused(event.data.token);
+   if(event.data.type==='fullscreen')setExpanded(Boolean(event.data.value));
    if(event.data.type==='select'){
     // Resolve against our trusted catalog, never accept arbitrary event data from a message.
     import('../lib/campus-map.mjs').then(({campusLocations})=>{
@@ -26,9 +29,18 @@ export default function CampusMap({groups,unmappedCount,focus,focusToken,filterK
   };
   window.addEventListener('message',listener);return()=>window.removeEventListener('message',listener);
  },[]);
+ // The iframe's Full screen button asks the parent to expand the stage to the
+ // whole viewport (iOS Safari has no element fullscreen); Escape closes it.
+ useEffect(()=>{
+  if(!expanded)return;
+  const previous=document.body.style.overflow;document.body.style.overflow='hidden';
+  const onKey=(event:KeyboardEvent)=>{if(event.key==='Escape'){setExpanded(false);frame.current?.contentWindow?.postMessage({channel:'byu-calendar-map',type:'fullscreen',value:false},location.origin);}};
+  window.addEventListener('keydown',onKey);
+  return()=>{document.body.style.overflow=previous;window.removeEventListener('keydown',onKey);};
+ },[expanded]);
  const count=groups.reduce((n,g)=>n+g.events.length,0);
- return <div className="campus-map-view">
-  <div className="map-summary"><span><MapPin size={16}/><b>{count} mapped events</b> across {groups.length} locations</span><span>Numbers count matching events · Rings show categories</span></div>
+ return <div className={'campus-map-view'+(expanded?' map-expanded':'')}>
+  <div className="map-summary"><span><MapPin size={16}/><b>{count} mapped event{count===1?'':'s'}</b> across {groups.length} location{groups.length===1?'':'s'}</span><span>Numbers count matching events · Rings show categories</span></div>
   <div className="map-stage"><iframe ref={frame} src="/campus/index.html" title="Interactive 3D map of BYU campus" onLoad={()=>frame.current?.contentWindow?.postMessage(latest.current.message,location.origin)}/></div>
   <div className="map-credits">Map data © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap contributors</a> · USGS 3DEP · <a href="https://map.byu.edu/" target="_blank" rel="noreferrer">BYU campus data</a> · <a href="/campus/ATTRIBUTION.md" target="_blank" rel="noreferrer">Credits</a></div>
   {status==='error'&&<p className="map-notice" role="status">The 3D map is unavailable in this browser. The location buttons below still open all matching events.</p>}

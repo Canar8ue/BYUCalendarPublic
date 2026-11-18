@@ -22,7 +22,7 @@ test('the reviewed navigation asset belongs to the current campus model and has 
  assert.equal(visited.size,nodes.length);assert.ok(nodes.length>1000);
 });
 
-test('the ordinary map keeps its smaller model while the game loads its own grounded model and catalog',async()=>{
+test('the ordinary map and game load valid paired campus models and catalogs',async()=>{
  const [ordinary,game,world,normalCatalog,gameCatalog]=await Promise.all([
   readFile(new URL('../public/campus/campus_web.glb',import.meta.url)),
   readFile(new URL('../public/explorer/campus/campus_web.glb',import.meta.url)),
@@ -30,12 +30,12 @@ test('the ordinary map keeps its smaller model while the game loads its own grou
   readFile(new URL('../public/campus/coordinates.json',import.meta.url),'utf8'),
   readFile(new URL('../public/explorer/campus/coordinates.json',import.meta.url),'utf8')
  ]);
- assert.equal(createHash('sha256').update(ordinary).digest('hex'),'0796afb0352892058999add33766d3e539e4a92ab8bfe55dab455eceeba55e67');
- assert.ok(game.length>ordinary.length*1.5);
+ const expectedHash='76432687aa4c783df25202e9791ddd931dc539a2bb963cb12ec4a05ba3895a46';
+ assert.equal(createHash('sha256').update(ordinary).digest('hex'),expectedHash);
+ assert.equal(createHash('sha256').update(game).digest('hex'),expectedHash);
  assert.match(world,/loadAsync\('\/explorer\/campus\/campus_web\.glb\?v=/);
  assert.match(world,/fetch\('\/explorer\/campus\/coordinates\.json\?v=/);
  assert.doesNotMatch(world,/['"]\/campus\/(?:campus_web\.glb|coordinates\.json)/);
  const normal=JSON.parse(normalCatalog).features,grounded=JSON.parse(gameCatalog).features;
  assert.deepEqual(normal.map(f=>[f.id,f.featureIndex]),grounded.map(f=>[f.id,f.featureIndex]));
- assert.notEqual(normalCatalog,gameCatalog,'each model keeps its own matching ground coordinates');
 });

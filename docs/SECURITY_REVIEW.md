@@ -7,6 +7,10 @@ dependencies, and the self-hosted deployment helper. It is an evidence-backed
 review of the checked-out code, not a guarantee that future changes or an
 external service are safe.
 
+## November 10, 2026 regression audit — published
+
+Personal subscription-token validation now requires exactly two segments, rejecting valid tokens with appended suffixes. Preferences and public RSVP rows commit in one transaction; the built-Worker regression forces an RSVP insert failure and verifies the preference write rolls back, then checks overlapping writes. Signup copy now accurately describes member-visible RSVP names/emails and does not infer account existence from a generic failed sign-in. Existing authentication/origin/privacy rules are preserved. Published in `2d13eca` with service/public health and asset checks; no external pentest or dependency audit was performed. Scope and evidence: [BUG_AUDIT_2026-11-10.md](BUG_AUDIT_2026-11-10.md).
+
 ## Findings fixed
 
 - Password recovery now removes any pending signup-verification code for the

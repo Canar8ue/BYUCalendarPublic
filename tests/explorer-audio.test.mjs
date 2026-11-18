@@ -8,8 +8,8 @@ import {createFoley} from '../public/explorer/game/foley.mjs';
 
 test('the complete self-hosted soundtrack has intact content hashes',async()=>{
  const manifest=JSON.parse(await readFile(new URL('../public/explorer/audio/manifest.json',import.meta.url),'utf8'));
- const expected=[...MUSIC_TRACKS.map(t=>t.id),...SOUND_EFFECTS.map(t=>t.id),...Object.keys(VOICE_LINES).map(id=>'voice-'+id)];
- assert.equal(manifest.version,1);assert.equal(expected.length,25);
+ const expected=[...MUSIC_TRACKS.map(t=>t.id),...SOUND_EFFECTS.map(t=>t.id),...Object.keys(VOICE_LINES).filter(id=>id!=='fragment-orientation').map(id=>'voice-'+id)];
+ assert.equal(manifest.version,1);assert.equal(expected.length,23);
  for(const id of expected){const asset=manifest.assets[id];assert.ok(asset,id);assert.match(asset.url,/^\/explorer\/audio\/[a-z0-9-]+\.mp3$/);const bytes=await readFile(new URL('../public'+asset.url,import.meta.url));assert.equal(bytes.length,asset.bytes);assert.equal(createHash('sha256').update(bytes).digest('hex'),asset.sha256);if(asset.kind==='voice')assert.equal(asset.caption,VOICE_LINES[id.slice(6)].text);}
  assert.doesNotMatch(JSON.stringify(manifest),/sk_[a-f0-9]{40,}/i);
 });
@@ -21,10 +21,24 @@ function audioHarness(){
  class Media{listeners={};paused=true;duration=75;currentTime=0;dataset={};addEventListener(name,fn){this.listeners[name]=fn;}setAttribute(){}async play(){this.paused=false;}pause(){this.paused=true;}removeAttribute(){this.src='';}load(){}remove(){this.removed=true;}}
  const context={currentTime:1,createGain(){const n=new Node();gains.push(n);return n;},createBiquadFilter(){const n=new Node();filters.push(n);return n;},createStereoPanner(){return new Node();},createMediaElementSource(){return new Node();},createOscillator(){return this.createBufferSource();},createBufferSource(){const n=new Node();sources.push(n);return n;},decodeAudioData:async()=>({duration:.6})};
  globalThis.Audio=Media;globalThis.document={body:{append(e){elements.push(e);}}};globalThis.setTimeout=fn=>{timers.set(++id,fn);return id;};globalThis.clearTimeout=id=>timers.delete(id);
- const assets=Object.fromEntries(['music-day','music-sunset','music-night','ambience','scooter','step','voice-intro','voice-cat-start'].map(id=>[id,{url:'/explorer/audio/'+id+'-123.mp3'}]));
+ const assets=Object.fromEntries(['music-day','music-sunset','music-night','ambience','step','voice-intro','voice-cat-start'].map(id=>[id,{url:'/explorer/audio/'+id+'-123.mp3',caption:VOICE_LINES[id.slice(6)]?.text}]));
  globalThis.fetch=async url=>{requests.push(url);return {ok:true,json:async()=>({version:1,assets}),arrayBuffer:async()=>new ArrayBuffer(2)};};
  return {context,master:new Node(),elements,sources,gains,filters,timers,requests,restore(){for(const [k,v]of original){if(v===undefined)delete globalThis[k];else globalThis[k]=v;}}};
 }
+
+test('skating uses bounded wheel, grind and deck sounds and honors effects mute',()=>{
+ const fake=audioHarness();
+ const foley=createFoley({context:fake.context,noise:{},effects:fake.master,ambience:fake.master,register(){},stepSample(){}});
+ try{
+  const state={skating:true,riding:true,grounded:true,speed:14,surface:()=>3};
+  for(let i=0;i<120;i++)foley.update(1/60,state);
+  assert.ok(fake.sources.length>=15&&fake.sources.length<=22);
+  const before=fake.sources.length;foley.update(.2,{...state,effectsOn:false});assert.equal(fake.sources.length,before);
+  foley.update(.2,{...state,grounded:false,grinding:true});assert.equal(fake.sources.length,before+1);
+  foley.play('skatePop',3,.7);foley.play('skateLand',3,.7);assert.equal(fake.sources.length,before+5);
+  foley.reset();foley.update(.2,{...state,enabled:false});assert.equal(fake.sources.length,before+5);
+ }finally{fake.restore();}
+});
 
 test('recorded audio streams only after activation, ducks narration, pauses, and fully releases its resources',async()=>{
  const fake=audioHarness(),captions=[];let ready=0;
@@ -91,42 +105,31 @@ test('footsteps require actual grounded travel, distinguish surfaces, and reset 
 });
 
 test('wheel and local chatter respect their independent buses and gameplay state',()=>{
- const fake=audioHarness(),rolls=[],ambience={};
- const foley=createFoley({context:fake.context,noise:{},effects:fake.master,ambience,register(){},stepSample(){},roll:(...args)=>rolls.push(args)});
+ const fake=audioHarness(),ambience={};
+ const foley=createFoley({context:fake.context,noise:{},effects:fake.master,ambience,register(){},stepSample(){}});
  try{
-  const riding={riding:true,grounded:true,speed:6,surface:()=>2};
+  const riding={skating:true,riding:true,grounded:true,speed:6,surface:()=>2};
   const talking={characters:[{gesture:'talk',x:2,z:0}]};
   foley.update(.1,{...riding,...talking,ambienceOn:false});
-  assert.deepEqual(rolls.at(-1),[6,3200,false]);
-  assert.equal(fake.sources.length,0);
+  assert.equal(fake.sources.length,1);
+  const wheel=fake.sources[0];assert.equal(wheel.destination.destination.destination,fake.master);
   foley.update(.1,{...riding,...talking,effectsOn:false});
-  assert.deepEqual(rolls.at(-1),[0]);
-  assert.equal(fake.sources.length,3);
-  assert.ok(fake.sources.every(source=>source.destination.destination.destination.destination===ambience));
+  assert.equal(fake.sources.length,4);
+  assert.ok(fake.sources.slice(1).every(source=>source.destination.destination.destination.destination===ambience));
   foley.update(.1,talking);
-  assert.equal(fake.sources.length,3,'chatter is throttled');
+  assert.equal(fake.sources.length,4,'chatter is throttled');
   foley.update(.1,{...riding,...talking,enabled:false});
-  assert.equal(fake.sources.length,3,'gameplay overlays suppress contextual sounds');
+  assert.equal(fake.sources.length,4,'gameplay overlays suppress contextual sounds');
  }finally{fake.restore();}
 });
 
-test('a scooter sound that finishes buffering after dismount cannot restart the motor',async()=>{
- const fake=audioHarness();let finishPlay;
- const play=globalThis.Audio.prototype.play;
- globalThis.Audio.prototype.play=function(){if(this.src.includes('scooter'))return new Promise(resolve=>finishPlay=()=>{this.paused=false;resolve();});return play.call(this);};
- const audio=createRecordedAudio(fake.context,fake.master);
+test('an updated narration caption never plays a mismatched old recording',async()=>{
+ const fake=audioHarness(),captions=[];
+ const audio=createRecordedAudio(fake.context,fake.master,{onCaption:c=>captions.push(c)});
  try{
-  await audio.resume();
-  audio.roll(7,3200);
-  const motor=fake.elements.find(item=>item.dataset.explorerAudio==='scooter');
-  assert.equal(fake.filters.at(-1).frequency.value,3200);
-  assert.ok(motor.playbackRate>1);
-  audio.roll(0);
-  finishPlay();
-  for(let i=0;i<8;i++)await Promise.resolve();
-  assert.equal(motor.paused,true);
-  audio.dispose();
-  assert.equal(fake.filters.at(-1).disconnected,true);
+  await audio.resume();await audio.speak('fragment-orientation',{force:true});
+  assert.equal(captions.at(-1).text,VOICE_LINES['fragment-orientation'].text);
+  assert.equal(fake.elements.filter(item=>item.dataset.explorerAudio.startsWith('voice-')).length,0);
  }finally{audio.dispose();fake.restore();}
 });
 

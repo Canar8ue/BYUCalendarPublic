@@ -55,6 +55,18 @@ test('campus viewer zooms over markers through the public helper, pins never cap
  // pointer and locked touch look-around after tapping a pin.
  assert.doesNotMatch(js,/labels\.addEventListener\('pointerdown'/);
  assert.match(css,/html,body,canvas,\.pin,\.tools\{touch-action:none\}/);
+ // Phones orbit with one finger and pinch with two; the iframe asks the page
+ // around it to expand for full screen because iOS has no element API.
+ assert.match(js,/controls\.touches\.TWO=null/);
+ assert.doesNotMatch(js,/controls\.touches\.ONE=null/);
+ assert.match(js,/zoom\(pinch\/distance\)/);
+ assert.match(js,/Two fingers to zoom/);
+ assert.match(js,/send\(\{type:'fullscreen',value:mapFullscreen\}\)/);
+ assert.match(html,/id="full"/);
+ assert.match(css,/\.tools button:is\(#in,#out\)/);
+ const host=readFileSync(new URL('../app/campus-map.tsx',import.meta.url),'utf8');
+ assert.match(host,/map-expanded/);
+ assert.doesNotMatch(host,/type==='scroll'/);
  const versions=[
   html.match(/calendar-map\.css\?v=([\w-]+)/)?.[1],
   html.match(/calendar-map\.js\?v=([\w-]+)/)?.[1],

@@ -81,8 +81,8 @@ Before deploying this account release to the existing server:
    node --import ./scripts/sites-env.mjs ./runtime/node_modules/wrangler/bin/wrangler.js d1 execute DB --local --config dist/server/wrangler.json --persist-to .wrangler/state --file drizzle/0001_byu_accounts_community.sql
    ```
 
-4. Create the private `.env.accounts` file when ready, install the systemd unit (`deploy/byucalendar-colo.service`) to `/etc/systemd/system/byucalendar.service`, and run `sudo systemctl daemon-reload`.
-5. Deploy the built code using `bash deploy/update.sh`, then restore the refresh cron. Check `/api/events` and `/api/account`. Missing email config should leave contributions gated and browsing operational.
+4. Create the private `.env.accounts` file when ready, install the systemd unit to `/etc/systemd/system/byucalendar.service`, and run `sudo systemctl daemon-reload`.
+5. Deploy the built code, then restore the refresh cron. Check `/api/events` and `/api/account`. Missing email config should leave contributions gated and browsing operational.
 6. Once Resend is configured, verify delivery to an actual authorized BYU inbox, complete sign-in, publish a real intended listing/tag, submit a report, and verify the chosen administrator can review it. Verify sign-out removes contribution access.
 
 Do not run these production steps merely to test the feature. The local integration suite exercises the same Worker against isolated D1 state. Backups now contain private account/session and report data as well as bookmarks; restrict access accordingly.

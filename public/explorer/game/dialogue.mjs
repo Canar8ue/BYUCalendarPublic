@@ -1,5 +1,5 @@
-import {NPC_DEFINITIONS} from './district-content.mjs?v=20261102polish6';
-import {activityStatus} from './activities.mjs?v=20261102polish6';
+import {NPC_DEFINITIONS} from './district-content.mjs?v=20261105rider6';
+import {activityStatus} from './activities.mjs?v=20261105rider6';
 
 const choice=(id,label,action=id)=>({id,label,action});
 const later=()=>choice('later','See you in a bit.','decline');
@@ -40,7 +40,7 @@ export function getConversation(s,npcId){
   }
   if(npcId==='nora'){
     const crash=s.nora.crashes?'Saw that spill. You all right? No points lost. We will work on the stop. ':'',lines=[
-      'I’m Nora. A clean stop is my favorite scooter trick. Want a short lesson, then a careful-turning challenge? No timer. No perfect run required.',
+      'I’m Nora. A clean stop is my favorite skate trick. Want a short lesson, then a careful-turning challenge? No timer. No perfect run required.',
       crash+'First, get moving above 2 m/s. Then hold F — or the Brake button — and come below 1.2 m/s near my workshop. Fast is optional. Control is useful.',
       crash+'Good stop. Now three gates down Library Lane, in order. Stay below 6.5 m/s and take the corners however slowly you like.',
       'You rode the whole practice line. Ready for the workshop challenge? Same gates, below 4 m/s, and hold Brake at the final gate. This deck has been waiting for a careful rider.',

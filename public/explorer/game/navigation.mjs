@@ -1,4 +1,4 @@
-import {NAVIGATION_URL} from './navigation-data.mjs?v=20261102polish6';
+import {NAVIGATION_URL} from './navigation-data.mjs?v=20261105rider6';
 const UNIT=.044571444392204285;
 
 // The network is generated from collision-checked walks. It supplies hints, never

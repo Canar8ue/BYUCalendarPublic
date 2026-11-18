@@ -21,6 +21,7 @@
 # misc
 .DS_Store
 *.pem
+desktop.ini
 
 # debug
 npm-debug.log*
@@ -41,6 +42,7 @@ next-env.d.ts
 /.wrangler/
 # Local tool state and scratch output.
 /.runtime-state/
+/.zcode/
 /output/
 /tmp/
 *.tsbuildinfo

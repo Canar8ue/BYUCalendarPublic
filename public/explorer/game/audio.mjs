@@ -1,5 +1,5 @@
-import {createRecordedAudio} from './recorded-audio.mjs?v=20261102polish6';
-import {createFoley} from './foley.mjs?v=20261102polish6';
+import {createRecordedAudio} from './recorded-audio.mjs?v=20261105rider6';
+import {createFoley} from './foley.mjs?v=20261105rider6';
 // The original score remains a graceful fallback when optional media is missing.
 const clamp = (value, low, high) => Math.max(low, Math.min(high, value));
 const pitch = midi => 440 * 2 ** ((midi - 69) / 12);
@@ -138,7 +138,7 @@ export function createAudio({onCaption=()=>{}}={}) {
         for (let i = 0; i < data.length; i++) {seed = (1664525 * seed + 1013904223) >>> 0; data[i] = ((seed / 4294967296) * 2 - 1) * .7;}
         if(typeof globalThis.Audio==='function'&&context.createMediaElementSource){recorded=createRecordedAudio(context,master,{onCaption,onMusicReady:()=>{stopScheduler();smoothing(music.gain,0,.5);}});recorded.setMix(mixSettings);recorded.setMood(mood);}
         foley = createFoley({context, noise, effects: syntheticEffects, ambience: syntheticAmbience, register,
-          stepSample: (level, rate) => void recorded?.effect('step', level, rate), roll: (...args) => recorded?.roll(...args)});
+          stepSample: (level, rate) => void recorded?.effect('step', level, rate)});
         started = true;
       } catch {if (context) context.close().catch(() => {}); context = undefined; return;}
     }

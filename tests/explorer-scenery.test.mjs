@@ -11,7 +11,7 @@ registerHooks({resolve(specifier,context,next){
 }});
 const {createScenery}=await import('../public/explorer/game/scenery.mjs');
 
-test('scenery batches repeated lamps and keeps ambient collision near the player',()=>{
+test('scenery retains lamps and gardens without anonymous campus walkers or crowd simulation',()=>{
  const oldDocument=globalThis.document;
  globalThis.document={createElement:()=>({getContext:()=>({
   fillRect(){},strokeRect(){},fillText(){},beginPath(){},moveTo(){},bezierCurveTo(){},stroke(){},arc(){},fill(){},
@@ -31,19 +31,17 @@ test('scenery batches repeated lamps and keeps ambient collision near the player
    scenery.update(0,0,{night:true});
    assert.equal(bulb.material.emissiveIntensity,2);
    const walkers=root.children.filter(o=>o.name==='Ambient walkers');
-   assert.equal(walkers.length,3);
+   assert.equal(walkers.length,0);
+   assert.ok(root.children.filter(o=>o.isInstancedMesh).every(batch=>batch.instanceMatrix.usage!==THREE.DynamicDrawUsage));
    const first=LOCATIONS[0],player={x:first.x+1.3*UNIT,z:first.z-1.2*UNIT};
    queries.length=0;
    scenery.update(.1,.1,{player});
-   assert.ok(queries.length>0);
-   assert.ok(queries.every(p=>Math.hypot(p.x-player.x,p.z-player.z)<49*UNIT));
-   assert.ok(walkers.every(batch=>batch.visible));
+   assert.equal(queries.length,0);
    queries.length=0;
    scenery.update(.1,.2,{player:{x:1000,z:1000}});
    assert.equal(queries.length,0);
-   assert.ok(walkers.every(batch=>batch.count===0&&!batch.visible));
    scenery.update(.1,.3,{player});
-   assert.ok(walkers.every(batch=>batch.count>0&&batch.visible));
+   assert.equal(queries.length,0);
   }finally{scenery.dispose();}
   assert.equal(scene.children.length,0);
  }finally{

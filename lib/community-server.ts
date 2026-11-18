@@ -8,7 +8,7 @@ import {staffEditGrant} from './staff-server.mjs';
 export async function communityRequest(request: Request, action: 'listing' | 'update' | 'delete' | 'mine' | 'tag' | 'report' | 'review' | 'reports' | 'moderate' | 'inventory') {
   try {
     const account = await readAccount(request);
-    requireContributor(account);
+    const user = requireContributor(account);
     const db = database();
     if (action === 'reports') return json({reports: await readReports(db, account)});
     if (action === 'mine') return json({listings: await readMyListings(db, account)});
@@ -16,7 +16,11 @@ export async function communityRequest(request: Request, action: 'listing' | 'up
     requireSameOrigin(request, authConfiguration().origin);
     const input = await readJSON(request);
     const findEvent = async (id: string) => (await readCalendar()).events.find(e => e.id === id);
-    if (action === 'listing') { const result = await publishListing(db, account, input); invalidateCalendar(); return json({event: result}, 201); }
+    // The first-listing flag drives the author's post-publish prompt to Your
+    // listings, so it is decided before this insert adds the row. A replay of
+    // the member's own submission id can only happen when a row already
+    // exists, which makes the count non-zero and the flag false.
+    if (action === 'listing') { const prior = await db.prepare('SELECT COUNT(*) AS n FROM community_listings WHERE user_id=?').bind(user.id).first<{n: number}>(); const result = await publishListing(db, account, input); invalidateCalendar(); return json({event: result, first: !prior?.n}, 201); }
     if (action === 'update') { const result = await updateListing(db, account, input); invalidateCalendar(); return json({event: result}); }
     if (action === 'delete') { const result = await deleteListing(db, account, input); invalidateCalendar(); return json(result); }
     if (action === 'tag') { const result = await publishTag(db, account, input, findEvent); invalidateCalendar(); return json(result); }

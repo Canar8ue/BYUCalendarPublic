@@ -1,10 +1,10 @@
-import {UNIT} from './content.mjs?v=20261102polish6';
-import {NPC_DEFINITIONS,ACTIVITIES} from './district-content.mjs?v=20261102polish6';
-import {activityObjectives} from './activities.mjs?v=20261102polish6';
-import {CAMPUS_ACTIVITIES,CAMPUS_NPCS,CAMPUS_DISTRICTS} from './campus-content.mjs?v=20261102polish6';
-import {applyCampusActivityAction,campusActivityObjectives,campusActivityTarget,campusActivityStatus,currentCampusStep,getCampusConversation,getCampusStepConversation} from './campus-state.mjs?v=20261102polish6';
-import {createCampusWorld} from './campus-world.mjs?v=20261102polish6';
-import {createDistrictUI} from './district-ui.mjs?v=20261102polish6';
+import {UNIT} from './content.mjs?v=20261105rider6';
+import {NPC_DEFINITIONS,ACTIVITIES} from './district-content.mjs?v=20261105rider6';
+import {activityObjectives} from './activities.mjs?v=20261105rider6';
+import {CAMPUS_ACTIVITIES,CAMPUS_NPCS,CAMPUS_DISTRICTS} from './campus-content.mjs?v=20261105rider6';
+import {applyCampusActivityAction,campusActivityObjectives,campusActivityTarget,campusActivityStatus,currentCampusStep,getCampusConversation,getCampusStepConversation} from './campus-state.mjs?v=20261105rider6';
+import {createCampusWorld} from './campus-world.mjs?v=20261105rider6';
+import {createDistrictUI} from './district-ui.mjs?v=20261105rider6';
 
 // One facade keeps the original district, races and adventure independent of
 // the campus-wide stories. Only this boundary supplies physical evidence.

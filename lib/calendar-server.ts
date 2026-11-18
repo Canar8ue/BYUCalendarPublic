@@ -20,12 +20,14 @@ async function ensureSeed(){
 // The merged calendar only changes when a source refresh or a community/moderation
 // mutation runs, so a short shared cache avoids recomputing ~1400 events per view.
 let calendarCache:{at:number;data:CalendarData}|null=null;
+let cacheGeneration=0;
 const CALENDAR_CACHE_MS=30000;
-export function invalidateCalendar(){calendarCache=null;}
+export function invalidateCalendar(){calendarCache=null;cacheGeneration++;}
 export async function readCalendar():Promise<CalendarData>{
  if(calendarCache&&Date.now()-calendarCache.at<CALENDAR_CACHE_MS)return calendarCache.data;
+ const generation=cacheGeneration;
  const data=await buildCalendar();
- calendarCache={at:Date.now(),data};
+ if(generation===cacheGeneration)calendarCache={at:Date.now(),data};
  return data;
 }
 async function buildCalendar():Promise<CalendarData>{

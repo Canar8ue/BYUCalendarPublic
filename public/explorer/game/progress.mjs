@@ -1,10 +1,11 @@
-import {SPAWN, LOCATIONS, CAT_TRAIL, COSMO_SPOTS, SECRETS, TRIALS, QUESTS, MAIN_CHAPTERS, LOST_ITEMS, TUNE_NOTES, PHOTO_SPOTS, OUTFITS, DECKS} from './content.mjs?v=20261102polish6';
-import {medalFor, validateGhost} from './racing.mjs?v=20261102polish6';
-import {ACTIVITIES, ACTIVITY_REWARDS} from './district-content.mjs?v=20261102polish6';
-import {createCampusLife, validateCampusLife} from './activities.mjs?v=20261102polish6';
-import {CAMPUS_ACTIVITIES} from './campus-content.mjs?v=20261102polish6';
-import {createCampusActivities,validateCampusActivities,completedCampusRewards} from './campus-state.mjs?v=20261102polish6';
-import {HIKE_REWARDS,createHikeState,validateHikeState,completedHikeRewards} from './hike-state.mjs?v=20261102polish6';
+import {SPAWN, LOCATIONS, CAT_TRAIL, COSMO_SPOTS, SECRETS, TRIALS, QUESTS, MAIN_CHAPTERS, LOST_ITEMS, TUNE_NOTES, PHOTO_SPOTS, OUTFITS, DECKS} from './content.mjs?v=20261105rider6';
+import {medalFor, validateGhost} from './racing.mjs?v=20261105rider6';
+import {ACTIVITIES, ACTIVITY_REWARDS} from './district-content.mjs?v=20261105rider6';
+import {createCampusLife, validateCampusLife} from './activities.mjs?v=20261105rider6';
+import {CAMPUS_ACTIVITIES} from './campus-content.mjs?v=20261105rider6';
+import {createCampusActivities,validateCampusActivities,completedCampusRewards} from './campus-state.mjs?v=20261105rider6';
+import {HIKE_REWARDS,createHikeState,validateHikeState,completedHikeRewards} from './hike-state.mjs?v=20261105rider6';
+import {validateSkateStats} from './skateboard.mjs?v=20261105rider6';
 
 export const SAVE_KEY = 'byucalendar-explorer-v1';
 export const LEVEL_THRESHOLDS = Object.freeze([0, 50, 120, 220, 350, 500, 700, 950, 1250, 1600]);
@@ -29,7 +30,7 @@ const count = (value, maximum) => Number.isInteger(value) ? Math.min(maximum, Ma
 const object = value => Boolean(value && typeof value === 'object' && !Array.isArray(value));
 
 export function createProgress() {
-  return {version: 2, claims: {}, visited: [], fragments: [], introSeen: false, trackedQuest:'main', finaleSeen: false, catStep: 0, cosmoStep: 0, deliveryStep: 0, deliveryStarted: false, quests: [], secrets: [], items: [], notes: [], photos: [], bestTimes: {}, bestRuns: {}, campusLife:createCampusLife(), campusActivities:createCampusActivities(), hike:createHikeState(), cosmetics:{outfit:'classic',deck:'classic'}, settings: {music: true, volume: .55, musicVolume:.55, ambienceVolume:.5, effectsVolume:.7, voiceVolume:.85, quality: 'auto', reducedMotion: false, time: 'sunset', cycle:false, routeHints:true, showGhost:true, sensitivity:1, cameraDistance:1, invertY:false, captions:true, photoFrame:'postcard'}, checkpoint: {...SPAWN}};
+  return {version: 2, skate:validateSkateStats(), claims: {}, visited: [], fragments: [], introSeen: false, trackedQuest:'main', finaleSeen: false, catStep: 0, cosmoStep: 0, deliveryStep: 0, deliveryStarted: false, quests: [], secrets: [], items: [], notes: [], photos: [], bestTimes: {}, bestRuns: {}, campusLife:createCampusLife(), campusActivities:createCampusActivities(), hike:createHikeState(), cosmetics:{outfit:'classic',deck:'classic'}, settings: {music: true, volume: .55, musicVolume:.55, ambienceVolume:.5, effectsVolume:.7, voiceVolume:.85, quality: 'auto', reducedMotion: false, time: 'sunset', cycle:false, routeHints:true, showGhost:true, sensitivity:1, cameraDistance:1, invertY:false, captions:true, photoFrame:'postcard'}, checkpoint: {...SPAWN}};
 }
 
 export function claimReward(state, id, xp) {
@@ -72,7 +73,7 @@ export function getAchievements(state) {
     ['cougar','Three cheers','Find every Cosmo cameo',state.cosmoStep,COSMO_SPOTS.length],
     ['postmaster','Wish you were here','Capture all three compositions',state.photos.length,PHOTO_SPOTS.length],
     ['collector','Keeper of small things','Find twelve secret postcards',state.secrets.length,SECRETS.length],
-    ['rider','The long way, faster','Finish every scooter trial',TRIALS.filter(t=>state.bestTimes[t.id]).length,TRIALS.length],
+    ['rider','The long way, faster','Finish every skateboard race',TRIALS.filter(t=>state.bestTimes[t.id]).length,TRIALS.length],
     ['gold-rider','A very smooth line','Earn gold on all three routes',TRIALS.filter(t=>state.bestTimes[t.id]&&state.bestTimes[t.id]<=t.targetSeconds).length,TRIALS.length],
     ['story','Adventure complete','Recover all four pages and return to the departure board',state.quests.includes('main')?1:0,1],
     ['stories','No story left behind','Finish all seven adventures',state.quests.length,QUESTS.length],
@@ -172,6 +173,7 @@ export function validateProgress(raw) {
   state.photos = uniqueKnown(raw.photos, photoIds);
   state.campusLife = validateCampusLife(raw.campusLife);
   state.campusActivities = validateCampusActivities(raw.campusActivities);
+  state.skate = validateSkateStats(raw.skate);
   state.hike = validateHikeState(raw.hike);
   state.catStep = count(raw.catStep, CAT_TRAIL.length);
   state.cosmoStep = count(raw.cosmoStep, COSMO_SPOTS.length);
@@ -179,9 +181,10 @@ export function validateProgress(raw) {
   if (raw.deliveryStarted === true) state.deliveryStep = Math.max(1, state.deliveryStep);
   if (state.quests.includes('delivery')) state.deliveryStep = 2;
   state.deliveryStarted = state.deliveryStep > 0;
-  if (object(raw.claims)) for (const [id, value] of Object.entries(raw.claims)) if (rewards.has(id) && value === rewards.get(id) && (!id.startsWith('campus:') || state.campusActivities.completed.includes(id.slice(7)))) state.claims[id] = value;
-  state.fragments=uniqueKnown(raw.fragments,ids(MAIN_CHAPTERS));
-  if(raw.version<2)state.fragments=MAIN_CHAPTERS.filter(c=>Object.hasOwn(state.claims,'chapter:'+c.id)).map(c=>c.id);
+  const legacyFragments = raw.version < 2 && object(raw.claims)
+    ? MAIN_CHAPTERS.filter(chapter => raw.claims[`chapter:${chapter.id}`] === chapter.xp).map(chapter => chapter.id)
+    : [];
+  state.fragments=raw.version<2?legacyFragments:uniqueKnown(raw.fragments,ids(MAIN_CHAPTERS));
   state.trackedQuest=raw.trackedQuest==='free'||quests.has(raw.trackedQuest)||ACTIVITIES.some(a=>'activity:'+a.id===raw.trackedQuest)||CAMPUS_ACTIVITIES.some(a=>'campus:'+a.id===raw.trackedQuest)?raw.trackedQuest:'main';
   state.introSeen=raw.introSeen===true||raw.version<2&&state.visited.length>0;
   state.finaleSeen=raw.finaleSeen===true||state.quests.includes('main');
@@ -208,7 +211,9 @@ export function validateProgress(raw) {
     if(['postcard','clean','cinema'].includes(raw.settings.photoFrame))state.settings.photoFrame=raw.settings.photoFrame;
   }
   if(object(raw.cosmetics)){equipCosmetic(state,'outfit',raw.cosmetics.outfit);equipCosmetic(state,'deck',raw.cosmetics.deck);}
-  if (object(raw.checkpoint) && Number.isFinite(raw.checkpoint.x) && Number.isFinite(raw.checkpoint.z) && raw.checkpoint.x >= -65 && raw.checkpoint.x <= 55 && raw.checkpoint.z >= -80 && raw.checkpoint.z <= 50) state.checkpoint = {x: raw.checkpoint.x, z: raw.checkpoint.z};
+  if (object(raw.checkpoint) && Number.isFinite(raw.checkpoint.x) && Number.isFinite(raw.checkpoint.z) && raw.checkpoint.x >= -65 && raw.checkpoint.x <= 55 && raw.checkpoint.z >= -80 && raw.checkpoint.z <= 50) {
+    state.checkpoint = {x: raw.checkpoint.x, z: raw.checkpoint.z, ...(Number.isFinite(raw.checkpoint.y) && raw.checkpoint.y >= -20 && raw.checkpoint.y <= 30 ? {y: raw.checkpoint.y} : {})};
+  }
   syncMain(state);
   return state;
 }

@@ -9,6 +9,7 @@ import {createAccountAuth, handleAccountAuth} from '../lib/auth-core.mjs';
 import {normalizeBYUEmail, permissionsFor, safeReturnTo} from '../lib/account-policy.mjs';
 import {parseListing, addCommunityData} from '../lib/community.mjs';
 import {publishListing, updateListing, deleteListing, readMyListings, publishTag, submitReport, readReports, reviewReport, moderateEvent, readModerationInventory, communityCalendar, consumeQuota} from '../lib/community-store.mjs';
+import {requestStaffStatus, resolveStaffAccount} from '../lib/staff-server.mjs';
 import {readJSON, requireSameOrigin} from '../lib/http.mjs';
 import {matchesEvent, exportICS} from '../lib/search.mjs';
 
@@ -20,7 +21,7 @@ const mail = new Map(); let ip = 1;
 before(async () => {
   mf = new Miniflare({modules: true, script: 'export default {fetch(){return new Response("test");}}', compatibilityDate: '2026-05-01', d1Databases: ['DB']});
   db = await mf.getD1Database('DB');
-  for (const file of ['0000_pink_scarlet_spider.sql', '0001_byu_accounts_community.sql', '0004_event_moderation.sql', '0008_staff_accounts.sql']) {
+  for (const file of ['0000_pink_scarlet_spider.sql', '0001_byu_accounts_community.sql', '0004_event_moderation.sql', '0008_staff_accounts.sql', '0009_event_saves_profiles.sql']) {
     const statements = readFileSync(new URL('../drizzle/' + file, import.meta.url), 'utf8').replaceAll('--> statement-breakpoint', '').split(';').map(s => s.trim()).filter(Boolean);
     await db.batch(statements.map(sql => db.prepare(sql)));
   }
@@ -211,7 +212,7 @@ test('authors can edit and delete only their own listings', async () => {
   await assert.rejects(deleteListing(db, admin.account, {id: event.id}), e => e.status === 403);
   await deleteListing(db, member.account, {id: event.id});
   assert.equal(await find(event.id), undefined);
-  for (const table of ['community_tags', 'listing_reports', 'listing_moderation']) {
+  for (const table of ['community_tags', 'listing_reports', 'listing_moderation', 'event_saves']) {
     const left = await db.prepare(`SELECT COUNT(*) c FROM ${table} WHERE event_id=?`).bind(event.id).first();
     assert.equal(left.c, 0, table);
   }
@@ -306,7 +307,7 @@ test('moderators edit and delete any listing; source corrections survive read ti
   // Community deletions remain a full cascade.
   await moderateEvent(db, admin.account, {action: 'delete', id: memberListing.id});
   assert.equal(await find(memberListing.id), undefined);
-  for (const table of ['community_tags', 'listing_reports', 'listing_moderation']) {
+  for (const table of ['community_tags', 'listing_reports', 'listing_moderation', 'event_saves']) {
     const left = await db.prepare(`SELECT COUNT(*) c FROM ${table} WHERE event_id=?`).bind(memberListing.id).first();
     assert.equal(left.c, 0, table);
   }
@@ -341,4 +342,34 @@ test('request bounds, origin checks, and return destinations reject bypasses', a
   assert.equal(safeReturnTo('/?q=clubs&event=abc'), '/?q=clubs&event=abc');
   const source = {id: 'source', title: 'Source listing', start: '2026-10-01', tags: [], food: 'no'};
   assert.equal(addCommunityData([source], [], [{id: 'tag', event_id: 'source', tag: 'Food provided', note: 'Community claim'}], [])[0].food, 'no');
+});
+
+test('staff grants cannot bypass denial, started community listings remain editable, and duplicate sign-ups spare send quota', async () => {
+  const deniedUser = (await login('denied-staff@byu.edu')).account;
+  await requestStaffStatus(db, deniedUser, {area: 'law'});
+  await resolveStaffAccount(db, admin.account, {userId: deniedUser.user.id, action: 'revoke'});
+  await assert.rejects(requestStaffStatus(db, deniedUser, {area: 'engineering'}), e => e.status === 403);
+
+  const pastStart = new Date(Date.now() - 30 * 60 * 1000).toISOString();
+  const futureEnd = new Date(Date.now() + 90 * 60 * 1000).toISOString();
+  const activeId = 'community:' + crypto.randomUUID();
+  const activePayload = {
+    id: activeId, title: 'Active club workshop', description: 'Happening right now with demos for students.',
+    organizer: 'Clubs', category: 'Campus life', start: pastStart, end: futureEnd, allDay: false,
+    location: 'WSC 201', url: 'https://clubs.byu.edu/', tags: ['Clubs'], sourceId: 'community',
+    sourceName: 'BYU community listing', sourceUpdated: new Date().toISOString(), community: true, cancelled: false,
+  };
+  await db.prepare('INSERT INTO community_listings(id,user_id,payload,created_at) VALUES(?,?,?,?)')
+    .bind(activeId, member.account.user.id, JSON.stringify(activePayload), new Date().toISOString()).run();
+  const edited = await updateListing(db, member.account, {
+    id: activeId, title: 'Active club workshop updated', organizer: 'Clubs',
+    description: 'Happening right now with demos and pizza for students.',
+    category: 'Campus life', location: 'WSC 210', url: 'https://clubs.byu.edu/',
+    allDay: false, start: tomorrow() + 'T18:00', end: tomorrow() + 'T19:00',
+  });
+  assert.equal(edited.title, 'Active club workshop updated');
+
+  // Repeated /sign-up/email attempts on an existing account never burn that email's send quota.
+  for (let i = 0; i < 4; i++) await call('/sign-up/email', {name: 'Dup', email: 'member@student.byu.edu', password: PASSWORD});
+  assert.equal((await call('/email-otp/request-password-reset', {email: 'member@student.byu.edu'})).status, 200);
 });

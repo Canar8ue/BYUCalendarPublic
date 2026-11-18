@@ -1,7 +1,7 @@
 // Production audio is generated once, then self-hosted. No API calls in-game.
 export const VOICE_LINES = Object.freeze({
   intro: {speaker:'Maya', text:'I’m Maya. Four pieces of your lost page are somewhere out here. Start with the library. Follow the gold marker.'},
-  'fragment-orientation': {speaker:'Maya', text:'Your first piece! The library, the student center, and a little curiosity. That’s a pretty good start. Next stop: the science district. Your scooter is always one tap away.'},
+  'fragment-orientation': {speaker:'Maya', text:'Your first piece! The library, the student center, and a little curiosity. That’s a pretty good start. Next stop: the science district. Your skateboard is always one tap away.'},
   'fragment-long-way': {speaker:'Maya', text:'Two pieces. Nicely wandered! Now head east. Someone left a melody between the Arts Building and the Music Building. There’s a whole different rhythm over there.'},
   'fragment-sound-vision': {speaker:'Maya', text:'Three pieces, one very good detour. Your last lead points north, toward the bells. Keep an eye out for someone in blue and white.'},
   'fragment-familiar-face': {speaker:'Maya', text:'You found the last piece. Bring them back to the little departure board where we started. I have a feeling your calendar is going to look a lot more interesting now.'},
@@ -22,7 +22,6 @@ export const MUSIC_TRACKS = Object.freeze([
 
 export const SOUND_EFFECTS = Object.freeze([
   {id:'ambience', seconds:16, loop:true, prompt:'Seamless loop of a peaceful outdoor university garden: gentle breeze rustling leafy trees, scattered small songbirds in the distance, soft spacious open-air atmosphere. Natural quiet field recording, no human voices, no traffic, no music, no abrupt sounds.'},
-  {id:'scooter', seconds:5, loop:true, prompt:'Seamless steady quiet electric scooter motor and rubber wheels rolling smoothly over clean pavement, gentle warm electric whirr, no acceleration, no voices, no music, close clean game sound effect.'},
   {id:'step', seconds:.6, prompt:'One single clean sneaker footstep on a stone campus walkway. Soft friendly game foley, dry close recording, no reverb, no background, no voices, no music.'},
   {id:'cat', seconds:1.4, prompt:'One adorable friendly small cat meow followed by a short contented purr. Close natural clean recording, no background sounds, no speech, no music.'},
   {id:'discovery', seconds:2.1, prompt:'A polished cozy adventure game discovery sound: delicate ascending glass bell arpeggio, warm soft magical shimmer, satisfying gentle final note. Clean short UI reward, no voices, no background, no harsh high frequencies.'},

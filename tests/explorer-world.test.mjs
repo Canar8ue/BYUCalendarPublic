@@ -34,7 +34,7 @@ test('labelled paving follows the visible surface and bridges support both deck 
  near(visible.groundHeight(.4,.3),.03,'explicit ground semantics replace the old overlay height cutoff');
 });
 
-test('shoe footprint and scooter wheel contacts stay above a sloping surface',()=>{
+test('shoe and board contact footprints stay above a sloping surface',()=>{
  const index=createCollisionIndex([
   {kind:'ground',surface:1,a:[-2,-.2,-2],b:[2,.2,2],c:[2,-.2,-2]},
   {kind:'ground',surface:1,a:[-2,-.2,-2],b:[-2,.2,2],c:[2,.2,2]}

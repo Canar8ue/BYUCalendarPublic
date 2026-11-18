@@ -7,6 +7,11 @@ import {readFileSync, readdirSync} from 'node:fs';
 import {createHmac,createHash} from 'node:crypto';
 import {Miniflare} from 'miniflare';
 import {NAVIGATION_URL} from '../public/explorer/game/navigation-data.mjs';
+import {load as parseHTML} from 'cheerio/slim';
+import {SEARCH_PAGES,searchPageEvents,searchPageWindow} from '../lib/search-pages.mjs';
+import {TOPICS} from '../lib/topics.mjs';
+import {dayKey} from '../lib/search.mjs';
+import {lastDay} from '../lib/catalog.mjs';
 
 let mf, db, memberCookie, reviewerCookie, eventId;
 const origin = 'http://localhost:8790';
@@ -51,6 +56,12 @@ before(async () => {
     const statements = readFileSync(new URL('../drizzle/' + file, import.meta.url), 'utf8').replaceAll('--> statement-breakpoint', '').split(';').map(s => s.trim()).filter(Boolean);
     await db.batch(statements.map(sql => db.prepare(sql)));
   }
+  // Known source fixtures make markup regressions independent of how much
+  // detail an old checked-in source snapshot happens to contain.
+  const start=new Date(Date.now()+2*86400000).toISOString();
+  const fixture={title:'Search fixture',description:'A published event used only in the isolated Worker test.',start,end:null,allDay:false,location:'',url:'https://byucougars.com/all-sports-schedule',sourceId:'byucougars',sourceName:'BYU Athletics',category:'Sports & recreation',tags:[],food:null,snacks:null,drinks:null,free:null,audience:null,format:'In person',cancelled:false,sourceUpdated:null};
+  const fixtures=[{...fixture,id:'aio-tba',title:'Tennis fixture TBA',timeTba:true,location:'Rome, GA'}, {...fixture,id:'aio-away',title:'Volleyball fixture away',location:'Boulder, Colorado / CU Events Center'}, {...fixture,id:'aio-unknown',title:'Venue fixture unknown',format:null}];
+  await db.prepare('INSERT INTO source_snapshots (id,payload,last_success,lock_until) VALUES (?,?,?,0)').bind('byucougars',JSON.stringify(fixtures),new Date().toISOString()).run();
 });
 after(async () => { await mf?.dispose(); });
 
@@ -105,7 +116,7 @@ async function login(email, password = 'worker-test-pass-123') {
 }
 
 test('the built Worker serves pages and enforces BYU permissions at every HTTP endpoint', async () => {
-  for (const path of ['/', '/signin', '/account', '/listings/new', '/moderation', '/moderation/analytics']) assert.equal((await request(path, null, '', {}, 'GET')).status, 200, path);
+  for (const path of ['/', '/signin', '/account', '/listings/new', '/listings/mine', '/moderation', '/moderation/analytics']) assert.equal((await request(path, null, '', {}, 'GET')).status, 200, path);
   const signedOut = await (await request('/api/account', null, '', {}, 'GET')).json();
   assert.equal(signedOut.user, null); assert.equal(signedOut.permissions.addListings, false);
   for (const path of ['/api/listings', '/api/listings/tags', '/api/listings/reports']) {
@@ -124,6 +135,31 @@ test('the built Worker serves pages and enforces BYU permissions at every HTTP e
   assert.equal((await request('/api/auth/sign-in/email', {email: 'unverified@student.byu.edu', password: 'worker-test-pass-123'})).status, 403);
   // Delivery failures surface instead of claiming a code was sent.
   assert.equal((await request('/api/auth/sign-up/email', {name: 'Failing', email: 'delivery-error@byu.edu', password: 'worker-test-pass-123'})).status, 503);
+});
+
+test('preference writes keep RSVP rows atomic, bounded and consistent under overlap', async () => {
+  const cookie = await login('preference-atomic@byu.edu');
+  const preferences = async () => (await request('/api/preferences', null, cookie, {}, 'GET')).json();
+  const account = await (await request('/api/account', null, cookie, {}, 'GET')).json();
+  const rows = async () => (await db.prepare('SELECT event_id FROM event_saves WHERE user_id=? ORDER BY event_id').bind(account.user.id).all()).results.map(row => row.event_id);
+  const saved = Array.from({length: 125}, (_, index) => 'atomic-' + index);
+  const response = await request('/api/preferences', {saved: [...saved, saved[0]], views: []}, cookie, {}, 'PUT');
+  assert.equal(response.status, 200, await response.clone().text());
+  assert.deepEqual((await response.json()).preferences.saved, saved);
+  assert.deepEqual(await rows(), [...saved].sort());
+  await db.prepare("CREATE TRIGGER audit_save_failure BEFORE INSERT ON event_saves WHEN NEW.event_id='audit-failure' BEGIN SELECT RAISE(ABORT,'test-only save failure'); END").run();
+  try {
+    const failed = await request('/api/preferences', {saved: ['audit-failure'], views: []}, cookie, {}, 'PUT');
+    assert.equal(failed.status, 503);
+    assert.deepEqual((await preferences()).saved, saved);
+    assert.deepEqual(await rows(), [...saved].sort());
+  } finally { await db.prepare('DROP TRIGGER audit_save_failure').run(); }
+  const writes = await Promise.all([
+    request('/api/preferences', {saved: ['overlap-a'], views: []}, cookie, {}, 'PUT'),
+    request('/api/preferences', {saved: ['overlap-b'], views: []}, cookie, {}, 'PUT'),
+  ]);
+  for (const write of writes) assert.equal(write.status, 200, await write.clone().text());
+  assert.deepEqual(await rows(), [...(await preferences()).saved].sort());
 });
 
 test('the built Worker publishes a listing and tags, stores private reports, and isolates bookmarks', async () => {
@@ -154,14 +190,14 @@ test('the built Worker publishes a listing and tags, stores private reports, and
   assert.equal((await request('/api/listings', input, memberCookie)).status, 401);
 });
 
-test('the served single-event ICS hands off to native calendar apps', async () => {
+test('the served single-event ICS downloads without a blank navigation', async () => {
   const calendar = await (await request('/api/events', null, '', {}, 'GET')).json();
   const event = calendar.events.find(e => e.end && !e.allDay);
   assert.ok(event, 'expected a timed event in the merged calendar');
   const served = await request('/api/events/ics?id=' + encodeURIComponent(event.id), null, '', {}, 'GET');
   assert.equal(served.status, 200);
   assert.match(served.headers.get('content-type'), /text\/calendar/);
-  assert.match(served.headers.get('content-disposition'), /inline/);
+  assert.match(served.headers.get('content-disposition'), /attachment/);
   const body = await served.text();
   assert.match(body, /BEGIN:VCALENDAR/);
   assert.match(body, new RegExp('UID:' + event.id));
@@ -209,25 +245,39 @@ test('server-rendered event pages expose Event structured data and 404 cleanly',
   assert.ok(!(await gone.text()).includes('stack'));
 });
 
-test('topic landing pages render live matches and unknown topics 404', async () => {
+test('topic landing pages and directory render live matches and unknown topics 404', async () => {
+  const dir = await request('/topics', null, '', {}, 'GET');
+  assert.equal(dir.status, 200);
+  const $dir = parseHTML(await dir.text());
+  assert.equal($dir('link[rel="canonical"]').attr('href'), 'https://byucalendar.com/topics');
+  for (const topic of TOPICS) assert.ok($dir(`a[href="/topics/${topic.slug}"]`).length > 0, topic.slug);
+  for (const page of SEARCH_PAGES) assert.ok($dir(`a[href="${page.href}"]`).length > 0, page.href);
+
   const topic = await request('/topics/free-food', null, '', {}, 'GET');
   assert.equal(topic.status, 200);
   const html = await topic.text();
   assert.match(html, /Food provided/i);
   assert.match(html, /href="\/topics\//);
+  assert.match(html, /href="\/topics"/);
+  assert.match(html, /"@type":"BreadcrumbList"/);
   assert.match(html, /Browse these in the live calendar/);
   assert.equal((await request('/topics/definitely-not-a-topic', null, '', {}, 'GET')).status, 404);
 });
 
-test('the sitemap advertises core, topic, and event URLs', async () => {
+test('the sitemap advertises core, topic, and event URLs and robots allows /api/events', async () => {
   const sitemap = await request('/sitemap.xml', null, '', {}, 'GET');
   assert.equal(sitemap.status, 200);
   const xml = await sitemap.text();
   assert.match(xml, /<urlset/);
   assert.match(xml, /https:\/\/byucalendar\.com\/<\/loc>/);
+  assert.match(xml, /https:\/\/byucalendar\.com\/topics<\/loc>/);
   assert.match(xml, /\/topics\/free-food<\/loc>/);
   assert.match(xml, /\/events\/[a-z0-9-]+<\/loc>/);
   assert.doesNotMatch(xml, /\/signin|\/moderation|\/api\//);
+
+  const robots = await (await request('/robots.txt', null, '', {}, 'GET')).text();
+  assert.match(robots, /Allow:\s*\/api\/events/);
+  assert.match(robots, /Disallow:\s*\/api\//);
 });
 
 test('the built Worker resets passwords through emailed codes and revokes old sessions', async () => {
@@ -307,6 +357,11 @@ test('the built Worker lets authors update and delete only their own listings', 
   const createdBody = await created.json();
   assert.equal(created.status, 201, JSON.stringify(createdBody));
   const id = createdBody.event.id;
+  // The first-publication flag drives the author's prompt to Your listings.
+  assert.equal(createdBody.first, true, 'a member with no prior listings publishes their first');
+  const secondDay = new Date(Date.now() + 5 * 86400000).toISOString().slice(0, 10);
+  const second = await (await request('/api/listings', {...input, submissionId: crypto.randomUUID(), title: 'A second gathering', start: secondDay + 'T18:00'}, authorCookie)).json();
+  assert.equal(second.first, false, 'the second publication is not a first');
 
   assert.equal((await request('/api/listings/mine', null, '', {}, 'GET')).status, 401);
   const mine = await (await request('/api/listings/mine', null, authorCookie, {}, 'GET')).json();
@@ -622,19 +677,19 @@ test('the campus game entry serves a separate grounded model while the ordinary 
   assert.match(css,/\.race-result\b/);
   assert.match(css,/\.campus-journal-filters\b/, 'the filtered campus journal ships in the production stylesheet');
   assert.doesNotMatch(html,/game\/play\.css/, 'race styles ship in the same hashed production stylesheet');
-  const model = await request('/campus/campus_web.glb?v=20261015', null, '', {}, 'GET');
+  const model = await request('/campus/campus_web.glb?v=20261116mapui1', null, '', {}, 'GET');
   assert.equal(model.status, 200);
   const ordinaryBytes = new Uint8Array(await model.arrayBuffer());
   const signature = ordinaryBytes.slice(0, 4);
   assert.deepEqual([...signature], [0x67, 0x6c, 0x54, 0x46], 'shared campus model remains a GLB asset');
-  assert.equal(ordinaryBytes.length,4_614_272);
-  const gameModel=await request('/explorer/campus/campus_web.glb?v=20261102buildings2',null,'',{},'GET');
+  assert.equal(ordinaryBytes.length,9_008_560);
+  const gameModel=await request('/explorer/campus/campus_web.glb?v=20261116mapui1',null,'',{},'GET');
   assert.equal(gameModel.status,200);
   const gameBytes=new Uint8Array(await gameModel.arrayBuffer());
-  assert.equal(gameBytes.length,8_788_124);
+  assert.equal(gameBytes.length,9_008_560);
   const navigation=JSON.parse(readFileSync('public'+NAVIGATION_URL,'utf8'));
   assert.equal(createHash('sha256').update(gameBytes).digest('hex'),navigation.modelSha256);
-  const gameCatalog=await request('/explorer/campus/coordinates.json?v=20261102buildings2',null,'',{},'GET');
+  const gameCatalog=await request('/explorer/campus/coordinates.json?v=20261116mapui1',null,'',{},'GET');
   assert.equal(gameCatalog.status,200);
   const deliveredCatalog=await gameCatalog.json();
   assert.deepEqual(deliveredCatalog,JSON.parse(readFileSync('public/explorer/campus/coordinates.json','utf8')),'the built game must serve its matching current catalog');
@@ -739,4 +794,136 @@ test('saving events builds RSVP lists with avatar profiles and privacy rules', a
   assert.equal((await request('/api/preferences', {saved: [], views: []}, cookieB, {}, 'PUT')).status, 200);
   assert.equal((await (await request('/api/events/rsvp?id=' + encodeURIComponent(target.id), null, cookieB, {}, 'GET')).json()).count, 0);
   assert.equal((await (await request('/api/events/rsvp?id=no-such-event', null, '', {}, 'GET')).json()).count, 0);
+});
+
+
+test('search-facing event facts agree with visible TBA and venue information', async () => {
+  const calendar = await (await request('/api/events', null, '', {}, 'GET')).json();
+  const tba = calendar.events.find(e => e.timeTba);
+  const away = calendar.events.find(e => e.sourceId === 'byucougars' && /Boulder|Rome, GA|Los Angeles/.test(e.location));
+  const unknown = calendar.events.find(e => !e.location && e.format !== 'Online');
+  assert.ok(tba && away && unknown, 'seed includes uncertain and away-event fixtures');
+  for (const [kind,event] of [['tba',tba],['away',away],['unknown',unknown]]) {
+    const response = await request('/events/' + encodeURIComponent(event.id), null, '', {}, 'GET');
+    assert.equal(response.status, 200);
+    const $ = parseHTML(await response.text());
+    const json = $('script[type="application/ld+json"]').map((i,node) => JSON.parse($(node).text())).get().find(node => node['@type'] === 'Event');
+    assert.ok(json);
+    if (kind === 'tba') {
+      assert.match(json.startDate, /^\d{4}-\d{2}-\d{2}$/);
+      assert.equal($('dt').filter((i,node) => $(node).text() === 'Time').next('dd').text(), 'TBA');
+      assert.ok(!json.endDate || /^\d{4}-\d{2}-\d{2}$/.test(json.endDate));
+    }
+    if (kind === 'away') assert.equal(json.location.address, undefined);
+    if (kind === 'unknown') assert.equal(json.location, undefined);
+    assert.deepEqual($('.site-footer a').map((i,node) => $(node).text()).get(), ['Privacy','About us']);
+  }
+});
+
+test('curated date searches render actual event links with individual canonical URLs', async () => {
+  const calendar = await (await request('/api/events', null, '', {}, 'GET')).json();
+  for (const page of SEARCH_PAGES) {
+    const expected = searchPageEvents(calendar.events, page);
+    const response = await request(page.href, null, '', {}, 'GET');
+    assert.equal(response.status, 200);
+    const $ = parseHTML(await response.text());
+    assert.equal($('.planning-summary h1').text(), page.title);
+    assert.equal($('link[rel="canonical"]').attr('href'), 'https://byucalendar.com' + page.href);
+    assert.equal($('.event-row-main a[href^="/events/"]').length, Math.min(expected.length,40));
+    const window=searchPageWindow(page);
+    for(const day of $('.agenda-group').map((i,node)=>$(node).attr('data-date')).get())assert.ok(day>=window.start&&day<=window.end,day);
+    for (const event of expected.slice(0,3)) assert.ok($('.event-row-main a[href="/events/' + encodeURIComponent(event.id) + '"]').length, event.id);
+    assert.ok(!$('.empty-state').text().includes('Loading events'));
+    assert.deepEqual($('.site-footer a').map((i,node) => $(node).text()).get(), ['Privacy','About us']);
+  }
+  const other = parseHTML(await (await request('/?q=pizza+this+weekend', null, '', {}, 'GET')).text());
+  assert.equal(other('.planning-summary').length, 0);
+  assert.equal(other('link[rel="canonical"]').attr('href'), 'https://byucalendar.com');
+
+  const home = parseHTML(await (await request('/', null, '', {}, 'GET')).text());
+  assert.equal(home('main.workspace h1').length, 1);
+  assert.ok(home('.event-row-main a[href^="/events/"]').length > 0, 'homepage renders initial event links on SSR');
+  assert.ok(!home('.empty-state').text().includes('Loading events'));
+  assert.ok(!home('.below-footer').text().startsWith('0 connected'), 'homepage SSR includes connected calendar count');
+  assert.ok(home('.below-browse a[href="/topics"]').length === 1);
+  for (const page of SEARCH_PAGES) assert.ok(home(`.below-browse a[href="${page.href}"]`).length === 1, page.href);
+  assert.deepEqual(home('.site-footer a').map((i,node) => home(node).text()).get(), ['Privacy','About us']);
+
+  const today = dayKey(new Date());
+  const pastEvent = calendar.events.find(e => lastDay(e) < today);
+  if (pastEvent) {
+    const pastHtml = parseHTML(await (await request('/events/' + encodeURIComponent(pastEvent.id), null, '', {}, 'GET')).text());
+    assert.match(pastHtml('meta[name="robots"]').attr('content') || '', /noindex/i);
+  }
+  const taggedUpcoming = calendar.events.find(e => !e.cancelled && lastDay(e) >= today && e.tags.includes('Food provided'));
+  if (taggedUpcoming) {
+    const taggedHtml = parseHTML(await (await request('/events/' + encodeURIComponent(taggedUpcoming.id), null, '', {}, 'GET')).text());
+    assert.ok(taggedHtml('.event-page-tags a[href="/topics/free-food"]').length > 0);
+  }
+});
+
+test('About us credits the team and links their portfolios', async () => {
+  const response = await request('/about', null, '', {}, 'GET');
+  assert.equal(response.status, 200);
+  const $ = parseHTML(await response.text());
+  for (const name of ['Tanner Abbott','Jarin Canar','Austin Pence']) assert.ok($('main').text().includes(name));
+  assert.ok($('a[href="https://jarin.dev"]').text().includes('Jarin Canar'));
+  assert.ok($('a[href="https://tannerabbott.com"]').text().includes('Tanner Abbott'));
+  assert.ok($('a[href="https://austin-pence.github.io"]').text().includes('Austin Pence'));
+  assert.equal($('link[rel="canonical"]').attr('href'), 'https://byucalendar.com/about');
+  const sitemap = await (await request('/sitemap.xml', null, '', {}, 'GET')).text();
+  assert.ok(sitemap.includes('https://byucalendar.com/about'));
+  for (const page of SEARCH_PAGES) assert.ok(sitemap.includes('https://byucalendar.com' + page.href));
+});
+
+test('POST /api/profile works, preferences keep newest 400 notes up to 240 location chars, staff approval invalidates cache, and account deletion cleans up', async () => {
+  const email = 'delete-cleanup@byu.edu';
+  const cookie = await login(email);
+  const tiny = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
+  assert.equal((await request('/api/profile', {avatar: tiny, hidden: false}, cookie, {}, 'POST')).status, 200);
+
+  const day = new Date(Date.now() + 6 * 86400000).toISOString().slice(0, 10);
+  const created = await request('/api/listings', {
+    submissionId: crypto.randomUUID(), title: 'Faculty office seminar', organizer: 'CS Faculty',
+    description: 'Open discussion on distributed systems and research projects.',
+    category: 'Academic', location: 'TMCB 1170', url: 'https://cs.byu.edu/',
+    allDay: false, start: day + 'T16:00', end: day + 'T17:00',
+  }, cookie);
+  assert.equal(created.status, 201);
+  const listingId = (await created.json()).event.id;
+  assert.equal((await (await request('/api/events', null, '', {}, 'GET')).json()).events.find(e => e.id === listingId).byuOfficial, undefined);
+
+  // Auto-verify faculty member AFTER publishing & warming /api/events cache; cache must invalidate immediately.
+  const facultyCookie = await login('mike@byu.edu');
+  const facCreated = await request('/api/listings', {
+    submissionId: crypto.randomUUID(), title: 'CS Systems Colloquium', organizer: 'BYU CS',
+    description: 'Weekly research colloquium with faculty speakers and students.',
+    category: 'Academic', location: 'TMCB 1170', url: 'https://cs.byu.edu/',
+    allDay: false, start: day + 'T15:00', end: day + 'T16:00',
+  }, facultyCookie);
+  const facId = (await facCreated.json()).event.id;
+  await request('/api/events', null, '', {}, 'GET'); // warm calendar cache
+  assert.equal((await request('/api/staff/request', {area: 'computer-science'}, facultyCookie)).status, 200);
+  assert.equal((await (await request('/api/events', null, '', {}, 'GET')).json()).events.find(e => e.id === facId).byuOfficial, true);
+
+  // Preferences retain newest 400 savedMeta entries and allow 240-char locations.
+  const savedMeta = {};
+  for (let i = 0; i < 405; i++) savedMeta['ev-' + i] = {title: 'Title ' + i, day, location: i === 404 ? 'L'.repeat(240) : 'WSC'};
+  assert.equal((await request('/api/preferences', {saved: [listingId, ...Object.keys(savedMeta)], views: [], savedMeta}, cookie, {}, 'PUT')).status, 200);
+  const prefs = await (await request('/api/preferences', null, cookie, {}, 'GET')).json();
+  assert.equal(prefs.savedMeta['ev-0'], undefined);
+  assert.equal(prefs.savedMeta['ev-404'].location.length, 240);
+
+  // Deleting account removes all owned/dependent records across profile, saves, staff, and auth tables.
+  await request('/api/staff/request', {area: 'law'}, cookie);
+  assert.equal((await request('/api/account/delete', {confirm: 'DELETE'}, cookie, {}, 'POST')).status, 200);
+  const rowCounts = await Promise.all([
+    db.prepare('SELECT COUNT(*) c FROM community_listings WHERE id=?').bind(listingId).first(),
+    db.prepare('SELECT COUNT(*) c FROM event_saves WHERE event_id=?').bind(listingId).first(),
+    db.prepare('SELECT COUNT(*) c FROM public_profiles WHERE user_id NOT IN (SELECT id FROM auth_user)').first(),
+    db.prepare('SELECT COUNT(*) c FROM staff_accounts WHERE user_id NOT IN (SELECT id FROM auth_user)').first(),
+    db.prepare('SELECT COUNT(*) c FROM auth_user WHERE email=?').bind(email).first(),
+  ]);
+  for (const row of rowCounts) assert.equal(row.c, 0);
+  assert.equal((await (await request('/api/events', null, '', {}, 'GET')).json()).events.find(e => e.id === listingId), undefined);
 });

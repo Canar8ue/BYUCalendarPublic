@@ -1,4 +1,4 @@
-import {UNIT, LOCATIONS, CAT_TRAIL} from './content.mjs?v=20261102polish6';
+import {UNIT, LOCATIONS, CAT_TRAIL} from './content.mjs?v=20261105rider6';
 
 // Entirely authored game scenes: fictional students, supplies and promotions.
 // Outdoor anchors reuse reviewed arrivals; this is not a present-day events guide.

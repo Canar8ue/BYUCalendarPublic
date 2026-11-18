@@ -45,7 +45,7 @@ function save(cv,name){writeFileSync(join(outDir,name),encodePNG(cv));console.lo
 // --- artwork ----------------------------------------------------------------
 // Brand mark (September 15, 2026): the standalone "Big Y" — hollow outline in the
 // header, solid blue fill for favicon/icons. The committed hi-fi icons in public/
-// are rendered from the project's vector-master logo sources (real Archivo/Roboto
+// are rendered from the vector masters in logos/source/ (real Archivo/Roboto
 // glyphs, antialiased); this script is the dependency-free fallback that
 // reproduces the icon design with hard-edged polygon fills. The OG uses its SVG.
 const Y_POLY=[[310.4,422.34],[203.54,422.34],[203.54,293.23],[71.52,89.65],[194.35,89.65],[258.18,200.39],[260.11,200.39],[323.94,89.65],[440.48,89.65],[310.4,293.23]];

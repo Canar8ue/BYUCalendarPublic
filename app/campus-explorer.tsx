@@ -7,7 +7,7 @@ import BrandY from './brand-y';
 import styles from './campus-explorer.module.css';
 
 const CHANNEL = 'byu-campus-explorer';
-const GAME_URL = '/explorer/index.html?v=20261102polish6';
+const GAME_URL = '/explorer/index.html?v=20261114bugs1';
 type Status = 'idle' | 'loading' | 'ready' | 'error';
 
 export default function CampusExplorer({missing = false}: {missing?: boolean}) {
@@ -105,28 +105,56 @@ export default function CampusExplorer({missing = false}: {missing?: boolean}) {
       <section className={styles.intro} aria-labelledby="explorer-title">
         <h1 id="explorer-title">{missing ? 'Page not found' : 'Lost on Campus'}</h1>
         {missing && <h2 className={styles.gameTitle}>Lost on Campus</h2>}
+        <p className={styles.skateIntro}>Skate campus, find a line, or drop into the downhill run.</p>
         <div className={styles.actions}>
           <button ref={play} onClick={start} className={styles.play}><Play size={17} fill="currentColor" aria-hidden="true"/> Play</button>
+          {missing && <Link href="/demo" className={styles.demoLink}>Demo the app</Link>}
         </div>
         <noscript><p className={styles.notice}>Enable JavaScript to play.</p></noscript>
       </section>
 
-      <div className={styles.poster} aria-hidden="true">
-        <div className={styles.scene} aria-hidden="true">
-          <div className={styles.sun}/><div className={styles.cloudOne}/><div className={styles.cloudTwo}/>
-          <div className={styles.mountainFar}/><div className={styles.mountainNear}/><span className={styles.mountainY}>Y</span>
-          <div className={styles.hills}/>
-          <div className={styles.campus}>
-            <div className={styles.library}><i/><span/><b/></div>
-            <div className={styles.tower}><i/><span/></div>
-            <div className={styles.hall}><i/><span/></div>
-            <div className={styles.bell}><i/><span/><b/></div>
+      {missing ? (
+        <div className={styles.posterPair}>
+          <div className={styles.poster} aria-hidden="true">
+            <div className={styles.scene} aria-hidden="true">
+              <div className={styles.sun}/><div className={styles.cloudOne}/><div className={styles.cloudTwo}/>
+              <div className={styles.mountainFar}/><div className={styles.mountainNear}/><span className={styles.mountainY}>Y</span>
+              <div className={styles.hills}/>
+              <div className={styles.campus}>
+                <div className={styles.library}><i/><span/><b/></div>
+                <div className={styles.tower}><i/><span/></div>
+                <div className={styles.hall}><i/><span/></div>
+                <div className={styles.bell}><i/><span/><b/></div>
+              </div>
+              <div className={styles.ground}/><div className={styles.path}/>
+              <div className={styles.treeOne}><i/></div><div className={styles.treeTwo}><i/></div>
+              <div className={styles.skateboard}><i/><b/><span/></div>
+            </div>
+            <span className={styles.posterTag}>Lost on Campus</span>
           </div>
-          <div className={styles.ground}/><div className={styles.path}/>
-          <div className={styles.treeOne}><i/></div><div className={styles.treeTwo}><i/></div>
-          <div className={styles.scooter}><i/><b/><span/></div>
+          <Link href="/demo" className={styles.demoPoster}>
+            <img src="/demo-deck/assets/shot-day.png" alt="BYU Calendar app preview"/>
+            <span className={styles.demoBadge}>Demo the app</span>
+          </Link>
         </div>
-      </div>
+      ) : (
+        <div className={styles.poster} aria-hidden="true">
+          <div className={styles.scene} aria-hidden="true">
+            <div className={styles.sun}/><div className={styles.cloudOne}/><div className={styles.cloudTwo}/>
+            <div className={styles.mountainFar}/><div className={styles.mountainNear}/><span className={styles.mountainY}>Y</span>
+            <div className={styles.hills}/>
+            <div className={styles.campus}>
+              <div className={styles.library}><i/><span/><b/></div>
+              <div className={styles.tower}><i/><span/></div>
+              <div className={styles.hall}><i/><span/></div>
+              <div className={styles.bell}><i/><span/><b/></div>
+            </div>
+            <div className={styles.ground}/><div className={styles.path}/>
+            <div className={styles.treeOne}><i/></div><div className={styles.treeTwo}><i/></div>
+            <div className={styles.skateboard}><i/><b/><span/></div>
+          </div>
+        </div>
+      )}
       </div>
 
     </> : <section ref={stage} className={styles.stage} aria-label="Campus adventure">

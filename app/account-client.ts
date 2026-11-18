@@ -27,7 +27,7 @@ export async function postJSON<T = Record<string, unknown>>(url: string, body: u
   try {
     const response = await fetch(url, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body), signal: timeoutSignal(timeoutMs)});
     const data = await readJSON<{error?: string | {message?: string}; message?: string}>(response);
-    if (!response.ok) throw new Error(typeof data.error === 'string' ? data.error : data.error?.message || data.message || 'Your request could not be completed.');
+    if (!response.ok) throw new Error(typeof data?.error === 'string' ? data.error : data?.error?.message || data?.message || 'Your request could not be completed.');
     return data as T;
   } catch (err) {
     if (isAbort(err)) throw new Error('This is taking longer than usual. It may still complete — check in a moment before retrying.');
@@ -36,10 +36,15 @@ export async function postJSON<T = Record<string, unknown>>(url: string, body: u
 }
 
 export async function getJSON<T>(url: string, timeoutMs = 0): Promise<T> {
-  const response = await fetch(url, {cache: 'no-store', signal: timeoutSignal(timeoutMs)});
-  const data = await readJSON<T & {error?: string}>(response);
-  if (!response.ok) throw new Error(typeof data.error === 'string' ? data.error : 'The calendar is briefly unavailable. Try again in a moment.');
-  return data;
+  try {
+    const response = await fetch(url, {cache: 'no-store', signal: timeoutSignal(timeoutMs)});
+    const data = await readJSON<T & {error?: string}>(response);
+    if (!response.ok) throw new Error(typeof data?.error === 'string' ? data.error : 'The calendar is briefly unavailable. Try again in a moment.');
+    return data;
+  } catch (error) {
+    if (isAbort(error)) throw new Error('Loading is taking longer than usual. Check your connection and try again.');
+    throw error;
+  }
 }
 
 export function useAccount() {
@@ -47,15 +52,12 @@ export function useAccount() {
   const [error, setError] = useState('');
   const reload = useCallback(async () => {
     try {
-      const response = await fetch('/api/account', {cache: 'no-store'});
-      if (!response.ok) throw new Error('Account information is temporarily unavailable.');
-      setAccount(await response.json()); setError('');
+      setAccount(await getJSON<AccountState>('/api/account', 15000)); setError('');
     } catch (err) { setError(err instanceof Error ? err.message : 'Could not load your account.'); }
   }, []);
   useEffect(() => {
     let active = true;
-    fetch('/api/account', {cache: 'no-store'})
-      .then(async response => { if (!response.ok) throw new Error('Account information is temporarily unavailable.'); return response.json() as Promise<AccountState>; })
+    getJSON<AccountState>('/api/account', 15000)
       .then(data => { if (active) { setAccount(data); setError(''); } })
       .catch(() => { if (active) setError('Account information is temporarily unavailable.'); });
     return () => { active = false; };

@@ -1,4 +1,4 @@
-import {hikeCheckpoints, hikeStatus, hikeObjectives, calebConversation, buildHikeActivities} from './hike-state.mjs?v=20261102polish6';
+import {hikeCheckpoints, hikeStatus, hikeObjectives, calebConversation, buildHikeActivities} from './hike-state.mjs?v=20261105rider6';
 
 let serial = 0;
 
@@ -83,7 +83,7 @@ export function createHikeUI({getState = () => ({}), getRoute = () => null, getA
   function openTrailhead({atTrailhead = true} = {}) {
     const state = getState(), route = getRoute();
     if (!open('trailhead',atTrailhead ? 'Y Trailhead' : 'Y Trail')) return;
-    describe(atTrailhead ? 'Leave your scooter at the trailhead.' : 'Use assisted travel to reach the trailhead.');
+    describe(atTrailhead ? 'Leave your skateboard at the trailhead.' : 'Use assisted travel to reach the trailhead.');
     quote(calebConversation(state,hikeCheckpoints(route)[0]?.id,route));
     addMap(route,state);
     const list = choices();

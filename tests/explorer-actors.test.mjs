@@ -9,7 +9,8 @@ const UNIT = .044571444392204285;
 async function actorModule() {
   const three = new URL('../public/campus/vendor/three.module.js', import.meta.url).href;
   const text = (await readFile(new URL('../public/explorer/game/actors.mjs', import.meta.url), 'utf8'))
-    .replace("'/campus/vendor/three.module.js'", JSON.stringify(three));
+    .replace("'/campus/vendor/three.module.js'", JSON.stringify(three))
+    .replace(/from '(\.\/[^']+)'/g, (_, path) => 'from ' + JSON.stringify(new URL(path, new URL('../public/explorer/game/actors.mjs', import.meta.url)).href));
   return import('data:text/javascript;base64,' + Buffer.from(text).toString('base64'));
 }
 
@@ -19,7 +20,7 @@ test('procedural actors use campus scale, preserve foot transforms, and release 
   try {
     const factories = await actorModule();
     const scene = new THREE.Scene();
-    for (const name of ['createPlayer', 'createScooter', 'createCat', 'createCosmo', 'createCar', 'createMarker', 'createBench']) {
+    for (const name of ['createPlayer', 'createCat', 'createCosmo', 'createCar', 'createMarker', 'createBench']) {
       const actor = factories[name](scene);
       assert.equal(actor.group.parent, scene, name);
       assert.deepEqual(actor.group.scale.toArray(), [UNIT, UNIT, UNIT]);
@@ -49,6 +50,29 @@ test('procedural actors use campus scale, preserve foot transforms, and release 
   } finally {
     if (document === undefined) delete globalThis.document; else globalThis.document = document;
   }
+});
+
+test('the live rider uses the bail character\'s block silhouette while keeping articulated contacts and a face', async () => {
+  const {createPlayer} = await actorModule(), player = createPlayer(new THREE.Scene());
+  try {
+    for (const name of ['Explorer pelvis block', 'Explorer jacket block', ...['Left', 'Right'].flatMap(side =>
+      ['thigh block', 'shin block', 'upper arm block', 'forearm block', 'hand block', 'shoe block'].map(part => `${side} ${part}`))]) {
+      const block = player.group.getObjectByName(name);
+      assert.ok(block, name);
+      assert.equal(block.geometry.type, 'BoxGeometry', name + ' has planar block faces');
+    }
+    const jacket = player.group.getObjectByName('Explorer jacket block');
+    assert.deepEqual([jacket.geometry.parameters.width, jacket.geometry.parameters.height, jacket.geometry.parameters.depth], [.43, .45, .29], 'live torso retains the rigid-body character proportions');
+    assert.ok(player.group.getObjectByName('Left eye'));
+    assert.ok(player.group.getObjectByName('Right eye'));
+    for (const side of ['Left', 'Right']) {
+      const sole = player.group.getObjectByName(`${side} shoe sole`);
+      sole.geometry.computeBoundingBox();
+      assert.ok(Math.abs(sole.position.y + sole.geometry.boundingBox.min.y + .13) < 1e-8, 'block shoe sole meets the existing contact target');
+      assert.equal(player.group.getObjectByName(`${side} knee`).position.y, -.40);
+      assert.equal(player.group.getObjectByName(`${side} ankle`).position.y, -.38);
+    }
+  } finally {player.dispose();}
 });
 
 function fakeAudio() {
@@ -152,7 +176,7 @@ test('level cosmetics recolor existing materials and airborne actors hide their 
   const actors = [];
   try {
     const factories = await actorModule(), scene = new THREE.Scene();
-    for (const name of ['createPlayer', 'createScooter']) {
+    for (const name of ['createPlayer']) {
       const actor = factories[name](scene); actors.push(actor);
       const before = new Set(); actor.group.traverse(object => {if (object.material) before.add(object.material);});
       const colors = [];
@@ -160,7 +184,7 @@ test('level cosmetics recolor existing materials and airborne actors hide their 
         actor.setStyle({level});
         const after = new Set(); actor.group.traverse(object => {if (object.material) after.add(object.material);});
         assert.deepEqual(after, before, 'cosmetics must reuse materials without allocations');
-        const name = actor.group.name === 'Student explorer' ? 'Explorer jacket' : 'Scooter deck';
+        const name = 'Explorer jacket';
         colors.push([...after].find(material => material.name === name).color.getHex());
       }
       assert.notEqual(colors[0], colors[1]); assert.notEqual(colors[1], colors[2]);
@@ -207,7 +231,7 @@ test('the articulated student bends knees and elbows, blends movement, and keeps
   } finally {player.dispose();}
 });
 
-test('jumping, descending, landing and scooter controls have distinct recoverable body poses', async () => {
+test('jumping, descending and landing have distinct recoverable body poses', async () => {
   const {createPlayer} = await actorModule(), player = createPlayer(new THREE.Scene());
   try {
     for (let i = 0; i < 30; i++) player.update(1 / 60, {grounded: false, verticalSpeed: 4});
@@ -218,11 +242,6 @@ test('jumping, descending, landing and scooter controls have distinct recoverabl
     assert.ok(risingKnee - player.group.getObjectByName('Left knee').rotation.x > .3);
     for (let i = 0; i < 30; i++) player.update(1 / 60, {grounded: true, landing: 1});
     assert.ok(player.group.getObjectByName('Right knee').rotation.x > .6, 'landing absorbs the impact with the knees');
-    for (let i = 0; i < 30; i++) player.update(1 / 60, {riding: true, speed: 6, turn: 1, braking: true});
-    assert.equal(player.group.userData.animationState, 'brake');
-    assert.ok(player.group.getObjectByName('Explorer pelvis').rotation.z < -.1, 'the rider leans into steering');
-    assert.ok(player.group.getObjectByName('Explorer torso').rotation.x < -.06, 'braking shifts the rider back');
-    assert.ok(player.group.getObjectByName('Left shoulder').rotation.x < -.4, 'rider arms reach toward the handlebar');
     for (let i = 0; i < 120; i++) player.update(1 / 60, {});
     assert.ok(Math.abs(player.group.getObjectByName('Explorer pelvis').rotation.z) < .001);
     assert.ok(Math.abs(player.group.getObjectByName('Explorer torso').rotation.x) < .001);
@@ -306,26 +325,7 @@ test('obstruction falls recoil away from impact and keep the leading silhouette 
   } finally {player.dispose();}
 });
 
-test('scooter steering, brake lamp and recoverable tip preserve heading and terrain roll', async () => {
-  const {createScooter} = await actorModule(), scooter = createScooter(new THREE.Scene());
-  try {
-    scooter.group.position.set(2, 1, 3); scooter.group.rotation.y = -.4;
-    for (let frame = 0; frame < 30; frame++) scooter.update(1 / 60, {speed: 5, turn: 1, braking: true, groundRoll: .12});
-    assert.equal(scooter.group.rotation.z, .12); assert.equal(scooter.group.rotation.y, -.4);
-    assert.deepEqual(scooter.group.position.toArray(), [2, 1, 3]);
-    assert.ok(scooter.group.getObjectByName('Scooter steering').rotation.y > .3);
-    const brake = scooter.group.getObjectByName('Scooter frame').children.find(object => object.material?.name === 'Scooter brake light').material;
-    assert.ok(brake.emissiveIntensity > 1);
-    scooter.update(1 / 60, {groundRoll: .12, stumble: {kind: 'crash', phase: .4, direction: -1}});
-    assert.ok(scooter.group.getObjectByName('Scooter frame').rotation.z < -1.2, 'scooter tips with the crash');
-    for (let frame = 0; frame < 150; frame++) scooter.update(1 / 60, {groundRoll: .12});
-    assert.equal(scooter.group.rotation.z, .12);
-    assert.ok(Math.abs(scooter.group.getObjectByName('Scooter frame').rotation.z) < .001);
-    assert.ok(Math.abs(scooter.group.getObjectByName('Scooter frame').position.y) < .001);
-    assert.ok(Math.abs(scooter.group.getObjectByName('Scooter steering').rotation.y) < .001);
-    assert.equal(brake.emissiveIntensity, .3);
-  } finally {scooter.dispose();}
-});
+
 
 test('the music puzzle plays three distinct ordered tones and respects mute', async () => {
   const fake = fakeAudio(), audio = createAudio();

@@ -19,17 +19,18 @@ current trail conditions are not surveyed. Caleb, cleanup props, waypoint signs,
 scrub and rocks are original authored game art, not surveyed fixtures.
 
 Three.js 0.180.0: MIT, see [/campus/vendor/LICENSE-three.txt](/campus/vendor/LICENSE-three.txt).
+Cannon-es 0.20.0: MIT, see [/explorer/vendor/CANNON-LICENSE](/explorer/vendor/CANNON-LICENSE). Vendored locally; no physics CDN or runtime network dependency. Ragdolls use rigid bodies and cone-twist joints. Skateboard, skate yard, Summit descent and its scenery are original authored game assets; the courses are fictional and do not represent BYU facilities. Skating is an original arcade implementation inspired by skateboarding games, with no Skate 3 code, assets or branding.
 Meshoptimizer 0.24.0: MIT, see [/campus/vendor/LICENSE-meshoptimizer.txt](/campus/vendor/LICENSE-meshoptimizer.txt).
 
-Student, scooter, cat, stylized cougar mascot, car, bench, markers and props: original procedural geometry authored for this project. No downloaded character meshes or textures. Jersey lettering is locally rendered to canvas. BYU and Cosmo names and marks belong to their respective owners; this student project does not imply endorsement.
+Student, skateboard, cat, stylized cougar mascot, car, bench, markers and props: original procedural geometry authored for this project. No downloaded character meshes or textures. Jersey lettering is locally rendered to canvas. BYU and Cosmo names and marks belong to their respective owners; this student project does not imply endorsement.
 
-Music, sound design and fictional character voices: original recordings produced for this game. All 25 recordings are self-hosted; the game never contacts an external audio service or receives an API key. Track titles: *Taking the Long Way*, *A Good Place to Get Lost*, and *After the Last Class*. `audio/manifest.json` records the production inventory.
+Music, sound design and fictional character voices: original recordings produced for this game. All 23 recordings are self-hosted; the game never contacts an external audio service or receives an API key. Track titles: *Taking the Long Way*, *A Good Place to Get Lost*, and *After the Last Class*. `audio/manifest.json` records the production inventory.
 
 The opening and finale were shortened locally on November 2. The three-note puzzle, surface cues, brake and impact effects, and wordless conversation ambience use local Web Audio synthesis. A locally synthesized score plays if music recordings are unavailable. Every audio source passes through the game mixer and shared output dynamics.
 
 Interface, poster, garden dressing, miniature props, illustrated departure board, character cosmetics, photo frames and achievement/postcard art: original procedural geometry, locally drawn canvas, CSS, SVG and HTML. No game-side external font requests.
 
-Quest stories, objects, routes, characters and transportation rules are fictional gameplay; they do not establish real campus access, entrances, scooter permissions or event information.
+Quest stories, objects, routes, characters and transportation rules are fictional gameplay; they do not establish real campus access, entrances, skating permissions or event information.
 
 The November 2 JSB and Maeser repairs use BYU's official building footprints,
 dated 2021 USGS NAIP imagery and exterior photographs as local review references.

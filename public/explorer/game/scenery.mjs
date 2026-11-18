@@ -1,13 +1,10 @@
 import * as THREE from '/campus/vendor/three.module.js';
-import {UNIT,SPAWN,LOCATIONS,SECRETS} from './content.mjs?v=20261102polish6';
+import {UNIT,SPAWN,LOCATIONS,SECRETS} from './content.mjs?v=20261105rider6';
 
-const WALKER_MOTION_RANGE = 48 * UNIT;
-const WALKER_VISIBLE_RANGE = 150 * UNIT;
-
-// Small instanced additions give the human-height routes a sense of life. They
-// are fictional garden/game objects, independent of the shared campus model.
+// Fictional garden/game objects, independent of the shared campus model.
+// Named story characters are created by the activity runtimes, not scenery.
 export function createScenery(scene,world) {
-  const root=new THREE.Group();root.name='Explorer gardens and campus life';scene.add(root);
+  const root=new THREE.Group();root.name='Explorer gardens';scene.add(root);
   const geometries=new Set(),materials=new Set(),textures=new Set(),batches=[],lamps=[],sparks=[],birds=[];
   const material=(color,extra={})=>{const m=new THREE.MeshStandardMaterial({color,roughness:.88,...extra});materials.add(m);return m;};
   const mesh=(geo,mat,x,y,z,sx=1,sy=1,sz=1)=>{geometries.add(geo);const m=new THREE.Mesh(geo,mat);m.position.set(x,y,z);m.scale.set(sx,sy,sz);root.add(m);return m;};
@@ -60,65 +57,11 @@ export function createScenery(scene,world) {
     else if(secret.id==='wrong-way'){mesh(pole,metal,secret.x+.02,y+.6*UNIT,secret.z,1,1.2,1);const sign=mesh(box,flower,secret.x+.02,y+1.3*UNIT,secret.z,.8,.25,.06);sign.rotation.z=.18;}
     else if(i%3===0){const flag=mesh(new THREE.PlaneGeometry(.45*UNIT,.32*UNIT),paper,secret.x,y+.75*UNIT,secret.z);flag.material.side=THREE.DoubleSide;flag.rotation.z=.15;}
   }
-  // Ambient walkers have no quest state. Keep their last grounded pose when
-  // outside walking range, and leave empty or far-away instances out of draws.
-  const clothesColors=['#537f77','#b27357','#81719c','#687f9c'].map(color=>new THREE.Color(color));
-  const walkers=LOCATIONS.filter((_,i)=>i%3===0).map((p,i)=>{
-    const x=p.x+1.3*UNIT,z=p.z-1.2*UNIT;
-    return {x,y:world.groundHeight(x,z)??world.groundHeight(p.x,p.z)??1,z,angle:i*1.8,time:i,origin:p,color:clothesColors[i%clothesColors.length]};
-  });
-  const skin=material('#bd8c67'),clothes=material('#627d92'),pants=material('#344953');
-  const head=createBatch(sphere,skin,walkers.length),body=createBatch(box,clothes,walkers.length),legs=createBatch(box,pants,2*walkers.length);
-  const people=[head,body,legs];
-  for(const batch of people){
-    batch.name='Ambient walkers';
-    batch.frustumCulled=false;
-    batch.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-  }
-  function poseWalker(batch,index,w,side,height,step,sx,sy,sz){
-    dummy.position.set(w.x+side*UNIT,w.y+height*UNIT,w.z+step*UNIT);
-    dummy.rotation.y=w.angle;
-    dummy.scale.set(sx,sy,sz);
-    dummy.updateMatrix();
-    batch.setMatrixAt(index,dummy.matrix);
-  }
-  function updateWalkers(dt,player,reducedMotion){
-    const hasPlayer=Number.isFinite(player?.x)&&Number.isFinite(player?.z);
-    let count=0;
-    for(const w of walkers){
-      const range=hasPlayer?Math.hypot(w.x-player.x,w.z-player.z):0;
-      if(range>WALKER_VISIBLE_RANGE)continue;
-      const walking=range<WALKER_MOTION_RANGE;
-      if(walking&&dt>0){
-        w.time+=dt;
-        if(Math.hypot(w.x-w.origin.x,w.z-w.origin.z)>2.4*UNIT)w.angle+=Math.PI*.85;
-        const p=world.move(w,{x:Math.sin(w.angle)*.65*UNIT*dt,z:Math.cos(w.angle)*.65*UNIT*dt},.3*UNIT);
-        if(Math.hypot(p.x-w.x,p.z-w.z)<.05*UNIT*dt)w.angle+=dt*3;
-        w.x=p.x;w.z=p.z;w.y=world.groundHeight(w.x,w.z)??w.y;
-      }
-      const step=walking&&!reducedMotion?Math.sin(w.time*5)*.09:0;
-      poseWalker(head,count,w,0,1.53,0,.18,.23,.18);
-      poseWalker(body,count,w,0,1.05,0,.42,.5,.26);
-      poseWalker(legs,2*count,w,-.12,.43,step,.13,.67,.15);
-      poseWalker(legs,2*count+1,w,.12,.43,-step,.13,.67,.15);
-      body.setColorAt(count,w.color);
-      count++;
-    }
-    head.count=body.count=count;
-    legs.count=2*count;
-    for(const batch of people){
-      batch.visible=count>0;
-      if(count)batch.instanceMatrix.needsUpdate=true;
-    }
-    if(count)body.instanceColor.needsUpdate=true;
-  }
-  updateWalkers(0,SPAWN,false);
   const points=new Float32Array(72*3);for(let i=0;i<72;i++){const p=LOCATIONS[i%LOCATIONS.length];points[i*3]=p.x+(Math.sin(i*37)*2)*UNIT;points[i*3+1]=(world.groundHeight(p.x,p.z)??1)+(.5+i%9*.12)*UNIT;points[i*3+2]=p.z+(Math.cos(i*19)*2)*UNIT;sparks.push([...points.slice(i*3,i*3+3)]);}
   const sparkGeo=new THREE.BufferGeometry();sparkGeo.setAttribute('position',new THREE.BufferAttribute(points,3));geometries.add(sparkGeo);const sparkMat=new THREE.PointsMaterial({color:'#ffe3a5',size:.055*UNIT,transparent:true,opacity:.55,depthWrite:false,sizeAttenuation:true});materials.add(sparkMat);const fireflies=new THREE.Points(sparkGeo,sparkMat);root.add(fireflies);
-  return {boardPoint,update(dt,time,{night=false,reducedMotion=false,player}={}){
+  return {boardPoint,update(_dt,time,{night=false,reducedMotion=false}={}){
     glass.emissiveIntensity=night?2:.2;fireflies.visible=night&&!reducedMotion;
     if(fireflies.visible){for(let i=0;i<sparks.length;i++)points[i*3+1]=sparks[i][1]+Math.sin(time*.8+i)*.16*UNIT;sparkGeo.attributes.position.needsUpdate=true;}
     for(const bird of birds)if(!reducedMotion){bird.mesh.position.y=bird.y+Math.sin(time+bird.x)*.12*UNIT;bird.mesh.rotation.z=Math.sin(time*.5)*.1;}
-    updateWalkers(dt,player,reducedMotion);
   },dispose(){for(const batch of batches)batch.dispose();for(const g of geometries)g.dispose();for(const m of materials)m.dispose();for(const t of textures)t.dispose();root.removeFromParent();}};
 }

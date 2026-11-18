@@ -1,11 +1,11 @@
 import * as THREE from '/campus/vendor/three.module.js';
+import {createSkatePose, SKATE_POSE} from './skate-pose.mjs?v=20261105rider6';
 
 // Original procedural game art. Model every object in meters, with a foot-level
 // origin, then apply the campus model's documented presentation scale once.
 const UNIT = 0.044571444392204285;
 const TAU = Math.PI * 2;
 const PLAYER_PALETTES = [['#336b9a', '#d4a556'], ['#326b64', '#e0b86a'], ['#574c8d', '#d6956c']];
-const SCOOTER_PALETTES = ['#275b9c', '#377e78', '#bd862e'];
 const cosmeticTier = level => Math.min(3, Math.max(1, Math.floor(Number(level) || 1)));
 const clamp = (value, low, high) => Math.max(low, Math.min(high, value));
 const mat = (color, options = {}) => new THREE.MeshStandardMaterial({color, roughness: .86, metalness: 0, ...options});
@@ -71,24 +71,21 @@ function humanArm(parent, x, sleeve, skin, length = .41) {
 // character or animation dependency. All animation remains below the foot anchor.
 function studentLeg(parent, x, pants, shoes, sole) {
   const side = x < 0 ? 'Left' : 'Right', hip = pivot(parent, [x, 0, 0]); hip.name = `${side} hip`;
-  add(hip, new THREE.CapsuleGeometry(.082, .24, 4, 10), pants, [0, -.20, 0]);
+  box(hip, pants, [.17, .40, .18], [0, -.20, 0]).name = `${side} thigh block`;
   const knee = pivot(hip, [0, -.40, 0]); knee.name = `${side} knee`;
-  sphere(knee, pants, [0, 0, 0], [.083, .083, .083]);
-  add(knee, new THREE.CapsuleGeometry(.068, .24, 4, 10), pants, [0, -.19, 0]);
+  box(knee, pants, [.15, .38, .17], [0, -.19, 0]).name = `${side} shin block`;
   const ankle = pivot(knee, [0, -.38, 0]); ankle.name = `${side} ankle`;
-  sphere(ankle, shoes, [0, -.055, .055], [.105, .075, .185]);
-  box(ankle, sole, [.19, .026, .31], [0, -.115, .067]);
-  for (const z of [.06, .105, .15]) bar(ankle, sole, [-.06, -.008, z], [.06, -.008, z], .006, 5);
+  box(ankle, shoes, [.18, .12, .31], [0, -.057, .067]).name = `${side} shoe block`;
+  box(ankle, sole, [.19, .026, .31], [0, -.117, .067]).name = `${side} shoe sole`;
+  for (const z of [.06, .105, .15]) box(ankle, sole, [.12, .008, .012], [0, .006, z]);
   return {hip, knee, ankle};
 }
 function studentArm(parent, x, sleeve, skin) {
   const side = x < 0 ? 'Left' : 'Right', shoulder = pivot(parent, [x, .425, 0]); shoulder.name = `${side} shoulder`;
-  sphere(shoulder, sleeve, [0, -.025, 0], [.088, .105, .09]);
-  add(shoulder, new THREE.CapsuleGeometry(.069, .16, 4, 10), sleeve, [0, -.145, 0]);
+  box(shoulder, sleeve, [.14, .30, .16], [0, -.145, 0]).name = `${side} upper arm block`;
   const elbow = pivot(shoulder, [0, -.29, 0]); elbow.name = `${side} elbow`;
-  add(elbow, new THREE.CapsuleGeometry(.058, .15, 4, 10), sleeve, [0, -.125, 0]);
-  sphere(elbow, skin, [0, -.275, .014], [.066, .085, .065]);
-  sphere(elbow, skin, [-Math.sign(x) * .046, -.262, .04], [.032, .047, .039]);
+  box(elbow, skin, [.12, .30, .13], [0, -.15, 0]).name = `${side} forearm block`;
+  box(elbow, skin, [.13, .08, .13], [0, -.29, .014]).name = `${side} hand block`;
   return {shoulder, elbow};
 }
 const ease = value => {const t = clamp(value, 0, 1); return t * t * (3 - 2 * t);};
@@ -106,11 +103,13 @@ export function createPlayer(scene) {
   const navy = mat('#18395c'), blue = mat('#336b9a'), skin = mat('#c98b63'), hair = mat('#3c2d29'), white = mat('#f5eee1'), sole = mat('#c5c7bc'), black = mat('#202931');
   blue.name = 'Explorer jacket';
   const leftLeg = studentLeg(body, -.115, navy, white, sole), rightLeg = studentLeg(body, .115, navy, white, sole);
-  sphere(body, navy, [0, .005, -.005], [.205, .12, .145]);
-  add(torso, new THREE.CapsuleGeometry(.195, .19, 5, 14), blue, [0, .245, 0], [1.08, 1, .77]);
+  // Use the same simple cuboid silhouette as the rigid-body bail character.
+  // Joint pivots and limb lengths stay independent of the surface geometry.
+  box(body, navy, [.34, .22, .25], [0, .005, -.005]).name = 'Explorer pelvis block';
+  box(torso, blue, [.43, .45, .29], [0, .245, 0]).name = 'Explorer jacket block';
   box(torso, white, [.135, .30, .014], [0, .27, .151]);
   box(torso, navy, [.016, .40, .018], [0, .235, .164]);
-  sphere(torso, blue, [0, .438, -.075], [.155, .082, .14]);
+  box(torso, blue, [.30, .07, .20], [0, .438, -.035]);
   for (const x of [-.075, .075]) {
     bar(torso, white, [x, .43, .15], [x, .285, .16], .007);
     box(torso, navy, [.10, .014, .013], [Math.sign(x) * .115, .155, .148]);
@@ -118,6 +117,7 @@ export function createPlayer(scene) {
   const leftArm = studentArm(torso, -.265, blue, skin), rightArm = studentArm(torso, .265, blue, skin);
   add(torso, new THREE.CylinderGeometry(.066, .073, .105, 10), skin, [0, .51, 0]);
   const head = pivot(torso, [0, .685, 0]); head.name = 'Explorer head';
+  const helmet = add(head, new THREE.SphereGeometry(.213, 14, 10, 0, TAU, 0, Math.PI * .56), mat('#18424c'), [0, .04, 0]); helmet.visible = false; helmet.scale.setScalar(0);
   sphere(head, skin, [0, 0, 0], [.18, .215, .175]);
   sphere(head, skin, [-.19, -.012, 0], [.043, .073, .038]); sphere(head, skin, [.19, -.012, 0], [.043, .073, .038]);
   add(head, new THREE.SphereGeometry(.193, 14, 9, 0, TAU, 0, Math.PI * .57), hair, [0, .043, -.013], [1, 1, .98]);
@@ -133,19 +133,138 @@ export function createPlayer(scene) {
   pack.material.name = 'Explorer backpack';
   box(pack, pack.material, [.255, .13, .032], [0, -.075, -.09]);
   bar(pack, navy, [-.105, -.015, -.11], [.105, -.015, -.11], .008);
-  sphere(torso, sole, [0, .425, -.20], [.13, .04, .09]);
+  box(torso, sole, [.26, .055, .12], [0, .425, -.20]);
   for (const x of [-.15, .15]) bar(torso, navy, [x, .43, -.02], [x, .05, .055], .021);
-  let time = 0, cycle = 0, motion = 0, runBlend = 0, rideBlend = 0;
+  // Bind physics to the live joints so clothing, face and accessories retain
+  // their original meshes and wardrobe materials throughout a crash.
+  const ragdollParts = [
+    {name:'pelvis', joint:body, center:[0,.005,-.005]},
+    {name:'torso', joint:torso, center:[0,.245,0], colliders:[pack]},
+    {name:'head', joint:head, center:[0,0,0], anchor:[0,-.17,0]},
+    ...[[leftLeg,'left'],[rightLeg,'right']].flatMap(([leg,side]) => [
+      {name:side+'-thigh', joint:leg.hip, center:[0,-.20,0]},
+      {name:side+'-shin', joint:leg.knee, center:[0,-.19,0], colliders:leg.ankle.children.filter(mesh=>mesh.name.endsWith('shoe block')||mesh.name.endsWith('shoe sole'))}
+    ]),
+    ...[[leftArm,'left'],[rightArm,'right']].flatMap(([arm,side]) => [
+      {name:side+'-upper-arm', joint:arm.shoulder, center:[0,-.145,0]},
+      {name:side+'-forearm', joint:arm.elbow, center:[0,-.15,0], colliders:arm.elbow.children.filter(mesh=>mesh.name.endsWith('hand block'))}
+    ])
+  ];
+  let activeRagdoll = null;
+  function ragdollPose() {
+    group.updateWorldMatrix(true,true);
+    const point=new THREE.Vector3(),rotation=new THREE.Quaternion(),scale=new THREE.Vector3(),size=new THREE.Vector3();
+    const poseOf=(object,center)=>{
+      object.getWorldQuaternion(rotation);
+      point.set(...center).applyMatrix4(object.matrixWorld).divideScalar(UNIT);
+      return {position:{x:point.x,y:point.y,z:point.z},quaternion:{x:rotation.x,y:rotation.y,z:rotation.z,w:rotation.w}};
+    };
+    return Object.fromEntries(ragdollParts.map(part=>{
+      const pose=poseOf(part.joint,part.center);
+      pose.anchor=poseOf(part.joint,part.anchor||[0,0,0]).position;
+      pose.colliders=(part.colliders||[]).map(mesh=>{
+        const bounds=mesh.geometry.boundingBox;
+        bounds.getCenter(point);
+        const collider=poseOf(mesh,point.toArray());
+        bounds.getSize(size);mesh.getWorldScale(scale).divideScalar(UNIT);
+        collider.size=size.multiply(scale).toArray();
+        return collider;
+      });
+      return [part.name,pose];
+    }));
+  }
+  function createRagdoll(ragdoll) {
+    activeRagdoll?.dispose();
+    group.updateWorldMatrix(true,true);
+    const rigidMatrix=new THREE.Matrix4(),localMatrix=new THREE.Matrix4(),targetMatrix=new THREE.Matrix4();
+    const position=new THREE.Vector3(),rotation=new THREE.Quaternion(),scale=new THREE.Vector3(1,1,1);
+    const matrixOf=rigidBody=>{
+      position.set(rigidBody.position.x*UNIT,rigidBody.position.y*UNIT,rigidBody.position.z*UNIT);
+      rotation.copy(rigidBody.quaternion);
+      return rigidMatrix.compose(position,rotation,scale);
+    };
+    const bindings=ragdollParts.map(part=>{
+      const rigidBody=ragdoll.parts.find(candidate=>candidate.name===part.name).body;
+      return {joint:part.joint,body:rigidBody,offset:matrixOf(rigidBody).clone().invert().multiply(part.joint.matrixWorld),
+        position:part.joint.position.clone(),rotation:part.joint.quaternion.clone(),scale:part.joint.scale.clone()};
+    });
+    const shadowVisible=shadow.visible;
+    shadow.visible=false;
+    let disposed=false;
+    const controller={update(){
+      if(disposed)return;
+      group.updateWorldMatrix(true,false);
+      // Parents precede their children, so every joint reaches its rigid body's
+      // world pose even as the camera-follow anchor moves during recovery.
+      for(const binding of bindings){
+        targetMatrix.multiplyMatrices(matrixOf(binding.body),binding.offset);
+        localMatrix.copy(binding.joint.parent.matrixWorld).invert().multiply(targetMatrix);
+        localMatrix.decompose(binding.joint.position,binding.joint.quaternion,binding.joint.scale);
+        binding.joint.updateWorldMatrix(false,false);
+      }
+      group.updateWorldMatrix(false,true);
+    },dispose(){
+      if(disposed)return;
+      disposed=true;
+      for(const binding of bindings){
+        binding.joint.position.copy(binding.position);binding.joint.quaternion.copy(binding.rotation);binding.joint.scale.copy(binding.scale);
+      }
+      shadow.visible=shadowVisible;
+      activeRagdoll=null;
+      group.updateWorldMatrix(true,true);
+    }};
+    activeRagdoll=controller;
+    return controller;
+  }
+  let time = 0, cycle = 0, motion = 0, runBlend = 0;
   const joints = [body, torso, head, ...[leftLeg, rightLeg].flatMap(leg => [leg.hip, leg.knee, leg.ankle]), ...[leftArm, rightArm].flatMap(arm => [arm.shoulder, arm.elbow])];
   const jointIndices = new Map(joints.map((joint, index) => [joint, index * 3])), targets = new Float64Array(joints.length * 3);
   const contactMeshes = [], shoeMeshes = [], contactBounds = new THREE.Box3(), contactMatrix = new THREE.Matrix4(), inverseAnchor = new THREE.Matrix4(), impactDirection = new THREE.Vector3();
   body.traverse(object => {if (object.isMesh) {object.geometry.computeBoundingBox(); contactMeshes.push(object);}});
   for (const leg of [leftLeg, rightLeg]) leg.ankle.traverse(object => {if (object.isMesh) shoeMeshes.push(object);});
   const approach = (object, property, value, alpha) => {object[property] += (value - object[property]) * alpha;};
-  return {group, setStyle({level = 1,jacket,backpack} = {}) {
+  const skatePose = createSkatePose();
+  const hipPoint = new THREE.Vector3(), anklePoint = new THREE.Vector3(), kneePoint = new THREE.Vector3(), legDirection = new THREE.Vector3(), bendDirection = new THREE.Vector3(), segmentDirection = new THREE.Vector3();
+  const bodyRotation = new THREE.Quaternion(), inverseBody = new THREE.Quaternion(), upperRotation = new THREE.Quaternion(), lowerRotation = new THREE.Quaternion(), inverseRotation = new THREE.Quaternion(), footRotation = new THREE.Quaternion();
+  const down = new THREE.Vector3(0, -1, 0), footEuler = new THREE.Euler(0, 0, 0, 'XZY'), soleOffset = new THREE.Vector3();
+  function keepLegReachable(leg, foot) {
+    footEuler.set(foot.pitch || 0, foot.yaw || 0, foot.roll || 0, 'XZY'); footRotation.setFromEuler(footEuler);
+    soleOffset.set(0, SKATE_POSE.soleHeight, -.067).applyQuaternion(footRotation);
+    anklePoint.set(foot.x, foot.y, foot.z).add(soleOffset);
+    hipPoint.copy(leg.hip.position).applyQuaternion(body.quaternion);
+    const dx = anklePoint.x - hipPoint.x - body.position.x, dz = anklePoint.z - hipPoint.z - body.position.z;
+    const verticalReach = Math.sqrt(Math.max(.0064, .775 ** 2 - dx * dx - dz * dz));
+    body.position.y = Math.min(body.position.y, anklePoint.y + verticalReach - hipPoint.y);
+  }
+  function solveSkateLeg(leg, foot) {
+    // Solve the two rigid limb lengths against a sole target after applying
+    // pelvis motion. Contact feet are never damped away from their support.
+    bodyRotation.copy(body.quaternion); inverseBody.copy(bodyRotation).invert();
+    hipPoint.copy(leg.hip.position).applyQuaternion(bodyRotation).add(body.position);
+    footEuler.set(foot.pitch || 0, foot.yaw || 0, foot.roll || 0, 'XZY'); footRotation.setFromEuler(footEuler);
+    soleOffset.set(0, SKATE_POSE.soleHeight, -.067).applyQuaternion(footRotation);
+    anklePoint.set(foot.x, foot.y, foot.z).add(soleOffset);
+    legDirection.copy(anklePoint).sub(hipPoint);
+    const length = clamp(legDirection.length(), .08, .7795); legDirection.normalize();
+    // The knee bends toward the student's chest, with enough abduction for
+    // the pushing foot beside the deck. No stretching of either limb.
+    bendDirection.set(0, 0, 1).applyQuaternion(bodyRotation);
+    bendDirection.addScaledVector(legDirection, -bendDirection.dot(legDirection)).normalize();
+    const along = (.40 * .40 - .38 * .38 + length * length) / (2 * length), bend = Math.sqrt(Math.max(0, .40 * .40 - along * along));
+    kneePoint.copy(hipPoint).addScaledVector(legDirection, along).addScaledVector(bendDirection, bend);
+    segmentDirection.copy(kneePoint).sub(hipPoint).normalize().applyQuaternion(inverseBody);
+    leg.hip.quaternion.setFromUnitVectors(down, segmentDirection);
+    upperRotation.copy(bodyRotation).multiply(leg.hip.quaternion); inverseRotation.copy(upperRotation).invert();
+    segmentDirection.copy(anklePoint).sub(kneePoint).normalize().applyQuaternion(inverseRotation);
+    leg.knee.quaternion.setFromUnitVectors(down, segmentDirection);
+    lowerRotation.copy(upperRotation).multiply(leg.knee.quaternion).invert();
+    leg.ankle.quaternion.copy(lowerRotation).multiply(footRotation);
+  }
+  return {group, ragdollPose, createRagdoll, setStyle({level = 1,jacket,backpack} = {}) {
     const tier = cosmeticTier(level), palette = PLAYER_PALETTES[tier - 1];
     blue.color.set(jacket||palette[0]); pack.material.color.set(backpack||palette[1]); group.userData.cosmeticTier = tier;
-  }, update(dt, {speed = 0, grounded = true, riding = false, emote = false, dance = false, running = false, verticalSpeed = 0, landing = 0, turn = 0, braking = false, stumble = null, instant = false} = {}) {
+  }, update(dt, {speed = 0, grounded = true, riding = false, skating = null, emote = false, dance = false, running = false, verticalSpeed = 0, landing = 0, turn = 0, stumble = null, instant = false} = {}) {
+    if(activeRagdoll){group.userData.animationState='ragdoll';return;}
     dt = clamp(finite(dt), 0, .1); time += dt;
     shadow.visible = Boolean(grounded);
     // A paused postcard can explicitly pose the rig without advancing its clock.
@@ -153,28 +272,27 @@ export function createPlayer(scene) {
     const meters = Math.min(18, Math.abs(finite(speed))), alpha = instant ? 1 : 1 - Math.exp(-dt * 14), moving = meters > .12;
     motion += ((moving && grounded && !riding ? Math.min(1, meters / 2.5) : 0) - motion) * alpha;
     runBlend += ((running || meters > 3.4 ? 1 : 0) - runBlend) * alpha;
-    rideBlend += ((riding ? 1 : 0) - rideBlend) * alpha;
     cycle += dt * (6.8 + Math.min(meters, 6) * 1.35);
     const steer = clamp(finite(turn), -1, 1), crouch = clamp(finite(landing), 0, 1), sway = Math.sin(cycle), stride = (.48 + runBlend * .28) * motion;
     // Reset every target each update: gestures, air poses and falls cannot leave
     // a joint rotated after their state ends. Damping avoids one-frame snaps.
     targets.fill(0);
     const set = (joint, x = 0, y = 0, z = 0) => {const index = jointIndices.get(joint); targets[index] = x; targets[index + 1] = y; targets[index + 2] = z;};
-    set(body, 0, Math.sin(cycle) * motion * .035, -steer * (.03 + rideBlend * .10));
-    set(torso, runBlend * motion * .13 + rideBlend * (braking ? -.10 : .045) + crouch * .20, -Math.sin(cycle) * motion * .07, Math.sin(time * 1.4) * .007);
+    set(body, 0, Math.sin(cycle) * motion * .035, -steer * .03);
+    set(torso, runBlend * motion * .13 + crouch * .20, -Math.sin(cycle) * motion * .07, Math.sin(time * 1.4) * .007);
     set(head, -runBlend * motion * .075, steer * .12, Math.sin(time * 1.4) * .015);
     for (const [leg, sign] of [[leftLeg, 1], [rightLeg, -1]]) {
       const phase = sway * sign, swing = phase * stride;
-      set(leg.hip, swing * (1 - rideBlend) - rideBlend * .065 - crouch * .30, 0, -sign * rideBlend * .025);
-      set(leg.knee, (.035 + Math.max(0, phase) * motion * (.50 + runBlend * .65)) * (1 - rideBlend) + rideBlend * .13 + crouch * .65);
-      set(leg.ankle, -Math.max(0, phase) * motion * .18 - rideBlend * .065 - crouch * .30);
-      approach(leg.hip.position, 'z', rideBlend * (sign > 0 ? .135 : -.16), alpha);
+      set(leg.hip, swing - crouch * .30);
+      set(leg.knee, .035 + Math.max(0, phase) * motion * (.50 + runBlend * .65) + crouch * .65);
+      set(leg.ankle, -Math.max(0, phase) * motion * .18 - crouch * .30);
+      approach(leg.hip.position, 'z', 0, alpha);
     }
     for (const [arm, sign] of [[leftArm, 1], [rightArm, -1]]) {
-      set(arm.shoulder, -sway * sign * stride * .72 * (1 - rideBlend) - rideBlend * .49 - runBlend * motion * .10, 0, -sign * (.055 + rideBlend * .035));
-      set(arm.elbow, -(.10 + runBlend * motion * .72) * (1 - rideBlend) - rideBlend * .055);
+      set(arm.shoulder, -sway * sign * stride * .72 - runBlend * motion * .10, 0, -sign * .055);
+      set(arm.elbow, -(.10 + runBlend * motion * .72));
     }
-    let pelvisY = .91 + rideBlend * .23 + Math.abs(Math.sin(cycle)) * motion * (.014 + runBlend * .020) - crouch * .10;
+    let pelvisY = .91 + Math.abs(Math.sin(cycle)) * motion * (.014 + runBlend * .020) - crouch * .10;
     let pelvisX = 0, pelvisZ = 0, recoilYaw = 0;
     if (!grounded && !stumble) {
       const rising = finite(verticalSpeed) >= 0;
@@ -191,6 +309,29 @@ export function createPlayer(scene) {
       set(leftArm.elbow, -.65); set(rightArm.elbow, -.65);
       set(leftLeg.hip, Math.sin(time * 5) * .23); set(rightLeg.hip, -Math.sin(time * 5) * .23);
       pelvisY = .91 + Math.abs(Math.sin(time * 5)) * .075;
+    }
+    helmet.visible = !!skating; helmet.scale.setScalar(skating ? 1 : 0);
+    let currentSkatePose = null;
+    if (skating) {
+      currentSkatePose = skatePose.update(skating, dt, instant);
+      const pose = currentSkatePose, low = clamp((.965 - pose.body.y) / .34, 0, 1), push = pose.load;
+      set(body, 0, Math.PI / 2, 0);
+      // Lower-body contact follows the board; chest, head, pack and hands lag
+      // that load, making a push and a braking stop read as an actual weight shift.
+      const sprintLean = skating.sprinting ? .29 * pose.direction : 0;
+      set(torso, .10 + low * .24 + push * .10, -pose.turn * .07, -.06 - pose.acceleration * .012 + sprintLean);
+      set(head, -.04 - low * .10, -pose.direction * Math.PI / 2 + pose.turn * .09, .035);
+      for (const [leg, x] of [[leftLeg, -.13], [rightLeg, .13]]) {leg.hip.position.x = x; leg.hip.position.z = 0;}
+      const armSwing = Math.sin(clamp(skating.push?.phase, 0, 1) * TAU) * push;
+      set(leftArm.shoulder, -.08 - armSwing * .28, -.15, -.35 - low * .28 - Math.abs(pose.turn) * .10);
+      set(rightArm.shoulder, .04 + armSwing * .22, .10, .43 + low * .20 + Math.abs(pose.turn) * .10);
+      set(leftArm.elbow, -.36 - push * .20); set(rightArm.elbow, -.42 - low * .24);
+      if (!grounded) {set(leftArm.shoulder, -.08, -.10, -.70); set(rightArm.shoulder, .12, .10, .75);}
+      if (skating.grabTime > .02 && !grounded) {set(rightArm.shoulder, -.45, 0, .16); set(rightArm.elbow, -.95);}
+      pelvisY = pose.body.y; pelvisX = pose.body.x; pelvisZ = pose.body.z;
+    } else {
+      skatePose.reset();
+      for (const [leg, x] of [[leftLeg, -.115], [rightLeg, .115]]) approach(leg.hip.position, 'x', x, alpha);
     }
     const fall = fallEnvelope(stumble);
     if (fall > 0) {
@@ -217,7 +358,16 @@ export function createPlayer(scene) {
     const poseAlpha = fall > 0 ? 1 : alpha;
     joints.forEach((joint, index) => {for (let axis = 0; axis < 3; axis++) approach(joint.rotation, ['x','y','z'][axis], targets[index * 3 + axis], poseAlpha);});
     approach(body.position, 'x', pelvisX, poseAlpha); approach(body.position, 'y', pelvisY, poseAlpha); approach(body.position, 'z', pelvisZ, poseAlpha);
-    if (grounded && (!riding || fall > 0)) {
+    if (currentSkatePose && !fall) {
+      // Skating feet use explicit contacts rather than lifting the entire
+      // skeleton by whichever shoe happens to have the lowest bounding box.
+      // Body yaw must be in its skate stance before solving the limbs.
+      body.rotation.set(-clamp(finite(skating.lean), -.48, .48), Math.PI / 2, 0, 'YXZ');
+      keepLegReachable(leftLeg, currentSkatePose.left); keepLegReachable(rightLeg, currentSkatePose.right);
+      solveSkateLeg(leftLeg, currentSkatePose.left); solveSkateLeg(rightLeg, currentSkatePose.right);
+      group.userData.skatePose = currentSkatePose;
+    } else delete group.userData.skatePose;
+    if (grounded && !skating) {
       // Pose the visual skeleton above its local contact plane. During a tumble
       // hands/backpack can make contact too; the physics foot anchor stays put.
       group.updateMatrixWorld(true); inverseAnchor.copy(group.matrixWorld).invert();
@@ -234,51 +384,16 @@ export function createPlayer(scene) {
       if (fall > 0) {
         // Keep every visual part behind the collision capsule's leading edge,
         // including toes during the get-up pose. Only the local rig is shifted.
-        const raised = Math.max(0, -bottom), excess = Math.max(0, leading + raised * impactDirection.y - (riding ? .43 : .30));
+        const raised = Math.max(0, -bottom), excess = Math.max(0, leading + raised * impactDirection.y - .30);
         const planar = Math.max(.01, impactDirection.x ** 2 + impactDirection.z ** 2);
         body.position.x -= impactDirection.x * excess / planar; body.position.z -= impactDirection.z * excess / planar;
       }
     }
-    pack.rotation.x = Math.sin(cycle - .4) * .025 * motion;
+    pack.rotation.x = currentSkatePose ? clamp(-currentSkatePose.acceleration * .012 - finite(skating.compressionVelocity) * .09, -.13, .13) : Math.sin(cycle - .4) * .025 * motion;
     const blink = time % 4.6, eyeOpen = blink > 4.42 ? .12 + .88 * Math.abs((blink - 4.51) / .09) : 1;
     for (const eye of eyes) eye.scale.y = clamp(eyeOpen, .12, 1);
-    group.userData.animationState = fall > 0 ? (stumble.kind === 'crash' ? 'crash' : 'trip') : !grounded ? (verticalSpeed >= 0 ? 'jump' : 'fall') : riding ? (braking ? 'brake' : 'ride') : dance ? 'dance' : emote ? 'wave' : moving ? (runBlend > .5 ? 'run' : 'walk') : 'idle';
-  }, dispose: disposer(group)};
-}
-
-export function createScooter(scene) {
-  const group = root(scene, 'Electric scooter'); const blue = mat('#275b9c', {metalness: .2}), dark = mat('#22303b'), tire = mat('#263036'), chrome = mat('#879ba5', {metalness: .6, roughness: .4});
-  groundShadow(group, .48, 1.17); blue.name = 'Scooter deck';
-  const frame = pivot(group, [0, 0, 0]); frame.name = 'Scooter frame';
-  const steering = pivot(frame, [0, 0, .29]); steering.name = 'Scooter steering';
-  box(frame, blue, [.20, .075, .76], [0, .19, -.03]); box(frame, dark, [.155, .012, .62], [0, .235, -.055]);
-  const wheels = [];
-  for (const z of [-.43, .43]) {
-    const wheel = pivot(z > 0 ? steering : frame, [0, .135, z > 0 ? z - .29 : z]); wheel.name = z > 0 ? 'Front wheel' : 'Rear wheel';
-    const ring = add(wheel, new THREE.TorusGeometry(.105, .033, 8, 18), tire); ring.rotation.y = Math.PI / 2;
-    const hub = add(wheel, new THREE.CylinderGeometry(.055, .055, .075, 12), chrome); hub.rotation.z = Math.PI / 2; wheels.push(wheel);
-  }
-  bar(steering, chrome, [0, .16, .10], [0, 1.08, 0], .025);
-  bar(steering, blue, [0, .32, .08], [0, .86, .02], .035);
-  bar(steering, chrome, [-.28, 1.09, 0], [.28, 1.09, 0], .025);
-  bar(steering, dark, [-.29, 1.09, 0], [-.16, 1.09, 0], .033); bar(steering, dark, [.16, 1.09, 0], [.29, 1.09, 0], .033);
-  box(steering, dark, [.10, .045, .065], [0, 1.115, 0]);
-  const headlight = mat('#fff2ce', {emissive: '#ffeab4', emissiveIntensity: .55}); sphere(steering, headlight, [0, .90, .065], [.035, .035, .015]);
-  const rear = mat('#cd543c', {emissive: '#a22c1c', emissiveIntensity: .3}); rear.name = 'Scooter brake light'; box(frame, rear, [.065, .035, .018], [0, .235, -.44]);
-  let roll = 0;
-  return {group, setStyle({level = 1,color} = {}) {const tier = cosmeticTier(level); blue.color.set(color||SCOOTER_PALETTES[tier - 1]); group.userData.cosmeticTier = tier;}, update(dt, {speed = 0, groundRoll = 0, turn = 0, braking = false, stumble = null} = {}) {
-    dt = clamp(finite(dt), 0, .1); const meters = Math.abs(finite(speed)), alpha = 1 - Math.exp(-dt * 14), fall = fallEnvelope(stumble), steer = clamp(finite(turn), -1, 1);
-    roll += meters * dt / .135; for (const wheel of wheels) wheel.rotation.x = roll;
-    group.rotation.z = finite(groundRoll);
-    const side = stumble?.direction === -1 ? -1 : 1;
-    const bank = -steer * Math.min(.13, meters * .018) + Math.sin(roll * .04) * Math.min(.015, meters * .002);
-    frame.rotation.z += ((fall > 0 ? side * 1.35 * fall : bank) - frame.rotation.z) * (fall > 0 ? 1 : alpha);
-    frame.position.y += (fall * .12 - frame.position.y) * (fall > 0 ? 1 : alpha);
-    frame.rotation.x += ((braking ? -.04 : 0) - frame.rotation.x) * alpha;
-    steering.rotation.y += (steer * .34 - steering.rotation.y) * alpha;
-    rear.emissiveIntensity = braking ? 1.8 : .3;
-    group.userData.animationState = fall > 0 ? 'crash' : braking ? 'brake' : meters > .1 ? 'ride' : 'parked';
-  }, dispose: disposer(group)};
+    group.userData.animationState = fall > 0 ? (stumble.kind === 'crash' ? 'crash' : 'trip') : currentSkatePose ? 'skate-' + currentSkatePose.pushPhase : !grounded ? (verticalSpeed >= 0 ? 'jump' : 'fall') : dance ? 'dance' : emote ? 'wave' : moving ? (runBlend > .5 ? 'run' : 'walk') : 'idle';
+  }, dispose() {activeRagdoll?.dispose();disposer(group)();}};
 }
 
 export function createCat(scene) {

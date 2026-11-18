@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as THREE from '../public/campus/vendor/three.module.js';
-import {movementDirection, normalizeMoveInput, lookDirection, zoomDistance} from '../public/explorer/game/controls.mjs';
+import {movementDirection, normalizeMoveInput, speedModifierHeld, lookDirection, zoomDistance} from '../public/explorer/game/controls.mjs';
 
 test('A/D and the joystick move to the correct screen side at every camera heading',()=>{
  for(const yaw of [0,.4,Math.PI/2,Math.PI,4.9,-2.1]){
@@ -27,6 +27,17 @@ test('analog movement preserves partial pushes and caps combined inputs and diag
  assert.deepEqual(normalizeMoveInput(Infinity,-Infinity),{x:0,z:0,magnitude:0});
  const large=normalizeMoveInput(Number.MAX_VALUE,Number.MAX_VALUE);assert.ok(Math.abs(Math.hypot(large.x,large.z)-1)<1e-12);
  assert.deepEqual(movementDirection(1,0,NaN),{x:0,z:0});
+});
+
+test('either held Shift key speeds movement and releases independently without a toggle',()=>{
+ const keys=new Set(['KeyW']);
+ assert.equal(speedModifierHeld(keys),false);
+ keys.add('ShiftLeft');assert.equal(speedModifierHeld(keys),true);
+ keys.add('ShiftRight');keys.delete('ShiftLeft');assert.equal(speedModifierHeld(keys),true);
+ keys.delete('ShiftRight');assert.equal(speedModifierHeld(keys),false);
+ keys.add('ShiftRight');assert.equal(speedModifierHeld(keys),true);
+ keys.clear();assert.equal(speedModifierHeld(keys),false,'pause and lost focus clear the held modifier');
+ keys.add('KeyC');assert.equal(speedModifierHeld(keys),false,'the skateboard slide key is separate from its harder-push modifier');
 });
 
 test('W/S keep their forward/backward heading and diagonals stay orthogonal',()=>{

@@ -1,5 +1,6 @@
 import {z} from 'zod';
 import {readAccount, authConfiguration} from '../../../../lib/auth';
+import {invalidateCalendar} from '../../../../lib/calendar-server';
 import {requireContributor} from '../../../../lib/community-store.mjs';
 import {database} from '../../../../db';
 import {json, readJSON, requireSameOrigin, errorResponse, RequestError} from '../../../../lib/http.mjs';
@@ -18,22 +19,28 @@ export async function POST(request: Request) {
     await db.batch([
       // The user's community content — children of their listings first.
       db.prepare(`DELETE FROM community_tags WHERE event_id IN (SELECT id FROM community_listings WHERE user_id=?)`).bind(user.id),
+      db.prepare(`DELETE FROM listing_reports WHERE event_id IN (SELECT id FROM community_listings WHERE user_id=?)`).bind(user.id),
       db.prepare(`DELETE FROM listing_moderation WHERE event_id IN (SELECT id FROM community_listings WHERE user_id=?)`).bind(user.id),
+      db.prepare(`DELETE FROM event_saves WHERE event_id IN (SELECT id FROM community_listings WHERE user_id=?)`).bind(user.id),
       db.prepare('DELETE FROM community_tags WHERE user_id=?').bind(user.id),
       db.prepare('DELETE FROM listing_reports WHERE user_id=? OR reviewed_by=?').bind(user.id, user.id),
       db.prepare('DELETE FROM listing_moderation WHERE reviewed_by=?').bind(user.id),
       db.prepare('DELETE FROM event_overrides WHERE reviewed_by=?').bind(user.id),
       db.prepare('DELETE FROM community_listings WHERE user_id=?').bind(user.id),
       // Everything the account itself owns.
+      db.prepare('DELETE FROM event_saves WHERE user_id=?').bind(user.id),
+      db.prepare('DELETE FROM public_profiles WHERE user_id=?').bind(user.id),
+      db.prepare('DELETE FROM staff_accounts WHERE user_id=?').bind(user.id),
       db.prepare('DELETE FROM user_preferences WHERE user_id=?').bind(user.id),
       db.prepare('DELETE FROM email_digests WHERE user_id=?').bind(user.id),
       db.prepare('DELETE FROM profile_activity WHERE user_id=?').bind(user.id),
       db.prepare('DELETE FROM user_profiles WHERE user_id=?').bind(user.id),
       db.prepare('DELETE FROM auth_session WHERE userId=?').bind(user.id),
       db.prepare('DELETE FROM auth_account WHERE userId=?').bind(user.id),
-      db.prepare('DELETE FROM auth_verification WHERE identifier=?').bind(user.email),
+      db.prepare('DELETE FROM auth_verification WHERE identifier IN (?,?,?)').bind(user.email, `email-verification-otp-${user.email}`, `forget-password-otp-${user.email}`),
       db.prepare('DELETE FROM auth_user WHERE id=?').bind(user.id),
     ]);
+    invalidateCalendar();
     return json({ok: true});
   } catch (error) { return errorResponse(error); }
 }

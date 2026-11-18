@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import ICAL from 'ical.js';
 import {parseICS,classify,clean,civilToISO,eventDays,mergeEvents,splitDescriptionProvenance,timeLabel} from '../lib/catalog.mjs';
-import {parseSearch,matchesEvent,exportICS,eventSlug,googleCalendarUrl,personalCalendarKind,savedViewSummary} from '../lib/search.mjs';
+import {parseSearch,matchesEvent,exportICS,eventSlug,googleCalendarUrl,outlookCalendarUrl,personalCalendarKind,savedViewSummary} from '../lib/search.mjs';
 import {listingLinks,eventPage,importSource,sameSite,sportsSchedule} from '../lib/source-import.mjs';
 import {parseClubSnapshot} from '../lib/club-snapshot.mjs';
 import {parseHandshakeSnapshot} from '../lib/handshake-snapshot.mjs';
@@ -62,6 +62,46 @@ test('label-style refreshments, invitation phrasing, and Tanner tables are snack
  assert.equal(metaphor.snacks,null);
 });
 test('food is distinct from admission, dates and ordinary is are understood',()=>{const e=classify({title:'Campus meetup',description:'Free pizza provided. All BYU students welcome.',location:'Tanner Building',url:'',sourceId:'test',start:'2026-09-17T23:30:00Z',allDay:false});assert.equal(e.free,null);assert.ok(matchesEvent(e,'free food this week after 5 pm',[],[],now));assert.deepEqual(parseSearch('what is happening today',now).tags,[]);assert.deepEqual(parseSearch('IS networking',now).tags,['IS','Networking']);assert.deepEqual(parseSearch('free food',now).tags,['Food provided']);assert.deepEqual(parseSearch('free food this week',now).tags,['Food provided']);});
+test('and/or/&/+ queries run as separate searches and union their results',()=>{
+ const finance=classify({title:'Finance Club Lunch',description:'Careers in finance overview.',location:'TNRB',url:'',sourceId:'test',start:'2026-09-17T23:30:00Z',allDay:false});
+ const info=classify({title:'Graduate School Information Sessions',description:'An overview of graduate programs.',location:'WSC',url:'',sourceId:'test',start:'2026-09-18T23:30:00Z',allDay:false});
+ const volleyball=classify({title:'Intramural Volleyball Night',description:'Open play.',location:'RB',url:'',sourceId:'test',start:'2026-09-19T23:30:00Z',allDay:false});
+ for(const query of ['finance and info sessions','finance or info sessions','finance & info sessions','finance + info sessions','finance or info sessions events']){
+  assert.ok(matchesEvent(finance,query,[],[],now),query);
+  assert.ok(matchesEvent(info,query,[],[],now),query);
+  assert.ok(!matchesEvent(volleyball,query,[],[],now),query);
+ }
+ // Without a separator the words still combine into one narrower search.
+ assert.ok(!matchesEvent(info,'finance info sessions',[],[],now));
+ assert.ok(!matchesEvent(volleyball,'finance info sessions',[],[],now));
+ // A trailing separator or filler side drops out instead of widening to everything.
+ assert.ok(matchesEvent(finance,'finance and',[],[],now));
+ assert.ok(!matchesEvent(volleyball,'finance or something',[],[],now));
+ const split=parseSearch('finance and info sessions',now);
+ assert.equal(split.any?.length,2);assert.deepEqual(split.any[0].tags,['Finance']);assert.deepEqual(split.any[1].words,['info','sessions']);assert.deepEqual(split.labels,['Finance']);
+ assert.equal(parseSearch('finance or something',now).any,undefined);assert.deepEqual(parseSearch('finance or something',now).tags,['Finance']);
+ // Dates stay scoped to their own part: the workshop half has no date, the food half keeps its week.
+ assert.equal(parseSearch('finance or snacks this week',now).start,'2026-09-14');
+ const workshopNextMonth=classify({title:'Resume Workshop',description:'Bring your resume.',location:'WSC',url:'',sourceId:'test',start:'2026-10-15T23:30:00Z',allDay:false});
+ const foodNextMonth=classify({title:'Pizza Social',description:'Free pizza provided.',location:'WSC',url:'',sourceId:'test',start:'2026-10-15T23:30:00Z',allDay:false});
+ assert.ok(matchesEvent(workshopNextMonth,'free food this week or workshops',[],[],now));
+ assert.ok(!matchesEvent(foodNextMonth,'free food this week or workshops',[],[],now));
+});
+test('apostrophes and small typos still find their events',()=>{
+ const tennis=classify({title:"Women's Tennis vs. ITA Sectional Championships",description:'Come watch the match.',location:'Provo, Utah',url:'',sourceId:'test',start:'2026-09-18T23:30:00Z',allDay:false});
+ const basketball=classify({title:"Women\u2019s Basketball vs. Portland",description:'Home game.',location:'Marriott Center',url:'',sourceId:'test',start:'2026-09-18T23:30:00Z',allDay:false});
+ for(const query of ['womens tennis',"women's tennis",'women\u2019s tennis','womans tennis','tenis sectional','womens champsonships']){
+  assert.ok(matchesEvent(tennis,query,[],[],now),query);
+ }
+ assert.ok(matchesEvent(basketball,'womens basketball',[],[],now),'the typographic apostrophe normalizes on both sides');
+ assert.ok(!matchesEvent(tennis,'womens volleyball',[],[],now),'an unrelated word still excludes');
+ // Substring recall is unchanged, and short words never fuzz.
+ const info=classify({title:'Graduate School Information Sessions',description:'Programs overview.',location:'WSC',url:'',sourceId:'test',start:'2026-09-18T23:30:00Z',allDay:false});
+ assert.ok(matchesEvent(info,'info sessions',[],[],now));
+ const chart=classify({title:'Chart Your Course',description:'Mapping workshop.',location:'WSC',url:'',sourceId:'test',start:'2026-09-18T23:30:00Z',allDay:false});
+ assert.ok(!matchesEvent(chart,'cat',[],[],now),'a three-letter word does not match a one-edit neighbor');
+ assert.ok(matchesEvent(chart,'charrt',[],[],now),'a five-letter word tolerates one edit');
+});
 test('duplicates retain provenance and exports are valid calendars',()=>{const a=parseICS(wrap(record(':20260917T180000Z')),source,now)[0];const merged=mergeEvents([a,{...a,sourceId:'other',sourceName:'Other',url:'https://example.com'}]);assert.equal(merged.length,1);assert.equal(merged[0].additionalSources.length,1);const calendar=new ICAL.Component(ICAL.parse(exportICS(merged)));assert.equal(calendar.getAllSubcomponents('vevent').length,1);});
 
 test('club identity supplies subject filters and combined food statements are recognized',()=>{
@@ -330,6 +370,21 @@ test('personal calendar handoff: platform kinds and Google template links',()=>{
  const unsafe=googleCalendarUrl({id:'x',title:'Unsafe',description:'',start:'2026-09-18T22:00:00.000Z',end:null,allDay:false,location:'',url:'javascript:alert(1)'});
  assert.equal(new URL(unsafe).searchParams.get('details').includes('Source:'),false);
  assert.equal(eventSlug('IS Career Night: Pizza & Panel!'),'is-career-night-pizza-panel');
+ // Outlook on the web gets the same facts through its compose deeplink.
+ const outlook=new URL(outlookCalendarUrl({id:'abc-123',title:'IS Career Night: Pizza & Panel',description:'Panel with alumni.',start:'2026-09-18T22:00:00.000Z',end:'2026-09-19T00:00:00.000Z',allDay:false,location:'TNRB 408',url:'https://events.byu.edu/is-night'}));
+ assert.equal(outlook.origin,'https://outlook.office.com');
+ assert.equal(outlook.pathname,'/calendar/0/deeplink/compose');
+ assert.equal(outlook.searchParams.get('path'),'/calendar/action/compose');
+ assert.equal(outlook.searchParams.get('rru'),'addevent');
+ assert.equal(outlook.searchParams.get('subject'),'IS Career Night: Pizza & Panel');
+ assert.equal(outlook.searchParams.get('startdt'),'2026-09-18T22:00:00Z');
+ assert.equal(outlook.searchParams.get('enddt'),'2026-09-19T00:00:00Z');
+ assert.equal(outlook.searchParams.get('location'),'TNRB 408');
+ assert.ok(outlook.searchParams.get('body').includes('Source: https://events.byu.edu/is-night'));
+ const outlookAllDay=new URL(outlookCalendarUrl({id:'hol-1',title:'University Holiday',description:'',start:'2026-11-26',end:'2026-11-27',allDay:true,location:'',url:''}));
+ assert.equal(outlookAllDay.searchParams.get('startdt'),'2026-11-26');
+ assert.equal(outlookAllDay.searchParams.get('allday'),'true');
+ assert.equal(outlookCalendarUrl({id:'x',title:'Bad',description:'',start:'not-a-date',end:null,allDay:false,location:'',url:''}),null);
 });
 
 test('"Take me there" hands venues to the platform map app with a Provo destination',()=>{
@@ -401,4 +456,67 @@ test('saved set summaries read like the filter bar and never double up IS/AIS',(
  // Duplicates and empty entries never leak into the label.
  assert.equal(savedViewSummary('',['Academic','Academic'],['Clubs','','Clubs']),'Academic · Academic · Clubs');
 });
+
+test('search parsing preserves Q&A, contractions, time edge cases, and multi-word phrases',()=>{
+ assert.equal(parseSearch('Q&A tomorrow',now).tags.length,0);
+ assert.deepEqual(parseSearch("i'm attending what's scheduled",now).words,['attending','scheduled']);
+ assert.deepEqual(parseSearch('free pizza tonight',now).tags,['Food provided']);
+ assert.equal(parseSearch('after 5:75 pm',now).after,null);
+ assert.equal(parseSearch('after 00:30',now).after,30);
+ assert.deepEqual(parseSearch('IS meetup',now).tags,['IS']);
+ assert.deepEqual(parseSearch('what is happening',now).tags,[]);
+ const phrase=classify({title:'Career Q&A',description:'Come for free info-session networking.',location:'WSC 3211',url:'',sourceId:'test',start:'2026-09-18T00:00:00Z',allDay:false});
+ assert.equal(matchesEvent(phrase,'Q&A',[],[],now),true);
+ assert.equal(matchesEvent(phrase,'info session',[],[],now),true);
+});
+
+test('classification handles code exclusions, empty refreshments, bare links, orphan recurrences, and 3-way merge conflicts',()=>{
+ const honor=classify({title:'Honor Code Variety Show',description:'Refreshments: None. Bring friends.',location:'https://meet.google.com/abc-defg-hij',url:'',sourceId:'test',start:'2026-09-18T00:00:00Z',allDay:false});
+ assert.equal(honor.snacks,null);
+ assert.equal(honor.format,'Online');
+ assert.ok(!honor.tags.includes('CS'));
+ assert.ok(!honor.tags.includes('Coding'));
+ assert.ok(honor.tags.includes('Performances'));
+ assert.equal(applyEventOverrides([honor],[{id:honor.id,patch:{location:'https://teams.microsoft.com/l/meetup'},at:null}])[0].format,'Online');
+
+ const orphan=parseICS(wrap('BEGIN:VEVENT\r\nUID:orphan-1\r\nRECURRENCE-ID:20260917T180000Z\r\nSUMMARY:Special session\r\nDTSTART:20260917T200000Z\r\nDTEND:20260917T210000Z\r\nEND:VEVENT'),source,now);
+ assert.equal(orphan.length,1);
+ assert.equal(orphan[0].start,'2026-09-17T20:00:00.000Z');
+
+ const a=classify({id:'s1',title:'Club Social',description:'Yes food',location:'',url:'https://a.example',sourceId:'a',sourceName:'A',start:'2026-09-18T00:00:00Z',allDay:false});
+ const b=classify({id:'s2',title:'Club Social!',description:'No food!!',location:'',url:'https://b.example',sourceId:'b',sourceName:'B',start:'2026-09-18T00:00:00Z',allDay:false});
+ const c=classify({id:'s3',title:'Club Social!!',description:'No food at all, come hang out with our club.',location:'',url:'https://c.example',sourceId:'c',sourceName:'C',start:'2026-09-18T00:00:00Z',allDay:false});
+ a.food='yes'; b.food='no'; c.food='no';
+ const conflictMerged=mergeEvents([a,b,c]);
+ assert.equal(conflictMerged.length,1);
+ assert.equal(conflictMerged[0].food,null);
+
+ // Doubleheader across two sources pairs accurately by time proximity regardless of input order.
+ const d1a=classify({id:'dh-a1',title:'BYU Baseball vs. Utah',description:'Game 1',start:'2026-09-18T18:00:00Z',allDay:false,category:'Sports & recreation',sourceId:'s1',sourceName:'S1',url:'https://1.example/a'});
+ const d1b=classify({id:'dh-a2',title:'BYU Baseball vs. Utah',description:'Game 2',start:'2026-09-18T22:00:00Z',allDay:false,category:'Sports & recreation',sourceId:'s1',sourceName:'S1',url:'https://1.example/b'});
+ const d2b=classify({id:'dh-b2',title:'Baseball vs. Utah',description:'Afternoon game 2 detailed preview',start:'2026-09-18T22:05:00Z',allDay:false,category:'Sports & recreation',sourceId:'s2',sourceName:'S2',url:'https://2.example/b'});
+ const d2a=classify({id:'dh-b1',title:'Baseball vs. Utah',description:'Morning game 1 detailed preview',start:'2026-09-18T18:05:00Z',allDay:false,category:'Sports & recreation',sourceId:'s2',sourceName:'S2',url:'https://2.example/a'});
+ const dh=mergeEvents([d1a,d1b,d2b,d2a]);
+ assert.equal(dh.length,2);
+ assert.ok(dh[0].additionalSources.some(s=>s.url==='https://1.example/a'));
+ assert.ok(dh[1].additionalSources.some(s=>s.url==='https://1.example/b'));
+});
+
+test('merge, date range, and search helpers tolerate non-Latin titles, bad bounds, and missing fields',()=>{
+ const jp=classify({id:'jp',title:'日本語イベント',description:'',location:'',url:'https://1.example',sourceId:'a',sourceName:'A',start:'2026-09-18T18:00:00Z',allDay:false});
+ const ko=classify({id:'ko',title:'한국어 행사',description:'',location:'',url:'https://2.example',sourceId:'b',sourceName:'B',start:'2026-09-18T18:00:00Z',allDay:false});
+ const emojiA=classify({id:'ea',title:'🍕',description:'',location:'',url:'https://3.example',sourceId:'a',sourceName:'A',start:'2026-09-18T18:00:00Z',allDay:false});
+ const emojiB=classify({id:'eb',title:'🎸',description:'',location:'',url:'https://4.example',sourceId:'b',sourceName:'B',start:'2026-09-18T18:00:00Z',allDay:false});
+ assert.equal(mergeEvents([jp,ko,emojiA,emojiB]).length,4);
+
+ assert.deepEqual(eventDays({start:'2026-09-18',end:'2026-09-18',allDay:true}),['2026-09-18']);
+ assert.deepEqual(eventDays({start:'2026-09-18T18:00:00Z',end:'2026-09-18T17:00:00Z',allDay:false}),['2026-09-18']);
+ assert.deepEqual(eventDays({start:'2026-09-18T18:00:00Z',end:'invalid',allDay:false}),['2026-09-18']);
+ assert.deepEqual(eventDays({start:'not-a-date',end:'not-a-date',allDay:false}),[]);
+
+ const sparse={id:'sparse',title:'Music Night',start:'2026-09-18T18:00:00Z',allDay:false,description:undefined,location:null,category:undefined,sourceName:undefined,tags:null};
+ assert.equal(matchesEvent(sparse,parseSearch('undefined'),[],[],now),false);
+ assert.equal(matchesEvent(sparse,parseSearch('music'),[],[],now),true);
+});
+
 

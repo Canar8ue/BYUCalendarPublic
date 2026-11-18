@@ -1,0 +1,10 @@
+import type {CampusEvent} from '../app/types';
+export function calendarDateLabel(day:string,options?:Intl.DateTimeFormatOptions):string;
+export function eventDateLabel(event:CampusEvent,options?:Intl.DateTimeFormatOptions):string;
+export function eventTimeLabel(event:CampusEvent):string;
+export function eventVenueLabel(event:CampusEvent):string;
+export function compareCalendarEvents(a:CampusEvent,b:CampusEvent):number;
+export function isUpcomingEvent(event:CampusEvent,now?:Date):boolean;
+export function eventJsonLd(event:CampusEvent):Record<string,unknown>;
+export function jsonLdText(value:unknown):string;
+export function sourceDateLabel(value:string|null|undefined):string|null;
