@@ -70,7 +70,7 @@ export default function CalendarApp({initialData=null,initialQuery='',initialNow
  const [modal,setModal]=useState<'sources'|'event'|'day'|'save'|'custom'|'signin'|'tag'|'report'|'edit'|'confirm-delete'|'profile'|'subscribe'|'calendar'|null>(null),[selected,setSelected]=useState<CampusEvent|null>(null),[selectedDay,setSelectedDay]=useState(''),[openMenu,setOpenMenu]=useState<'filters'|'perks'|'interests'|'saved'|null>(null),[compact,setCompact]=useState(false),[viewName,setViewName]=useState(''),[viewNameError,setViewNameError]=useState(''),[toast,setToast]=useState(''),[listScope,setListScope]=useState({key:'',limit:40}),[shared,setShared]=useState(false);
  const [savedScope,setSavedScope]=useState<'upcoming'|'past'>('upcoming'),[undoSaved,setUndoSaved]=useState<{event:CampusEvent;note:SavedEventNote}|null>(null);
  const undoTimer=useRef<ReturnType<typeof setTimeout>|null>(null),toolbarRef=useRef<HTMLDivElement>(null);
- const listScopeKey=JSON.stringify([query,categories,tags,view]);
+ const listScopeKey=JSON.stringify([query,categories,tags,view,section,savedScope]);
  const listLimit=listScope.key===listScopeKey?listScope.limit:40;
  // The custom set builder holds its own draft so a half-built set never changes
  // the calendar behind it; only saving applies it.
@@ -334,7 +334,7 @@ export default function CalendarApp({initialData=null,initialQuery='',initialNow
  }
  async function saveView(){await saveNamedView(viewName,{query,categories,tags},false);}
  async function saveCustomView(){await saveNamedView(viewName,{query:customWhen,categories:customCategories,tags:customTags},true);}
- function download(items:CampusEvent[]){const exportable=section==='saved'?items.filter(e=>!isSuggestion(e)):items;if(!exportable.length){setToast('Choose some events before exporting.');return;}track({type:'export',detail:'list',name:String(exportable.length)});const url=URL.createObjectURL(new Blob([exportICS(exportable)],{type:'text/calendar;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download='byu-calendar.ics';a.click();URL.revokeObjectURL(url);setToast('Calendar file downloaded. This export is a snapshot.');}
+ function download(items:CampusEvent[]){const exportable=section==='saved'?items.filter(e=>!isSuggestion(e)):items;if(!exportable.length){setToast('Choose some events before exporting.');return;}track({type:'export',detail:'list',name:String(exportable.length)});const url=URL.createObjectURL(new Blob([exportICS(exportable)],{type:'text/calendar;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download='byu-calendar.ics';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);setToast('Calendar file downloaded. This export is a snapshot.');}
  // One-click export of a single event as an .ics file the visitor's own calendar app can import.
  function downloadEventICS(e:CampusEvent){
   const ua=navigator.userAgent;

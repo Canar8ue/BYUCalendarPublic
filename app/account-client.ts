@@ -31,6 +31,7 @@ export async function postJSON<T = Record<string, unknown>>(url: string, body: u
     return data as T;
   } catch (err) {
     if (isAbort(err)) throw new Error('This is taking longer than usual. It may still complete — check in a moment before retrying.');
+    if (err instanceof TypeError) throw new Error('Could not reach BYU Calendar. Check your connection and try again.');
     throw err;
   }
 }
@@ -43,6 +44,7 @@ export async function getJSON<T>(url: string, timeoutMs = 0): Promise<T> {
     return data;
   } catch (error) {
     if (isAbort(error)) throw new Error('Loading is taking longer than usual. Check your connection and try again.');
+    if (error instanceof TypeError) throw new Error('Could not reach BYU Calendar. Check your connection and try again.');
     throw error;
   }
 }

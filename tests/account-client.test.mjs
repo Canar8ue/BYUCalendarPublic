@@ -19,4 +19,7 @@ test('network timeouts and proxy error pages show useful retry messages', async 
   mocked.mock.mockImplementation(async () => new Response('<html>Restarting</html>', {status: 503}));
   await assert.rejects(getJSON('/api/events'), /briefly unavailable/);
   await assert.rejects(postJSON('/api/preferences', {}), /briefly unavailable/);
+  mocked.mock.mockImplementation(async () => {throw new TypeError('Failed to fetch');});
+  await assert.rejects(getJSON('/api/events'), /Could not reach BYU Calendar/);
+  await assert.rejects(postJSON('/api/auth/sign-up/email', {}), /Could not reach BYU Calendar/);
 });

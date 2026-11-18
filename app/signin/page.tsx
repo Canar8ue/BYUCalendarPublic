@@ -38,6 +38,7 @@ function SignInContent() {
   }, () => '');
   const staff = staffOverride ?? Boolean(stashedArea), staffAreaId = areaOverride ?? stashedArea;
   const [busy, setBusy] = useState(false), [error, setError] = useState(''), [notice, setNotice] = useState('');
+  const [fromSignInBounce, setFromSignInBounce] = useState(false), [duplicateAccount, setDuplicateAccount] = useState(false);
   const sendStaffRequest = async (verifiedEmail: string) => {
     let stash: {area?: string; email?: string} | null = null;
     try { stash = JSON.parse(localStorage.getItem(STAFF_REQUEST_STASH) || 'null'); } catch { stash = null; }
@@ -55,10 +56,10 @@ function SignInContent() {
     return () => clearTimeout(timer);
   }, [cooldown]);
 
-  function goVerify(toEmail: string, message: string) { setMode('verify'); setCode(''); setError(''); setNotice(message); setCooldown(60); }
+  function goVerify(toEmail: string, message: string) { setEmail(toEmail); setMode('verify'); setCode(''); setError(''); setDuplicateAccount(false); setFromSignInBounce(false); setNotice(message); setCooldown(60); }
   async function resendVerification() {
     setBusy(true); setError('');
-    try { await postJSON('/api/auth/email-otp/send-verification-otp', {email, type: 'email-verification'}); setNotice(`We sent a new code to ${email}.`); setCooldown(60); }
+    try { await postJSON('/api/auth/email-otp/send-verification-otp', {email, type: 'email-verification'}); setCode(''); setNotice(`We sent a new code to ${email}.`); setCooldown(60); }
     catch (err) { setError(err instanceof Error ? err.message : 'Could not send a code.'); }
     finally { setBusy(false); }
   }
@@ -66,7 +67,7 @@ function SignInContent() {
   async function submitSignIn() {
     const normalized = normalizeBYUEmail(email);
     if (!normalized) { setError('Use your @byu.edu or @student.byu.edu email address.'); return; }
-    setBusy(true); setError(''); setNotice(''); setEmail(normalized);
+    setBusy(true); setError(''); setNotice(''); setDuplicateAccount(false); setEmail(normalized);
     try {
       await postJSON('/api/auth/sign-in/email', {email: normalized, password});
       window.location.assign(returnTo);
@@ -80,21 +81,25 @@ function SignInContent() {
         // No account answers that email yet: carry the email and password into
         // sign-up instead of dead-ending. (If the account does exist and the
         // password was wrong, sign-up bounces back here with a clear notice.)
-        setConfirm(''); setNotice('Those sign-in details did not work. Create an account if you are new, or choose Sign in to try again or reset your password.');
+        setConfirm(''); setFromSignInBounce(true); setNotice('Those sign-in details did not work. Create an account if you are new, or choose Sign in to try again or reset your password.');
         setMode('signup'); setError('');
       } else setError(message);
     } finally { setBusy(false); }
   }
   async function submitSignUp() {
     const normalized = normalizeBYUEmail(email);
+    if (!name.trim()) { setError('Enter your name.'); return; }
     if (!normalized) { setError('Use your @byu.edu or @student.byu.edu email address.'); return; }
+    if (staff && !staffAreaId) { setError('Choose your department or area.'); return; }
     if (password.length < 8) { setError('Your password needs at least 8 characters.'); return; }
+    if (password.length > 128) { setError('Your password must be 128 characters or fewer.'); return; }
     if (password !== confirm) { setError('Those passwords do not match.'); return; }
     if (!PASSWORD_RULES.every(rule => rule.test(password))) { setError('Choose a password that meets all five checks.'); return; }
-    setBusy(true); setError(''); setNotice(''); setEmail(normalized);
+    setBusy(true); setError(''); setNotice(''); setDuplicateAccount(false); setEmail(normalized);
     try {
       await postJSON('/api/auth/sign-up/email', {name: name.trim(), email: normalized, password});
       if (staff && staffAreaId) { try { localStorage.setItem(STAFF_REQUEST_STASH, JSON.stringify({area: staffAreaId, email: normalized})); } catch { /* retried from the account page */ } }
+      else { try { localStorage.removeItem(STAFF_REQUEST_STASH); } catch {} }
       goVerify(normalized, `We sent a six-digit code to ${normalized}. Enter it below to finish creating your account.`);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Could not create your account.';
@@ -102,8 +107,14 @@ function SignInContent() {
       // resend recovers it, so still move there instead of blocking sign-up.
       if (/could not send|not available/i.test(message)) goVerify(normalized, message);
       else if (/already (?:exists|registered|has an account)|user already/i.test(message)) {
-        // The sign-in handoff sent a visitor here whose account exists after all.
-        setNotice('That email already has an account — sign in with its password, or reset it below.'); setMode('signin'); setConfirm(''); setError('');
+        if (fromSignInBounce) {
+          // The sign-in handoff sent a visitor here whose account exists after all.
+          setError('This email already has an account — sign in with its password, or reset it below.');
+          setMode('signin'); setPassword(''); setConfirm(''); setNotice(''); setFromSignInBounce(false);
+        } else {
+          setError(message.includes('This email already has an account') ? message : 'This email already has an account.');
+          setDuplicateAccount(true);
+        }
       }
       else setError(message);
     } finally { setBusy(false); }
@@ -120,7 +131,7 @@ function SignInContent() {
   async function submitForgot() {
     const normalized = normalizeBYUEmail(email);
     if (!normalized) { setError('Use your @byu.edu or @student.byu.edu email address.'); return; }
-    setBusy(true); setError(''); setNotice(''); setEmail(normalized);
+    setBusy(true); setError(''); setNotice(''); setDuplicateAccount(false); setEmail(normalized);
     try {
       await postJSON('/api/auth/email-otp/request-password-reset', {email: normalized});
       setMode('reset'); setCode(''); setNotice(`If ${normalized} has an account, we sent a reset code to it.`); setCooldown(60);
@@ -128,12 +139,15 @@ function SignInContent() {
     finally { setBusy(false); }
   }
   async function submitReset() {
+    const normalized = normalizeBYUEmail(email) || email.trim().toLowerCase();
+    if (code.length !== 6) { setError('Enter the six-digit reset code from your email.'); return; }
     if (password.length < 8) { setError('Your new password needs at least 8 characters.'); return; }
+    if (password.length > 128) { setError('Your password must be 128 characters or fewer.'); return; }
     if (password !== confirm) { setError('Those passwords do not match.'); return; }
     setBusy(true); setError('');
     try {
-      await postJSON('/api/auth/email-otp/reset-password', {email, otp: code, password});
-      try { await postJSON('/api/auth/sign-in/email', {email, password}); window.location.assign(returnTo); }
+      await postJSON('/api/auth/email-otp/reset-password', {email: normalized, otp: code, password});
+      try { await postJSON('/api/auth/sign-in/email', {email: normalized, password}); window.location.assign(returnTo); }
       catch { setNotice('Your password is updated. Sign in with it below.'); setPassword(''); setConfirm(''); setMode('signin'); }
     } catch (err) { setError(err instanceof Error ? err.message : 'Could not reset your password.'); }
     finally { setBusy(false); }
@@ -155,10 +169,15 @@ function SignInContent() {
   const confirmMismatch = (mode === 'signup' || mode === 'reset') && confirm.length > 0 && password !== confirm;
   const canSubmit = account?.emailReady && !submitting && (
     (mode === 'signin' && email && password) ||
-    (mode === 'signup' && name.trim() && email && passwordStrong && password === confirm) ||
+    (mode === 'signup' && name.trim() && email && (!staff || Boolean(staffAreaId)) && passwordStrong && password === confirm) ||
     (mode === 'verify' && code.length === 6) ||
     (mode === 'forgot' && email) ||
-    (mode === 'reset' && code.length === 6 && password && confirm));
+    (mode === 'reset' && code.length === 6 && password.length >= 8 && password.length <= 128 && password === confirm));
+  function switchAuthMode(next: Mode, {clearPassword = true}: {clearPassword?: boolean} = {}) {
+    setMode(next); setError(''); setNotice(''); setDuplicateAccount(false); setFromSignInBounce(false);
+    setCode('');
+    if (clearPassword) { setPassword(''); setConfirm(''); }
+  }
 
   return <AccountShell><section className="signin-layout"><div className="signin-story"><div className="eyebrow">YOUR CAMPUS. YOUR COMMUNITY.</div><h1>A little more<br/>{' '}<span>connected.</span></h1><p>Your BYU email opens up a calendar you can help make better.</p><ul className="account-benefits"><li><Bookmark/>Keep your favorite events together.</li><li><Plus/>Share a listing with campus.</li><li><Tags/>Add helpful tags to events.</li><li><Flag/>Report details that need attention.</li></ul><div className="account-stamp"><ShieldCheck size={22}/><span>FOR THE BYU COMMUNITY<small>Create an account with your BYU email.</small></span></div></div>
     <div className="account-card"><span className="account-icon">{mode === 'verify' || mode === 'forgot' ? <Mail size={27}/> : <KeyRound size={27}/>}</span><h2>{account?.permissions.addListings ? 'You’re signed in.' : HEADINGS[mode]}</h2>
@@ -168,34 +187,34 @@ function SignInContent() {
         {accountError && <div className="form-error" role="alert">{accountError} <button className="text-button" onClick={reload}>Try again</button></div>}
         {account && !account.emailReady && <div className="account-notice" role="status"><b>Accounts are coming soon.</b><p>You can browse the calendar now. Creating an account and contributing will open once email delivery is available.</p></div>}
         <form className="community-form" onSubmit={event => {event.preventDefault(); void onSubmit();}}>
-          {mode === 'signup' && <label>Your name<input value={name} onChange={e => setName(e.target.value)} placeholder="Jordan" maxLength={80} required disabled={submitting} autoComplete="name"/><small>Visible to verified BYU members in RSVP lists when you save events. You can hide your RSVP profile in Account.</small></label>}
+          {mode === 'signup' && <label>Your name<input value={name} onChange={e => {setName(e.target.value); setError('');}} placeholder="Jordan" maxLength={80} required disabled={submitting} autoComplete="name"/><small>Visible to verified BYU members in RSVP lists when you save events. You can hide your RSVP profile in Account.</small></label>}
           {mode === 'signup' && <div className="form-checkbox staff-signup-toggle">
-            <input type="checkbox" id="staff-signup" checked={staff} onChange={e => setStaff(e.target.checked)} disabled={submitting}/>
+            <input type="checkbox" id="staff-signup" checked={staff} onChange={e => {setStaff(e.target.checked); setError('');}} disabled={submitting}/>
             <label htmlFor="staff-signup">I am a professor or BYU staff member</label>
           </div>}
           {mode === 'signup' && staff && <label>My field
-            <select value={staffAreaId} onChange={e => setStaffAreaId(e.target.value)} required disabled={submitting}>
+            <select value={staffAreaId} onChange={e => {setStaffAreaId(e.target.value); setError('');}} required disabled={submitting}>
               <option value="" disabled>Choose your area</option>
               {STAFF_AREAS.map(area => <option key={area.id} value={area.id}>{area.label}</option>)}
             </select>
             <small>Staff accounts start with student powers; an administrator verifies them before BYU events you add are labeled “BYU added event” and you can edit listings in your area.</small>
           </label>}
-          {(mode === 'signin' || mode === 'signup' || mode === 'forgot') && <label>BYU email<input type="email" autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@student.byu.edu" maxLength={254} required disabled={submitting}/><small>@byu.edu and @student.byu.edu</small></label>}
-          {mode === 'verify' && <label>Verification code<input autoFocus aria-label="Verification code" className="otp-input" value={code} onChange={e => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))} inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" minLength={6} maxLength={6} required/><small>The code expires in 10 minutes. Use the newest code if you request another.</small></label>}
-          {(mode === 'signin' || mode === 'signup' || mode === 'reset') && <label>{mode === 'reset' ? 'New password' : 'Password'}<span className="password-input"><input type={showPassword ? 'text' : 'password'} autoComplete={mode === 'signin' ? 'current-password' : 'new-password'} value={password} onChange={e => setPassword(e.target.value)} minLength={8} maxLength={128} required disabled={submitting}/>{mode !== 'signin' && <button type="button" className="password-toggle" aria-label={showPassword ? 'Hide password' : 'Show password'} aria-pressed={showPassword} title={showPassword ? 'Hide password' : 'Show password'} onClick={() => setShowPassword(value => !value)} disabled={submitting}>{showPassword ? <EyeOff size={18}/> : <Eye size={18}/>}</button>}</span>{mode !== 'signin' && <small>At least 8 characters.</small>}</label>}
+          {(mode === 'signin' || mode === 'signup' || mode === 'forgot') && <label>BYU email<input type="email" autoComplete="email" value={email} onChange={e => {setEmail(e.target.value); setError(''); setDuplicateAccount(false); setFromSignInBounce(false);}} placeholder="you@student.byu.edu" maxLength={254} required disabled={submitting}/><small>@byu.edu and @student.byu.edu</small></label>}
+          {mode === 'verify' && <label>Verification code<input autoFocus aria-label="Verification code" className="otp-input" value={code} onChange={e => {setCode(e.target.value.replace(/\D/g, '').slice(0, 6)); setError('');}} inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" minLength={6} maxLength={6} required disabled={submitting}/><small>The code expires in 10 minutes. Use the newest code if you request another.</small></label>}
+          {(mode === 'signin' || mode === 'signup' || mode === 'reset') && <label>{mode === 'reset' ? 'New password' : 'Password'}<span className="password-input"><input type={showPassword ? 'text' : 'password'} autoComplete={mode === 'signin' ? 'current-password' : 'new-password'} value={password} onChange={e => {setPassword(e.target.value); setError('');}} minLength={8} maxLength={128} required disabled={submitting}/>{mode !== 'signin' && <button type="button" className="password-toggle" aria-label={showPassword ? 'Hide password' : 'Show password'} aria-pressed={showPassword} title={showPassword ? 'Hide password' : 'Show password'} onClick={() => setShowPassword(value => !value)} disabled={submitting}>{showPassword ? <EyeOff size={18}/> : <Eye size={18}/>}</button>}</span>{mode !== 'signin' && <small>At least 8 characters.</small>}</label>}
           {mode === 'signup' && <div className={'password-strength score-' + passwordScore} aria-live="polite"><div className="password-meter" aria-hidden="true">{PASSWORD_RULES.map((rule, index) => <span key={rule.id} className={index < passwordScore ? 'on' : ''}/>)}</div><p className="password-strength-label">{passwordScore === PASSWORD_RULES.length ? 'Strong password' : passwordScore >= 3 ? 'Almost there' : 'Choose a stronger password'}</p><ul className="password-checklist">{passwordChecks.map(check => <li key={check.id} className={check.ok ? 'ok' : ''}>{check.ok ? <Check size={13}/> : <span className="check-dot" aria-hidden="true"/>}{check.label}</li>)}</ul></div>}
-          {((mode === 'signup' && password) || mode === 'reset') && <label>Confirm password<span className="password-input"><input type={showConfirm ? 'text' : 'password'} className={confirmMismatch ? 'input-error' : undefined} aria-invalid={confirmMismatch || undefined} aria-describedby={confirmMismatch ? 'confirm-mismatch' : undefined} autoComplete="new-password" value={confirm} onChange={e => setConfirm(e.target.value)} minLength={8} maxLength={128} required disabled={submitting}/><button type="button" className="password-toggle" aria-label={showConfirm ? 'Hide password' : 'Show password'} aria-pressed={showConfirm} title={showConfirm ? 'Hide password' : 'Show password'} onClick={() => setShowConfirm(value => !value)} disabled={submitting}>{showConfirm ? <EyeOff size={18}/> : <Eye size={18}/>}</button></span>{confirmMismatch ? <small id="confirm-mismatch" className="field-error" role="alert">Passwords do not match.</small> : <small>At least 8 characters.</small>}</label>}
-          {mode === 'reset' && <><label>Reset code<input autoFocus aria-label="Reset code" className="otp-input" value={code} onChange={e => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))} inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" minLength={6} maxLength={6} required/><small>The code expires in 10 minutes. Use the newest code if you request another.</small></label></>}
+          {((mode === 'signup' && password) || mode === 'reset') && <label>Confirm password<span className="password-input"><input type={showConfirm ? 'text' : 'password'} className={confirmMismatch ? 'input-error' : undefined} aria-invalid={confirmMismatch || undefined} aria-describedby={confirmMismatch ? 'confirm-mismatch' : undefined} autoComplete="new-password" value={confirm} onChange={e => {setConfirm(e.target.value); setError('');}} minLength={8} maxLength={128} required disabled={submitting}/><button type="button" className="password-toggle" aria-label={showConfirm ? 'Hide password' : 'Show password'} aria-pressed={showConfirm} title={showConfirm ? 'Hide password' : 'Show password'} onClick={() => setShowConfirm(value => !value)} disabled={submitting}>{showConfirm ? <EyeOff size={18}/> : <Eye size={18}/>}</button></span>{confirmMismatch ? <small id="confirm-mismatch" className="field-error" role="alert">Passwords do not match.</small> : <small>At least 8 characters.</small>}</label>}
+          {mode === 'reset' && <><label>Reset code<input autoFocus aria-label="Reset code" className="otp-input" value={code} onChange={e => {setCode(e.target.value.replace(/\D/g, '').slice(0, 6)); setError('');}} inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" minLength={6} maxLength={6} required disabled={submitting}/><small>The code expires in 10 minutes. Use the newest code if you request another.</small></label></>}
           {notice && <p className="form-help" role="status">{notice}</p>}
-          {error && <p className="form-error" role="alert">{error}</p>}
+          {error && <div className="form-error" role="alert"><span>{error}</span>{duplicateAccount && mode === 'signup' && <div className="duplicate-actions"><button type="button" className="text-button" disabled={submitting} onClick={() => switchAuthMode('signin')}>Sign in instead</button><button type="button" className="text-button" disabled={submitting} onClick={() => switchAuthMode('forgot')}>Reset password</button></div>}</div>}
           <button className="primary-button" disabled={!canSubmit}>{submitting ? 'Just a moment…' : buttonLabel}<ArrowRight size={16}/></button>
         </form>
         <div className="signin-secondary">
-          {mode === 'signin' && <><button className="text-button" disabled={submitting} onClick={() => {setMode('forgot'); setError(''); setNotice(''); setPassword('');}}>Forgot password?</button><button className="text-button" disabled={submitting} onClick={() => {setMode('signup'); setError(''); setNotice('');}}>New here? Create an account</button></>}
-          {mode === 'signup' && <><span></span><button className="text-button" disabled={submitting} onClick={() => {setMode('signin'); setError(''); setNotice(''); setPassword(''); setConfirm('');}}>Already have an account? Sign in</button></>}
-          {mode === 'verify' && <><button className="text-button" disabled={submitting || cooldown > 0} onClick={() => void resendVerification()}>{cooldown ? `Resend in ${cooldown}s` : 'Resend code'}</button><button className="text-button" disabled={submitting} onClick={() => {setMode('signin'); setError(''); setNotice(''); setCode('');}}>Use a different account</button></>}
-          {mode === 'forgot' && <><span></span><button className="text-button" disabled={submitting} onClick={() => {setMode('signin'); setError(''); setNotice('');}}>Back to sign in</button></>}
-          {mode === 'reset' && <><button className="text-button" disabled={submitting || cooldown > 0} onClick={() => void submitForgot()}>{cooldown ? `Resend in ${cooldown}s` : 'Resend code'}</button><button className="text-button" disabled={submitting} onClick={() => {setMode('signin'); setError(''); setNotice(''); setCode(''); setPassword(''); setConfirm('');}}>Back to sign in</button></>}
+          {mode === 'signin' && <><button className="text-button" disabled={submitting} onClick={() => switchAuthMode('forgot')}>Forgot password?</button><button className="text-button" disabled={submitting} onClick={() => switchAuthMode('signup', {clearPassword: false})}>New here? Create an account</button></>}
+          {mode === 'signup' && <><span></span><button className="text-button" disabled={submitting} onClick={() => switchAuthMode('signin')}>Already have an account? Sign in</button></>}
+          {mode === 'verify' && <><button className="text-button" disabled={submitting || cooldown > 0} onClick={() => void resendVerification()}>{cooldown ? `Resend in ${cooldown}s` : 'Resend code'}</button><button className="text-button" disabled={submitting} onClick={() => switchAuthMode('signin')}>Use a different account</button></>}
+          {mode === 'forgot' && <><span></span><button className="text-button" disabled={submitting} onClick={() => switchAuthMode('signin')}>Back to sign in</button></>}
+          {mode === 'reset' && <><button className="text-button" disabled={submitting || cooldown > 0} onClick={() => void submitForgot()}>{cooldown ? `Resend in ${cooldown}s` : 'Resend code'}</button><button className="text-button" disabled={submitting} onClick={() => switchAuthMode('signin')}>Back to sign in</button></>}
         </div>
         <p className="account-fineprint"><ShieldCheck size={15}/> Verified BYU members can see your name and email in RSVP lists unless you hide your profile in Account. See our <Link prefetch={false} href="/privacy">privacy policy</Link>.</p>
       </>}

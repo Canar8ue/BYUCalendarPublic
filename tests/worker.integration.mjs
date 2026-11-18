@@ -133,6 +133,13 @@ test('the built Worker serves pages and enforces BYU permissions at every HTTP e
   const unverified = await request('/api/auth/sign-up/email', {name: 'Unverified', email: 'unverified@student.byu.edu', password: 'worker-test-pass-123'});
   assert.equal(unverified.status, 200, await unverified.text());
   assert.equal((await request('/api/auth/sign-in/email', {email: 'unverified@student.byu.edu', password: 'worker-test-pass-123'})).status, 403);
+  // Duplicate sign-ups on both unverified and verified accounts fail clearly instead of returning 200.
+  const dupUnverified = await request('/api/auth/sign-up/email', {name: 'Unverified', email: 'UNVERIFIED@student.byu.edu', password: 'worker-test-pass-123'});
+  assert.equal(dupUnverified.status, 409);
+  assert.match((await dupUnverified.json()).message, /This email already has an account/);
+  const dupVerified = await request('/api/auth/sign-up/email', {name: 'Member', email: 'member@student.byu.edu', password: 'worker-test-pass-123'});
+  assert.equal(dupVerified.status, 409);
+  assert.equal((await dupVerified.json()).message, 'This email already has an account.');
   // Delivery failures surface instead of claiming a code was sent.
   assert.equal((await request('/api/auth/sign-up/email', {name: 'Failing', email: 'delivery-error@byu.edu', password: 'worker-test-pass-123'})).status, 503);
 });

@@ -369,7 +369,14 @@ test('staff grants cannot bypass denial, started community listings remain edita
   });
   assert.equal(edited.title, 'Active club workshop updated');
 
-  // Repeated /sign-up/email attempts on an existing account never burn that email's send quota.
-  for (let i = 0; i < 4; i++) await call('/sign-up/email', {name: 'Dup', email: 'member@student.byu.edu', password: PASSWORD});
+  // Duplicate sign-ups on unverified or verified accounts return 409 with a clear message and never burn send quota.
+  const unverifiedDup = await call('/sign-up/email', {name: 'Dup', email: 'hash@BYU.edu', password: PASSWORD});
+  assert.equal(unverifiedDup.status, 409);
+  assert.match((await unverifiedDup.json()).message, /This email already has an account/);
+  for (let i = 0; i < 4; i++) {
+    const dup = await call('/sign-up/email', {name: 'Dup', email: 'member@student.byu.edu', password: PASSWORD});
+    assert.equal(dup.status, 409);
+    assert.equal((await dup.json()).message, 'This email already has an account.');
+  }
   assert.equal((await call('/email-otp/request-password-reset', {email: 'member@student.byu.edu'})).status, 200);
 });

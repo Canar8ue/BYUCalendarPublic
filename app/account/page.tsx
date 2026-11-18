@@ -132,6 +132,7 @@ export default function AccountPage() {
     setBusy(true);
     try {
       await postJSON('/api/account/delete', {confirm: confirmText}, 20000);
+      try { localStorage.removeItem(STAFF_REQUEST_STASH); } catch {}
       window.location.assign('/');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not delete the account.');
