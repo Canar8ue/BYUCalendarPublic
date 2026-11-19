@@ -17,10 +17,10 @@ test('avatars accept only bounded PNG, JPEG, and WebP data URLs',()=>{
  assert.equal(cleanAvatar('data:image/png;base64,'+'A'.repeat(MAX_AVATAR_CHARS)),undefined,'oversized avatars are refused');
 });
 
-test('RSVP entries show initials to everyone and identities to members',()=>{
+test('RSVP entries show initials to everyone and names (without emails) to members',()=>{
  const row={name:'Jordan Garcia',email:'jordan@byu.edu',avatar:null};
  assert.deepEqual(rsvpEntry(row,false),{initial:'J',avatar:null});
- assert.deepEqual(rsvpEntry(row,true),{initial:'J',avatar:null,name:'Jordan Garcia',email:'jordan@byu.edu'});
+ assert.deepEqual(rsvpEntry(row,true),{initial:'J',avatar:null,name:'Jordan Garcia'});
  // Odd names fall back to the email, then a question mark.
  assert.equal(rsvpEntry({name:'',email:'go@byu.edu',avatar:null},false).initial,'G');
  assert.equal(rsvpEntry({name:'',email:'',avatar:null},false).initial,'?');

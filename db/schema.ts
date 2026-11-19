@@ -109,8 +109,8 @@ export const staffAccounts = sqliteTable("staff_accounts", {
   requestedAt: text("requested_at").notNull(),
   resolvedAt: text("resolved_at"), resolvedBy: text("resolved_by"),
 }, t => [index('staff_accounts_status_idx').on(t.status)]);
-// Public RSVP records and profiles: saving an event lists the member on its
-// RSVP page (unless they opt out), optionally with an avatar they uploaded.
+// Public RSVP records and profiles: saving an event only lists a member publicly
+// once they opt in (hidden defaults to true).
 export const eventSaves = sqliteTable("event_saves", {
   userId: text("user_id").notNull().references(() => authUser.id, {onDelete: "cascade"}),
   eventId: text("event_id").notNull(),
@@ -119,6 +119,6 @@ export const eventSaves = sqliteTable("event_saves", {
 export const publicProfiles = sqliteTable("public_profiles", {
   userId: text("user_id").primaryKey().references(() => authUser.id, {onDelete: "cascade"}),
   avatar: text("avatar"),
-  hidden: integer("hidden", {mode: "boolean"}).notNull().default(false),
+  hidden: integer("hidden", {mode: "boolean"}).notNull().default(true),
   updatedAt: text("updated_at").notNull(),
 });

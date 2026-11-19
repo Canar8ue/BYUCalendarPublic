@@ -695,7 +695,7 @@ test('the campus game entry serves a separate grounded model while the ordinary 
   assert.match(css,/\.race-result\b/);
   assert.match(css,/\.campus-journal-filters\b/, 'the filtered campus journal ships in the production stylesheet');
   assert.doesNotMatch(html,/game\/play\.css/, 'race styles ship in the same hashed production stylesheet');
-  const model = await request('/campus/campus_web.glb?v=20261118mapui3', null, '', {}, 'GET');
+  const model = await request('/campus/campus_web.glb?v=20261119mapui4', null, '', {}, 'GET');
   assert.equal(model.status, 200);
   const ordinaryBytes = new Uint8Array(await model.arrayBuffer());
   const signature = ordinaryBytes.slice(0, 4);
@@ -795,13 +795,18 @@ test('saving events builds RSVP lists with avatar profiles and privacy rules', a
   const target = events[0];
   assert.equal((await request('/api/preferences', {saved: [target.id], views: []}, cookieA, {}, 'PUT')).status, 200);
   assert.equal((await request('/api/preferences', {saved: [target.id], views: []}, cookieB, {}, 'PUT')).status, 200);
+  // Opt-in default: saving starts hidden until the member opts in to public RSVPs.
+  const initialRsvp = await (await request('/api/events/rsvp?id=' + encodeURIComponent(target.id), null, '', {}, 'GET')).json();
+  assert.equal(initialRsvp.count, 0);
+  assert.equal((await request('/api/profile', {hidden: false}, cookieA, {}, 'PUT')).status, 200);
+  assert.equal((await request('/api/profile', {hidden: false}, cookieB, {}, 'PUT')).status, 200);
   // Signed-out visitors see initials only, never names or emails.
   const anonymous = await (await request('/api/events/rsvp?id=' + encodeURIComponent(target.id), null, '', {}, 'GET')).json();
   assert.equal(anonymous.count, 2);
   assert.ok(anonymous.members.every(m => m.initial && !('name' in m) && !('email' in m)));
-  // Verified members see the name and BYU email.
+  // Verified members see the attendee name (emails are never exposed).
   const seen = await (await request('/api/events/rsvp?id=' + encodeURIComponent(target.id), null, cookieA, {}, 'GET')).json();
-  assert.ok(seen.members.every(m => typeof m.name === 'string' && /@(student\.)?byu\.edu$/.test(m.email)));
+  assert.ok(seen.members.every(m => typeof m.name === 'string' && !('email' in m)));
   // Avatars must be real picture data URLs; anything else is rejected.
   const tiny = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
   assert.equal((await request('/api/profile', {avatar: tiny}, cookieA, {}, 'PUT')).status, 200);
@@ -813,7 +818,7 @@ test('saving events builds RSVP lists with avatar profiles and privacy rules', a
   assert.equal((await request('/api/profile', {hidden: true}, cookieA, {}, 'PUT')).status, 200);
   const hidden = await (await request('/api/events/rsvp?id=' + encodeURIComponent(target.id), null, cookieB, {}, 'GET')).json();
   assert.equal(hidden.count, 1);
-  assert.ok(hidden.members.every(m => m.email !== 'rsvp-a@byu.edu'));
+  assert.ok(hidden.members.every(m => !('email' in m)));
   // Unsaving leaves the list, and unknown events answer empty.
   assert.equal((await request('/api/preferences', {saved: [], views: []}, cookieB, {}, 'PUT')).status, 200);
   assert.equal((await (await request('/api/events/rsvp?id=' + encodeURIComponent(target.id), null, cookieB, {}, 'GET')).json()).count, 0);

@@ -71,7 +71,7 @@ async function sendReply(db: ReturnType<typeof database>, user: NonNullable<Acco
     throw new RequestError(429, 'You have reached today’s reply limit. Please try again tomorrow.');
   }
   const subject = row.subject && String(row.subject).startsWith('Re:') ? String(row.subject) : `Re: ${row.subject || 'your message'}`;
-  const text = `${data.body}\n\n—\nBYU Calendar · https://byucalendar.com\nIndependent student project, not an official BYU service.`;
+  const text = `${data.body}\n\n—\nBYU Calendar · https://byucalendar.com\nIndependent student project, not an official BYU service.\nMesa Assembly LLC · 327 West Harvest Moon Drive, Saratoga Springs, UT 84045`;
   const headers = row.message_id ? {'In-Reply-To': row.message_id, 'References': row.message_id} : undefined;
   const response = await fetch('https://api.resend.com/emails', {
     method: 'POST', signal: AbortSignal.timeout(20000),

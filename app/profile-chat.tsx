@@ -138,7 +138,7 @@ export default function ProfileChat({onFinished, onUpdated, restartsOnOpen}: {on
           <button className="text-button" onClick={restart}>Start Over</button>
         </div>
       )}
-      <p className="chat-footnote"><MessageCircleQuestion size={14}/> Question wording comes from the calendar&apos;s AI assistant; your answers and every pick are computed on our servers.</p>
+      <p className="chat-footnote"><MessageCircleQuestion size={14}/> Your chat answers and custom text are sent to our configured AI provider solely to phrase follow-up questions; your saved profile and event matching run on our servers.</p>
     </div>
   );
 }
