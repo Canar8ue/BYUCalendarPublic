@@ -3,8 +3,8 @@ import {database} from '../db';
 import {readAccount, authConfiguration} from './auth';
 import {json, errorResponse, readJSON, readBodyText, requireSameOrigin, RequestError} from './http.mjs';
 import {verifyWebhookSignature} from './webhook-sig.mjs';
-import {normalizeInboundEmail, htmlToText, buildPreview, parseReadInput, parseReply, INBOX_BODY_LIMIT} from './inbox.mjs';
-import {consumeQuota} from './community-store.mjs';
+import {normalizeInboundEmail, htmlToText, buildPreview, parseReadInput, parseReply, parseInterestSuggestion, INBOX_BODY_LIMIT} from './inbox.mjs';
+import {consumeQuota, requireContributor} from './community-store.mjs';
 import type {AccountState} from '../app/types';
 
 // The moderator inbox: mail sent to the public contact address arrives
@@ -137,6 +137,25 @@ export async function inboundWebhook(request: Request) {
   } catch (error) {
     // RequestErrors carry their status; anything else (bad JSON, content
     // fetch failure) becomes a 503 so Resend retries the delivery.
+    return errorResponse(error);
+  }
+}
+
+export async function suggestInterestRequest(request: Request) {
+  try {
+    const account = await readAccount(request);
+    const user = requireContributor(account);
+    requireSameOrigin(request, authConfiguration().origin);
+    const data = parseInterestSuggestion(await readJSON(request));
+    const db = database();
+    if (!(await consumeQuota(db, `interest-suggest:${user.id}`, 10, 86400))) {
+      throw new RequestError(429, 'You have reached today’s suggestion limit. Please try again tomorrow.');
+    }
+    const bodyText = `Suggested interest: ${data.interest}\nSubmitted by: ${user.name} (${user.email})${data.note ? `\n\nDetails:\n${data.note}` : ''}`;
+    await db.prepare('INSERT INTO inbound_emails(id,from_address,to_address,subject,preview,body_text,message_id,received_at) VALUES(?,?,?,?,?,?,?,?)')
+      .bind(`interest-${crypto.randomUUID()}`, user.email, inboxConfiguration().address, `Interest suggestion: ${data.interest}`, buildPreview(bodyText), bodyText, null, new Date().toISOString()).run();
+    return json({ok: true}, 201);
+  } catch (error) {
     return errorResponse(error);
   }
 }

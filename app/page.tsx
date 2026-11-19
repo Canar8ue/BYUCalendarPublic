@@ -1,7 +1,7 @@
 import type {Metadata} from 'next';
 import CalendarApp from './calendar-app';
 import {readCalendar} from '../lib/calendar-server';
-import {lastDay} from '../lib/catalog.mjs';
+import {lastDay,mountainZoneAbbr} from '../lib/catalog.mjs';
 import {dayKey} from '../lib/search.mjs';
 import {compareCalendarEvents} from '../lib/event-presentation.mjs';
 import {requestSearchPage,searchPageEvents,searchPageWindow} from '../lib/search-pages.mjs';
@@ -12,7 +12,8 @@ export const dynamic='force-dynamic';
 export async function generateMetadata({searchParams}:PageProps):Promise<Metadata>{
  const page=requestSearchPage(await searchParams);
  if(!page)return {};
- const description=`Find BYU events for ${searchPageWindow(page).range}, in Mountain Time, from linked calendars and community additions.`;
+ const now=new Date();
+ const description=`Find BYU events for ${searchPageWindow(page,now).range}, in ${mountainZoneAbbr(now)}, from linked calendars and community additions.`;
  return {title:page.title,description,alternates:{canonical:page.href},openGraph:{title:page.title,description,url:page.href},twitter:{title:page.title,description}};
 }
 

@@ -1,6 +1,6 @@
 'use client';
 import {useEffect, useState} from 'react';
-import {CalendarPlus, Check, Copy, LoaderCircle, Sparkles} from 'lucide-react';
+import {ArrowUpRight, CalendarDays, CalendarPlus, Check, Copy, LoaderCircle, Mail, Sparkles} from 'lucide-react';
 import {getJSON} from './account-client';
 
 // The live-subscription dialog. It hands out two links: the filters currently
@@ -17,6 +17,7 @@ function webcal(url: string) {
 export default function SubscribeDialog({filterSummary, feedPath, signedIn}: Props) {
   const [copied, setCopied] = useState<'' | 'filter' | 'saved'>('');
   const [copyError, setCopyError] = useState('');
+  const [showAppsFor, setShowAppsFor] = useState<'' | 'filter' | 'saved'>('');
   const [personal, setPersonal] = useState<Personal>({state: signedIn ? 'loading' : 'idle'});
 
   useEffect(() => {
@@ -50,14 +51,19 @@ export default function SubscribeDialog({filterSummary, feedPath, signedIn}: Pro
 
     <section className="subscribe-block">
       <p className="section-label">WHAT YOU ARE LOOKING AT</p>
-      <p className="subscribe-summary">{filterSummary || 'All events'}</p>
+      <p className="subscribe-summary">{filterSummary || 'All Events'}</p>
       <code className="subscribe-url">{filterUrl || 'Loading the link…'}</code>
       <div className="subscribe-actions">
         <button type="button" className="primary-button" disabled={!filterUrl} onClick={() => copyUrl(filterUrl, 'filter')}>
-          {copied === 'filter' ? <><Check size={16}/> Copied</> : <><Copy size={16}/> Copy feed link</>}
+          {copied === 'filter' ? <><Check size={16}/> Copied</> : <><Copy size={16}/> Copy Feed Link</>}
         </button>
-        {filterUrl && <a className="outline-button" href={webcal(filterUrl)}>Open in my calendar app</a>}
+        {filterUrl && <button type="button" className="outline-button" aria-expanded={showAppsFor === 'filter'} onClick={() => setShowAppsFor(current => current === 'filter' ? '' : 'filter')}>Open in My Calendar App</button>}
       </div>
+      {filterUrl && showAppsFor === 'filter' && <div className="calendar-options account-sync-options">
+        <a className="calendar-option" href={'https://calendar.google.com/calendar/r?cid=' + encodeURIComponent(webcal(filterUrl))} target="_blank" rel="noreferrer"><span className="calendar-option-mark google"><CalendarDays size={19}/></span><span><b>Google Calendar</b><small>Subscribe via your calendar feed URL.</small></span><ArrowUpRight size={16}/></a>
+        <a className="calendar-option" href={'https://outlook.live.com/calendar/0/addfromweb?url=' + encodeURIComponent(filterUrl) + '&name=' + encodeURIComponent('BYU Calendar')} target="_blank" rel="noreferrer"><span className="calendar-option-mark outlook"><Mail size={19}/></span><span><b>Outlook</b><small>Subscribe from web in Outlook.</small></span><ArrowUpRight size={16}/></a>
+        <a className="calendar-option" href={webcal(filterUrl)}><span className="calendar-option-mark apple"><CalendarPlus size={19}/></span><span><b>Apple Calendar / Default App</b><small>Opens your device&rsquo;s calendar subscription prompt.</small></span><ArrowUpRight size={16}/></a>
+      </div>}
       <p className="subscribe-hint">This link follows the filters on screen. Change the filters and copy a new link, or clear them to include everything.</p>
     </section>
 
@@ -65,15 +71,20 @@ export default function SubscribeDialog({filterSummary, feedPath, signedIn}: Pro
       <p className="section-label">JUST YOUR SAVED EVENTS</p>
       {personal.state === 'loading' && <p className="subscribe-hint"><LoaderCircle className="spin" size={15}/> Building your personal link…</p>}
       {personal.state === 'error' && <p className="subscribe-hint">Your personal link is unavailable right now. The filtered link above still works.</p>}
-      {personal.state === 'ready' && <>
+      {personal.state === 'ready' && personal.webcal && <>
         <p className="subscribe-summary"><Sparkles size={13}/> Everything you save, kept up to date in your own calendar.</p>
         <code className="subscribe-url">{personalUrl}</code>
         <div className="subscribe-actions">
           <button type="button" className="primary-button" onClick={() => copyUrl(personalUrl, 'saved')}>
-            {copied === 'saved' ? <><Check size={16}/> Copied</> : <><Copy size={16}/> Copy personal link</>}
+            {copied === 'saved' ? <><Check size={16}/> Copied</> : <><Copy size={16}/> Copy Personal Link</>}
           </button>
-          <a className="outline-button" href={personal.webcal}>Open in my calendar app</a>
+          <button type="button" className="outline-button" aria-expanded={showAppsFor === 'saved'} onClick={() => setShowAppsFor(current => current === 'saved' ? '' : 'saved')}>Open in My Calendar App</button>
         </div>
+        {showAppsFor === 'saved' && <div className="calendar-options account-sync-options">
+          <a className="calendar-option" href={'https://calendar.google.com/calendar/r?cid=' + encodeURIComponent(personal.webcal)} target="_blank" rel="noreferrer"><span className="calendar-option-mark google"><CalendarDays size={19}/></span><span><b>Google Calendar</b><small>Subscribe via your personal calendar sync URL.</small></span><ArrowUpRight size={16}/></a>
+          <a className="calendar-option" href={'https://outlook.live.com/calendar/0/addfromweb?url=' + encodeURIComponent(personalUrl) + '&name=' + encodeURIComponent('BYU Calendar')} target="_blank" rel="noreferrer"><span className="calendar-option-mark outlook"><Mail size={19}/></span><span><b>Outlook</b><small>Subscribe from web in Outlook with your personal sync URL.</small></span><ArrowUpRight size={16}/></a>
+          <a className="calendar-option" href={personal.webcal}><span className="calendar-option-mark apple"><CalendarPlus size={19}/></span><span><b>Apple Calendar / Default App</b><small>Opens your device&rsquo;s calendar subscription prompt.</small></span><ArrowUpRight size={16}/></a>
+        </div>}
         <p className="subscribe-hint">This link is personal: anyone who has it can read the events you saved. Events you unsave drop out on the next refresh.</p>
       </>}
     </section>}
@@ -87,6 +98,6 @@ export default function SubscribeDialog({filterSummary, feedPath, signedIn}: Pro
       <p><span>Outlook</span> Add calendar → Subscribe from web, then paste.</p>
     </section>
 
-    <p className="subscribe-note">Added calendars refresh on the app&rsquo;s own schedule, usually every few hours. Need a one-time copy instead? Close this and use <b>Export these events</b> under the calendar.</p>
+    <p className="subscribe-note">Added calendars refresh on the app&rsquo;s own schedule, usually every few hours. Need a one-time copy instead? Close this and use <b>Export These Events</b> under the calendar.</p>
   </div>;
 }

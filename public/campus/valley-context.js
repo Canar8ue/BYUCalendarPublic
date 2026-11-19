@@ -61,7 +61,7 @@ function makeValleyToonMaterial(gradientMap){
 // Optional scenery loads after campus is usable. No textures, shadows, picking,
 // animation, new decoder, or network calls to a terrain service at runtime.
 export function loadValleyContext(loader,scene,camera,invalidate,{gradientMap,sunPosition}={}){
-  const load=()=>loader.loadAsync('./valley_lod.glb?v=20261116mapui1').then(({scene:valley})=>{
+  const load=()=>loader.loadAsync('./valley_lod.glb?v=20261118mapui3').then(({scene:valley})=>{
     valley.name='Valley context';
     const valleyMat=gradientMap?makeValleyToonMaterial(gradientMap):null;
     valley.traverse(object=>{

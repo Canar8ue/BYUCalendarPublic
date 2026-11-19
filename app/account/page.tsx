@@ -1,9 +1,10 @@
 'use client';
 import {useEffect, useState} from 'react';
-import {ShieldCheck, LogOut, Plus, Flag, Copy, Check, GraduationCap, ClipboardList} from 'lucide-react';
+import {ShieldCheck, LogOut, Plus, Flag, Copy, Check, GraduationCap, ClipboardList, CalendarDays, Mail, CalendarPlus, ArrowUpRight} from 'lucide-react';
 import AccountShell from '../account-shell';
 import {postJSON, useAccount, getJSON} from '../account-client';
 import {STAFF_AREAS} from '../../lib/staff.mjs';
+import {mountainZoneAbbr} from '../../lib/catalog.mjs';
 
 const STAFF_REQUEST_STASH = 'byucalendar-staff-request';
 
@@ -13,6 +14,7 @@ export default function AccountPage() {
   const [digest, setDigest] = useState({loaded: false, optedIn: false, busy: false});
   const [feed, setFeed] = useState<{state: 'loading' | 'ready' | 'error'; url?: string; webcal?: string}>({state: 'loading'});
   const [feedCopied, setFeedCopied] = useState(false);
+  const [showFeedApps, setShowFeedApps] = useState(false);
   const [staffAreaId, setStaffAreaId] = useState(''), [staffBusy, setStaffBusy] = useState(false);
   // Public profile: the avatar and the hide-from-RSVV-lists switch.
   const [avatar, setAvatar] = useState<{state: 'loading' | 'ready'; url: string | null; hidden: boolean; busy: boolean}>({state: 'loading', url: null, hidden: false, busy: false});
@@ -142,72 +144,77 @@ export default function AccountPage() {
   return <AccountShell><section className="account-card account-single"><span className="account-icon"><ShieldCheck size={28}/></span><div className="eyebrow">YOUR ACCOUNT</div><h1>Made for <span>you.</span></h1>
     {(accountError || error) && <p className="form-error" role="alert">{accountError || error}</p>}
     {!account && !accountError && <p role="status">Loading your account…</p>}
-    {account?.user ? <><p className="account-email">{account.user.email}</p><span className="community-badge">{account.permissions.addListings ? 'Verified BYU email' : 'Email verification required'}</span><p className="account-description">Your saved events and filters belong to this account. Verified members can publish listings, add tags, and report issues.</p><div className="account-actions"><a className="primary-button" href="/listings/new"><Plus size={16}/> Add a listing</a><a className="outline-button" href="/listings/mine"><ClipboardList size={16}/> Your listings</a>{account.permissions.reviewReports && <a className="outline-button" href="/moderation"><Flag size={16}/> Review reports</a>}<button className="outline-button" disabled={busy} onClick={signOut}><LogOut size={16}/> {busy ? 'Signing out…' : 'Sign out'}</button></div>
+    {account?.user ? <><p className="account-email">{account.user.email}</p><span className="community-badge">{account.permissions.addListings ? 'Verified BYU Email' : 'Email Verification Required'}</span><p className="account-description">Your saved events and filters belong to this account. Verified members can publish listings, add tags, and report issues.</p><div className="account-actions"><a className="primary-button" href="/listings/new"><Plus size={16}/> Add a Listing</a><a className="outline-button" href="/listings/mine"><ClipboardList size={16}/> Your Listings</a>{account.permissions.reviewReports && <a className="outline-button" href="/moderation"><Flag size={16}/> Review Reports</a>}<button className="outline-button" disabled={busy} onClick={signOut}><LogOut size={16}/> {busy ? 'Signing out…' : 'Sign Out'}</button></div>
       <div className="account-digest">
         <div className="eyebrow">PUBLIC PROFILE</div>
         <p className="account-description">Saving an event adds you to its RSVP list so classmates can see who is going — your picture and first initial for everyone, your name and BYU email for signed-in members. You can hide yourself at any time.</p>
         <div className="profile-editor">
           <span className="profile-editor-avatar">{avatar.url ? <img src={avatar.url} alt="Your profile picture"/> : (account.user.name || account.user.email).charAt(0).toUpperCase()}</span>
           <div className="profile-editor-actions">
-            <label className="outline-button">{avatar.busy ? 'Saving…' : avatar.url ? 'Change picture' : 'Add a picture'}<input type="file" accept="image/png,image/jpeg,image/webp" hidden disabled={avatar.busy} onChange={e => { const file = e.target.files?.[0]; e.target.value = ''; onAvatarChange(file); }}/></label>
-            {avatar.url && <button className="outline-button" disabled={avatar.busy} onClick={() => void saveProfile({avatar: null})}>Remove picture</button>}
-            <button className="outline-button" disabled={avatar.busy} onClick={() => void saveProfile({hidden: !avatar.hidden})}>{avatar.hidden ? 'Show me on RSVP lists' : 'Hide me from RSVP lists'}</button>
+            <label className="outline-button">{avatar.busy ? 'Saving…' : avatar.url ? 'Change Picture' : 'Add a Picture'}<input type="file" accept="image/png,image/jpeg,image/webp" hidden disabled={avatar.busy} onChange={e => { const file = e.target.files?.[0]; e.target.value = ''; onAvatarChange(file); }}/></label>
+            {avatar.url && <button className="outline-button" disabled={avatar.busy} onClick={() => void saveProfile({avatar: null})}>Remove Picture</button>}
+            <button className="outline-button" disabled={avatar.busy} onClick={() => void saveProfile({hidden: !avatar.hidden})}>{avatar.hidden ? 'Show Me on RSVP Lists' : 'Hide Me from RSVP Lists'}</button>
           </div>
         </div>
         {avatar.state === 'loading' && <p className="account-description" role="status">Loading your profile…</p>}
-        {avatar.hidden && <span className="community-badge">Hidden from RSVP lists</span>}
+        {avatar.hidden && <span className="community-badge">Hidden from RSVP Lists</span>}
       </div>
       <div className="account-digest">
         <div className="eyebrow">BYU PROFESSOR OR STAFF</div>
         {account.staff?.status === 'verified' ? <>
-          <p className="account-description">Your account is verified for <strong>{account.staff.areaLabel}</strong>. Events you publish are labeled “BYU added event”, and you can correct any listing in your area — open it and choose Edit listing.</p>
-          <span className="community-badge byu-badge"><GraduationCap size={12}/> Verified staff · {account.staff.areaLabel}</span>
+          <p className="account-description">Your account is verified for <strong>{account.staff.areaLabel}</strong>. Events you publish are labeled “BYU added event”, and you can correct any listing in your area — open it and choose Edit Listing.</p>
+          <span className="community-badge byu-badge"><GraduationCap size={12}/> Verified Staff · {account.staff.areaLabel}</span>
         </> : account.staff?.status === 'pending' ? <>
           <p className="account-description">Your request for <strong>{account.staff.areaLabel}</strong> is waiting for an administrator to verify you. Until then your account works exactly like a student account.</p>
-          <span className="community-badge">Verification pending</span>
+          <span className="community-badge">Verification Pending</span>
         </> : account.staff?.status === 'denied' ? (
           <p className="account-description">Your last staff request was declined. If that seems wrong, reply from your BYU email to privacy@byucalendar.com.</p>
         ) : <>
           <p className="account-description">Professors and BYU staff can request verification: your published events are labeled “BYU added event” and you can correct listings in your area. Sign-up started this automatically if you checked the box there.</p>
           <div className="account-actions">
-            <select aria-label="Staff area" value={staffAreaId} onChange={e => setStaffAreaId(e.target.value)} disabled={staffBusy} style={{padding:'10px 12px',borderRadius:8,border:'1px solid var(--line,#d8dce2)'}}>
+            <select aria-label="Staff area" className="account-select" value={staffAreaId} onChange={e => setStaffAreaId(e.target.value)} disabled={staffBusy}>
               <option value="">Choose your area…</option>
               {STAFF_AREAS.map(area => <option key={area.id} value={area.id}>{area.label}</option>)}
             </select>
-            <button className="outline-button" disabled={!staffAreaId || staffBusy} onClick={requestStaff}>{staffBusy ? 'Sending…' : 'Request verification'}</button>
+            <button className="outline-button" disabled={!staffAreaId || staffBusy} onClick={requestStaff}>{staffBusy ? 'Sending…' : 'Request Verification'}</button>
           </div>
         </>}
       </div>
       <div className="account-digest">
         <div className="eyebrow">DAILY EMAIL DIGEST</div>
-        <p className="account-description">Once a morning between 7:00 and 10:00 AM Mountain Time, we email a summary of the events you saved for that day. It is off until you turn it on, and you can turn it off here or from any digest email.</p>
-        <button className="outline-button" disabled={!digest.loaded || digest.busy} onClick={() => toggleDigest(!digest.optedIn)}>{digest.optedIn ? 'Turn off the daily digest' : 'Turn on the daily digest'}</button>
+        <p className="account-description">Once a morning between 7:00 and 10:00 AM {mountainZoneAbbr()}, we email a summary of the events you saved for that day. It is off until you turn it on, and you can turn it off here or from any digest email.</p>
+        <button className="outline-button" disabled={!digest.loaded || digest.busy} onClick={() => toggleDigest(!digest.optedIn)}>{digest.optedIn ? 'Turn Off Daily Digest' : 'Turn On Daily Digest'}</button>
         {digest.loaded && digest.optedIn && <span className="community-badge">On</span>}
         {!digest.loaded && <p className="account-description" role="status">Checking your digest setting…</p>}
       </div>
       <div className="account-digest">
-        <div className="eyebrow">CALENDAR SUBSCRIPTION</div>
+        <div className="eyebrow">CALENDAR SYNC</div>
         <p className="account-description">Add your saved events to Google Calendar, Apple Calendar, or Outlook once, and they stay current as the sources update. The link is personal: anyone who has it can read the events you saved, and events you unsave drop out on the next refresh.</p>
-        {feed.state === 'ready' ? <>
+        {feed.state === 'ready' && feed.url && feed.webcal ? <>
           <code className="account-feed-url">{feed.url}</code>
           <div className="account-actions">
-            <button className="outline-button" onClick={copyFeed}>{feedCopied ? <><Check size={16}/> Copied</> : <><Copy size={16}/> Copy link</>}</button>
-            <a className="outline-button" href={feed.webcal}>Open in my calendar app</a>
+            <button className="outline-button" onClick={copyFeed}>{feedCopied ? <><Check size={16}/> Copied</> : <><Copy size={16}/> Copy Link</>}</button>
+            <button type="button" className="outline-button" aria-expanded={showFeedApps} onClick={() => setShowFeedApps(v => !v)}>Open in My Calendar App</button>
           </div>
+          {showFeedApps && <div className="calendar-options account-sync-options">
+            <a className="calendar-option" href={'https://calendar.google.com/calendar/r?cid=' + encodeURIComponent(feed.webcal)} target="_blank" rel="noreferrer"><span className="calendar-option-mark google"><CalendarDays size={19}/></span><span><b>Google Calendar</b><small>Subscribe via your personal calendar sync URL.</small></span><ArrowUpRight size={16}/></a>
+            <a className="calendar-option" href={'https://outlook.live.com/calendar/0/addfromweb?url=' + encodeURIComponent(feed.url) + '&name=' + encodeURIComponent('BYU Calendar')} target="_blank" rel="noreferrer"><span className="calendar-option-mark outlook"><Mail size={19}/></span><span><b>Outlook</b><small>Subscribe from web in Outlook with your personal sync URL.</small></span><ArrowUpRight size={16}/></a>
+            <a className="calendar-option" href={feed.webcal}><span className="calendar-option-mark apple"><CalendarPlus size={19}/></span><span><b>Apple Calendar / Default App</b><small>Opens your device&rsquo;s calendar subscription prompt.</small></span><ArrowUpRight size={16}/></a>
+          </div>}
         </> : <p className="account-description" role="status">{feed.state === 'error' ? 'Your personal link is unavailable right now. Reload the page to try again.' : 'Building your personal link…'}</p>}
       </div>
       <div className="account-digest">
         <div className="eyebrow">DELETE YOUR ACCOUNT</div>
         <p className="account-description">Permanently deletes your account and everything it owns on our servers: saved events and filters, digest setting, picks profile, and the listings, tags, and reports you published. This cannot be undone. Type DELETE to confirm.</p>
         {!deleting ? (
-          <button className="outline-button" onClick={() => setDeleting(true)}>Delete my account…</button>
+          <button className="outline-button" onClick={() => setDeleting(true)}>Delete My Account…</button>
         ) : (
           <div className="account-actions">
             <input value={confirmText} onChange={e => setConfirmText(e.target.value)} placeholder="Type DELETE" aria-label="Type DELETE to confirm account deletion" style={{padding:'10px 12px',borderRadius:8,border:'1px solid var(--line,#d8dce2)',minWidth:140}}/>
-            <button className="outline-button" disabled={busy || confirmText !== 'DELETE'} onClick={deleteAccount}>{busy ? 'Deleting…' : 'Delete permanently'}</button>
+            <button className="outline-button" disabled={busy || confirmText !== 'DELETE'} onClick={deleteAccount}>{busy ? 'Deleting…' : 'Delete Permanently'}</button>
             <button className="outline-button" disabled={busy} onClick={() => {setDeleting(false); setConfirmText('');}}>Cancel</button>
           </div>
         )}
-      </div></> : account && <><p className="account-description">Sign in with your BYU email to save events and contribute.</p><a className="primary-button" href="/signin?returnTo=/account">Sign in</a></>}
+      </div></> : account && <><p className="account-description">Sign in with your BYU email to save events and contribute.</p><a className="primary-button" href="/signin?returnTo=/account">Sign In</a></>}
   </section></AccountShell>;
 }

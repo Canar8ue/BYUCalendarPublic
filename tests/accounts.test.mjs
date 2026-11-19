@@ -21,7 +21,7 @@ const mail = new Map(); let ip = 1;
 before(async () => {
   mf = new Miniflare({modules: true, script: 'export default {fetch(){return new Response("test");}}', compatibilityDate: '2026-05-01', d1Databases: ['DB']});
   db = await mf.getD1Database('DB');
-  for (const file of ['0000_pink_scarlet_spider.sql', '0001_byu_accounts_community.sql', '0004_event_moderation.sql', '0008_staff_accounts.sql', '0009_event_saves_profiles.sql']) {
+  for (const file of ['0000_pink_scarlet_spider.sql', '0001_byu_accounts_community.sql', '0004_event_moderation.sql', '0008_staff_accounts.sql', '0009_event_saves_profiles.sql', '0010_listing_approval.sql']) {
     const statements = readFileSync(new URL('../drizzle/' + file, import.meta.url), 'utf8').replaceAll('--> statement-breakpoint', '').split(';').map(s => s.trim()).filter(Boolean);
     await db.batch(statements.map(sql => db.prepare(sql)));
   }
@@ -179,22 +179,36 @@ test('every contribution rejects anonymous, unverified, and non-BYU accounts', a
   }
 });
 
-test('listings publish immediately, survive source replacement, and never expose account IDs', async () => {
+test('student listings wait for moderator approval while admin and staff listings publish immediately', async () => {
   const input = listing();
-  const event = await publishListing(db, member.account, input);
-  assert.equal((await publishListing(db, member.account, input)).id, event.id);
-  assert.equal(event.community, true);
+  const pendingEvent = await publishListing(db, member.account, input);
+  assert.equal((await publishListing(db, member.account, input)).id, pendingEvent.id);
+  assert.equal(pendingEvent.community, true);
+  assert.equal(pendingEvent.approvalStatus, 'pending');
+  assert.ok(!(await communityCalendar(db, [])).some(e => e.id === pendingEvent.id), 'pending listing is hidden before approval');
+  const mine = await readMyListings(db, member.account);
+  assert.equal(mine.find(e => e.id === pendingEvent.id)?.approvalStatus, 'pending');
+  const queue = await readModerationInventory(db, admin.account);
+  assert.ok(queue.pending.some(row => row.id === pendingEvent.id), 'pending queue lists unapproved submission');
+  await moderateEvent(db, admin.account, {action: 'approve', id: pendingEvent.id});
   const initial = await communityCalendar(db, []);
-  assert.ok(initial.some(e => e.id === event.id));
-  assert.ok((await communityCalendar(db, [])).some(e => e.id === event.id));
+  assert.ok(initial.some(e => e.id === pendingEvent.id), 'approved listing appears in public calendar');
   assert.ok(!JSON.stringify(initial).includes(member.account.user.email));
   assert.ok(!JSON.stringify(initial).includes(member.account.user.id));
-  assert.match(exportICS([event]), /Student project showcase/);
+  const declined = await publishListing(db, member.account, listing({title: 'Declined listing test'}));
+  await moderateEvent(db, admin.account, {action: 'reject', id: declined.id});
+  assert.ok(!(await communityCalendar(db, [])).some(e => e.id === declined.id));
+  assert.equal((await readMyListings(db, member.account)).find(e => e.id === declined.id)?.approvalStatus, 'rejected');
+  const adminEvent = await publishListing(db, admin.account, listing({title: 'Admin immediate listing'}));
+  assert.equal(adminEvent.approvalStatus, 'approved');
+  assert.ok((await communityCalendar(db, [])).some(e => e.id === adminEvent.id));
+  assert.match(exportICS([pendingEvent]), /Student project showcase/);
   await assert.rejects(publishListing(db, member.account, listing({userId: admin.account.user.id})), e => e.status === 400);
 });
 
 test('authors can edit and delete only their own listings', async () => {
   const event = await publishListing(db, member.account, listing());
+  await moderateEvent(db, admin.account, {action: 'approve', id: event.id});
   const find = async id => (await communityCalendar(db, [])).find(e => e.id === id);
   const input = {id: event.id, title: 'Renamed project showcase', organizer: 'Campus builders', description: 'Meet students and see their latest projects. The showcase now includes demos.', start: tomorrow() + 'T18:00', end: tomorrow() + 'T19:00', allDay: false, category: 'Campus life', location: 'WSC 101', url: 'https://clubs.byu.edu/'};
   const updated = await updateListing(db, member.account, input);
@@ -221,6 +235,7 @@ test('authors can edit and delete only their own listings', async () => {
 
 test('community tags enter search without rewriting source facts; duplicate tags are harmless', async () => {
   const event = await publishListing(db, member.account, listing());
+  await moderateEvent(db, admin.account, {action: 'approve', id: event.id});
   const find = async id => (await communityCalendar(db, [])).find(e => e.id === id);
   const input = {eventId: event.id, tag: 'Food provided', note: 'The organizer confirmed that pizza is included.'};
   await publishTag(db, member.account, input, find);
@@ -255,6 +270,7 @@ test('a delayed delete cannot remove a listing ID recreated by another author', 
 
 test('reports are private, deduplicated, and actionable only by reviewers', async () => {
   const event = await publishListing(db, member.account, listing());
+  await moderateEvent(db, admin.account, {action: 'approve', id: event.id});
   const find = async id => (await communityCalendar(db, [])).find(e => e.id === id);
   await publishTag(db, member.account, {eventId: event.id, tag: 'IS', note: 'The listing is for Information Systems students.'}, find);
   const input = {eventId: event.id, reason: 'Incorrect details', details: 'Private report: organizer has cancelled the event.'};
@@ -278,6 +294,7 @@ test('moderators edit and delete any listing; source corrections survive read ti
   const find = async id => (await communityCalendar(db, sourceEvents)).find(e => e.id === id);
   await db.prepare("INSERT INTO source_snapshots (id,payload,last_success,lock_until) VALUES (?,?,'2026-09-21T00:00:00Z',0) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload").bind('test-src', JSON.stringify(sourceEvents)).run();
   const memberListing = await publishListing(db, member.account, listing());
+  await moderateEvent(db, admin.account, {action: 'approve', id: memberListing.id});
   // Moderation powers fail closed for ordinary members.
   await assert.rejects(moderateEvent(db, member.account, {action: 'delete', id: memberListing.id}), e => e.status === 403);
   await assert.rejects(readModerationInventory(db, member.account), e => e.status === 403);

@@ -8,27 +8,48 @@ import type {CampusEvent,CalendarData} from '../app/types';
 
 type Snapshot={id:string;payload:string;last_success:string;last_attempt:string|null;error:string|null;lock_until:number};
 
+let seededDb:ReturnType<typeof database>|null=null;
+let seedPromise:Promise<void>|null=null;
+
 async function ensureSeed(){
  const db=database();
- const existing=new Set((await db.prepare('SELECT id FROM source_snapshots').all<{id:string}>()).results.map(r=>r.id));
- const missing=SOURCES.filter(s=>!existing.has(s.id));
- // Add newly connected sources to existing databases as well as fresh installations.
- if(missing.length)await db.batch(missing.map(source=>{const saved=seed.find(s=>s.id===source.id);return db.prepare('INSERT INTO source_snapshots (id,payload,last_success,lock_until) VALUES (?,?,?,0) ON CONFLICT(id) DO NOTHING').bind(source.id,JSON.stringify(saved?.events||[]),saved?.lastSuccess||'1970-01-01T00:00:00Z');}));
- for(const source of SOURCES.filter(s=>s.kind==='snapshot')){const saved=seed.find(s=>s.id===source.id);if(saved)await db.prepare('UPDATE source_snapshots SET payload=?,last_success=?,error=NULL WHERE id=? AND last_success<?').bind(JSON.stringify(saved.events),saved.lastSuccess,source.id,saved.lastSuccess).run();}
+ if(seededDb===db&&seedPromise){await seedPromise;return db;}
+ seededDb=db;
+ seedPromise=(async()=>{
+  const existing=new Set((await db.prepare('SELECT id FROM source_snapshots').all<{id:string}>()).results.map(r=>r.id));
+  const missing=SOURCES.filter(s=>!existing.has(s.id));
+  // Add newly connected sources to existing databases as well as fresh installations.
+  if(missing.length)await db.batch(missing.map(source=>{const saved=seed.find(s=>s.id===source.id);return db.prepare('INSERT INTO source_snapshots (id,payload,last_success,lock_until) VALUES (?,?,?,0) ON CONFLICT(id) DO NOTHING').bind(source.id,JSON.stringify(saved?.events||[]),saved?.lastSuccess||'1970-01-01T00:00:00Z');}));
+  for(const source of SOURCES.filter(s=>s.kind==='snapshot')){const saved=seed.find(s=>s.id===source.id);if(saved)await db.prepare('UPDATE source_snapshots SET payload=?,last_success=?,error=NULL WHERE id=? AND last_success<?').bind(JSON.stringify(saved.events),saved.lastSuccess,source.id,saved.lastSuccess).run();}
+ })().catch(error=>{seededDb=null;seedPromise=null;throw error;});
+ await seedPromise;
  return db;
 }
 // The merged calendar only changes when a source refresh or a community/moderation
-// mutation runs, so a short shared cache avoids recomputing ~1400 events per view.
-let calendarCache:{at:number;data:CalendarData}|null=null;
+// mutation runs, so a short shared cache + singleflight avoids recomputing ~2,700
+// events across concurrent views.
+let calendarCache:{at:number;data:CalendarData;json?:string}|null=null;
 let cacheGeneration=0;
-const CALENDAR_CACHE_MS=30000;
-export function invalidateCalendar(){calendarCache=null;cacheGeneration++;}
+let inflightBuild:{generation:number;promise:Promise<CalendarData>}|null=null;
+const CALENDAR_CACHE_MS=60000;
+export function invalidateCalendar(){calendarCache=null;inflightBuild=null;cacheGeneration++;}
 export async function readCalendar():Promise<CalendarData>{
  if(calendarCache&&Date.now()-calendarCache.at<CALENDAR_CACHE_MS)return calendarCache.data;
+ if(inflightBuild&&inflightBuild.generation===cacheGeneration)return inflightBuild.promise;
  const generation=cacheGeneration;
- const data=await buildCalendar();
- if(generation===cacheGeneration)calendarCache={at:Date.now(),data};
- return data;
+ const promise=buildCalendar().then(data=>{
+  if(generation===cacheGeneration)calendarCache={at:Date.now(),data};
+  return data;
+ }).finally(()=>{
+  if(inflightBuild?.promise===promise)inflightBuild=null;
+ });
+ inflightBuild={generation,promise};
+ return promise;
+}
+export async function readCalendarJSON():Promise<string>{
+ const data=await readCalendar();
+ if(calendarCache?.data===data)return calendarCache.json??=JSON.stringify(data);
+ return JSON.stringify(data);
 }
 async function buildCalendar():Promise<CalendarData>{
  const db=await ensureSeed(),rows=(await db.prepare('SELECT * FROM source_snapshots').all<Snapshot>()).results;
@@ -41,7 +62,17 @@ async function buildCalendar():Promise<CalendarData>{
  const community=events.filter(e=>e.community);
  return {events,sources:[...statuses,...(community.length?[{id:'community',name:'Community listings',url:'/',enabled:true,count:community.filter(e=>!e.cancelled&&lastDay(e)>=today).length,lastSuccess:null,error:null,note:'Published by members with verified BYU email addresses. Details are community submitted.'}]:[]),...UNCONNECTED.map(s=>({...s,enabled:false,count:0,lastSuccess:null,error:null}))],stored:true};
 }
+let inflightRefresh:Promise<{refreshed:number}>|null=null;
+let inflightRefreshForce=false;
 export async function refreshCalendar(force=false){
+ if(inflightRefresh&&(!force||inflightRefreshForce))return inflightRefresh;
+ if(inflightRefresh)await inflightRefresh.catch(()=>{});
+ inflightRefreshForce=force;
+ const run=runRefresh(force).finally(()=>{if(inflightRefresh===run){inflightRefresh=null;inflightRefreshForce=false;}});
+ inflightRefresh=run;
+ return run;
+}
+async function runRefresh(force=false){
  const db=await ensureSeed(),rows=(await db.prepare('SELECT * FROM source_snapshots').all<Snapshot>()).results;let refreshed=0;
  for(const source of SOURCES){
    if(source.kind==='snapshot')continue;

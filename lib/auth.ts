@@ -20,11 +20,15 @@ export function authConfiguration() {
   return {secret, origin, configured, emailReady: configured && Boolean(env.RESEND_API_KEY && env.AUTH_EMAIL_FROM)};
 }
 
+let cachedAuth: {db: ReturnType<typeof database>; key: string; auth: ReturnType<typeof createAccountAuth>} | null = null;
+
 export function accountAuth() {
   const config = authConfiguration();
   if (!config.configured) return null;
   const db = database();
-  return createAccountAuth({
+  const key = [config.secret, config.origin, env.RESEND_API_KEY || '', env.AUTH_EMAIL_FROM || ''].join('\0');
+  if (cachedAuth && cachedAuth.db === db && cachedAuth.key === key) return cachedAuth.auth;
+  const auth = createAccountAuth({
     database: drizzleAdapter(drizzle(db, {schema}), {provider: 'sqlite', schema, transaction: false}),
     secret: config.secret, baseURL: config.origin,
     reserveSend: async email => {
@@ -46,6 +50,8 @@ export function accountAuth() {
       await response.body?.cancel();
     } : null,
   });
+  cachedAuth = {db, key, auth};
+  return auth;
 }
 
 export async function readAccount(request: Request): Promise<AccountState> {

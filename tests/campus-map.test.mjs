@@ -23,7 +23,7 @@ test('pins group filtered daily events, preserving category counts and unmapped 
  const events=[event('a','TNRB 151'),event('b','Tanner Building',{category:'Career & business',tags:['Food provided']}),event('c','WSC'),event('d','TBD'),event('e','TNRB',{start:'2026-09-17T00:00:00Z',end:null})];
  const {groups,unmapped}=groupCampusEvents(events,'2026-09-15');
  assert.equal(groups.length,2);assert.equal(groups[0].events.length,2);
- assert.deepEqual(groups[0].colors,[{color:'blue',count:1},{color:'green',count:1}]);assert.deepEqual(unmapped.map(e=>e.id),['d']);
+ assert.deepEqual(groups[0].colors,[{color:'blue',count:1},{color:'red',count:1}]);assert.deepEqual(unmapped.map(e=>e.id),['d']);
  const filtered=events.filter(e=>matchesEvent(e,parseSearch(''),[],['Food provided']));
  assert.deepEqual(groupCampusEvents(filtered,'2026-09-15').groups[0].events.map(e=>e.id),['b']);
  assert.deepEqual(groupCampusEvents(events,'2026-10-01'),{groups:[],unmapped:[]});
@@ -60,6 +60,7 @@ test('campus viewer zooms over markers through the public helper, pins never cap
  assert.match(js,/controls\.touches\.TWO=null/);
  assert.doesNotMatch(js,/controls\.touches\.ONE=null/);
  assert.match(js,/zoom\(pinch\/distance\)/);
+ assert.match(js,/panScreen\(/);
  assert.match(js,/Two fingers to zoom/);
  assert.match(js,/send\(\{type:'fullscreen',value:mapFullscreen\}\)/);
  assert.match(html,/id="full"/);

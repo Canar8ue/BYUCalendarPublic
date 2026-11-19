@@ -6,7 +6,7 @@ import AboutCanvas from './about-canvas';
 const description = 'Meet the BYU students behind BYU Calendar — Jarin Canar, Tanner Abbott, and Austin Pence.';
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {
-  title: 'About us',
+  title: 'About Us',
   description,
   alternates: {canonical: '/about'},
   openGraph: {title: 'About BYU Calendar', description, url: '/about'},

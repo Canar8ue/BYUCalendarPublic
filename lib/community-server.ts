@@ -20,7 +20,7 @@ export async function communityRequest(request: Request, action: 'listing' | 'up
     // listings, so it is decided before this insert adds the row. A replay of
     // the member's own submission id can only happen when a row already
     // exists, which makes the count non-zero and the flag false.
-    if (action === 'listing') { const prior = await db.prepare('SELECT COUNT(*) AS n FROM community_listings WHERE user_id=?').bind(user.id).first<{n: number}>(); const result = await publishListing(db, account, input); invalidateCalendar(); return json({event: result, first: !prior?.n}, 201); }
+    if (action === 'listing') { const prior = await db.prepare('SELECT COUNT(*) AS n FROM community_listings WHERE user_id=?').bind(user.id).first<{n: number}>(); const result = await publishListing(db, account, input, await staffEditGrant(db, account)); invalidateCalendar(); return json({event: result, first: !prior?.n, approvalStatus: result.approvalStatus}, 201); }
     if (action === 'update') { const result = await updateListing(db, account, input); invalidateCalendar(); return json({event: result}); }
     if (action === 'delete') { const result = await deleteListing(db, account, input); invalidateCalendar(); return json(result); }
     if (action === 'tag') { const result = await publishTag(db, account, input, findEvent); invalidateCalendar(); return json(result); }

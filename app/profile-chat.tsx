@@ -8,6 +8,7 @@
 import {useEffect, useRef, useState} from 'react';
 import {Bot, ChevronRight, MessageCircleQuestion, SendHorizontal, Sparkles} from 'lucide-react';
 import {postJSON} from './account-client';
+import {displayCategory, displayTag} from '../lib/catalog.mjs';
 
 type ChatStep = {question: string; key: string; options: string[]; multiple: boolean};
 type ChatAnswer = {question: string; key: string; options: string[]; free?: string};
@@ -34,7 +35,7 @@ export default function ProfileChat({onFinished, onUpdated, restartsOnOpen}: {on
   function apply(data: ChatResponse) {
     if (data.done) {
       setStep(null); setFinished(true);
-      setMessages(current => [...current, {role: 'bot', text: (data.summary || 'Your picks are ready.') + ' My calendar will keep an eye out for events like these.'}]);
+      setMessages(current => [...current, {role: 'bot', text: (data.summary || 'Your picks are ready.') + ' My Calendar will keep an eye out for events like these.'}]);
     } else if (data.step) {
       setStep(data.step); setPicked([]); setTyped('');
       setMessages(current => [...current, {role: 'bot', text: data.step!.question}]);
@@ -79,7 +80,7 @@ export default function ProfileChat({onFinished, onUpdated, restartsOnOpen}: {on
     const entry: ChatAnswer = {question: step.question, key: step.key, options: labels, ...(text ? {free: text} : {})};
     const next = [...answers, entry];
     setAnswers(next);
-    const echo = [...labels, ...(text ? [text] : [])];
+    const echo = [...labels.map(label => displayCategory(displayTag(label))), ...(text ? [text] : [])];
     setMessages(current => [...current, {role: 'you', text: echo.length ? echo.join(' · ') : 'Skipped'}]);
     void ask(next);
   }
@@ -116,7 +117,7 @@ export default function ProfileChat({onFinished, onUpdated, restartsOnOpen}: {on
               <button key={option} className={'chat-reply' + (step.multiple && picked.includes(option) ? ' selected' : '')}
                 aria-pressed={step.multiple ? picked.includes(option) : undefined}
                 onClick={() => (step.multiple ? toggle(option) : answer([option]))}>
-                {step.multiple && picked.includes(option) && '✓ '}{option}
+                {step.multiple && picked.includes(option) && '✓ '}{displayCategory(displayTag(option))}
               </button>
             ))}
           </div>
@@ -128,13 +129,13 @@ export default function ProfileChat({onFinished, onUpdated, restartsOnOpen}: {on
               ? <button className="primary-button chat-next" type="submit" disabled={!canSend}>Next<ChevronRight size={16}/></button>
               : <button className="primary-button chat-next" type="submit" disabled={!canSend} aria-label="Send answer"><SendHorizontal size={16}/></button>}
           </form>
-          <button className="text-button chat-skip" onClick={() => answer([])}>Skip this</button>
+          <button className="text-button chat-skip" onClick={() => answer([])}>Skip This</button>
         </>
       )}
       {finished && (
         <div className="chat-done">
-          <button className="primary-button" onClick={onFinished}><Sparkles size={16}/>See my picks</button>
-          <button className="text-button" onClick={restart}>Start over</button>
+          <button className="primary-button" onClick={onFinished}><Sparkles size={16}/>See My Picks</button>
+          <button className="text-button" onClick={restart}>Start Over</button>
         </div>
       )}
       <p className="chat-footnote"><MessageCircleQuestion size={14}/> Question wording comes from the calendar&apos;s AI assistant; your answers and every pick are computed on our servers.</p>

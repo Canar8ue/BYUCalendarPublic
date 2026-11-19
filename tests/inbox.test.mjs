@@ -4,7 +4,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createHmac} from 'node:crypto';
 import {verifyWebhookSignature} from '../lib/webhook-sig.mjs';
-import {normalizeInboundEmail, htmlToText, buildPreview, parseReadInput, parseReply, INBOX_BODY_LIMIT, INBOX_REPLY_LIMIT} from '../lib/inbox.mjs';
+import {normalizeInboundEmail, htmlToText, buildPreview, parseReadInput, parseReply, parseInterestSuggestion, INBOX_BODY_LIMIT, INBOX_REPLY_LIMIT} from '../lib/inbox.mjs';
 
 const SECRET = 'whsec_' + Buffer.from('unit-test-signing-secret-byucalendar').toString('base64');
 
@@ -77,4 +77,15 @@ test('read and reply submissions are validated', () => {
   assert.throws(() => parseReply({id: 'Email-1', body: 'x'.repeat(INBOX_REPLY_LIMIT + 1)}), /under/);
   assert.throws(() => parseReply({body: 'hi'}), /Check your submission/);
   assert.ok(INBOX_BODY_LIMIT >= INBOX_REPLY_LIMIT);
+});
+
+test('interest suggestions require a short valid name and optional note', () => {
+  assert.deepEqual(parseInterestSuggestion({interest: '  Astronomy Club ', note: '  Stargazing nights  '}), {
+    interest: 'Astronomy Club',
+    note: 'Stargazing nights',
+  });
+  assert.deepEqual(parseInterestSuggestion({interest: 'Pickleball'}), {interest: 'Pickleball', note: ''});
+  assert.throws(() => parseInterestSuggestion({interest: 'A'}), /2–60 characters/);
+  assert.throws(() => parseInterestSuggestion({interest: 'x'.repeat(61)}), /2–60 characters/);
+  assert.throws(() => parseInterestSuggestion({interest: 'Hiking', note: 'n'.repeat(501)}), /under 500/);
 });

@@ -45,6 +45,11 @@ try {
     const statements = readFileSync('drizzle/0007_digest_opt_in.sql', 'utf8').replaceAll('--> statement-breakpoint', '').split(';').map(s => s.trim()).filter(Boolean);
     await db.batch(statements.map(sql => db.prepare(sql)));
   }
+  const listingColumns = await db.prepare("SELECT name FROM pragma_table_info('community_listings')").all();
+  if (!listingColumns.results.some(column => column.name === 'approval_status')) {
+    const statements = readFileSync('drizzle/0010_listing_approval.sql', 'utf8').replaceAll('--> statement-breakpoint', '').split(';').map(s => s.trim()).filter(Boolean);
+    await db.batch(statements.map(sql => db.prepare(sql)));
+  }
   console.log('LOCAL ACCOUNT SANDBOX:', String(await mf.ready) + 'signin');
   console.log('Only the supplied test address is accepted. Codes appear in this terminal; no email is sent.');
   console.log('Data persists separately in .wrangler/account-sandbox. Restarting signs out test sessions.');

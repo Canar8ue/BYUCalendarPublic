@@ -13,11 +13,11 @@ export const dynamic='force-dynamic';
 const description='Browse BYU event topics by category, major, club, and perk — including free food, career fairs, AIS, performing arts, and events happening today or this week.';
 
 export const metadata:Metadata={
- title:'Browse BYU event topics',
+ title:'Browse BYU Event Topics',
  description,
  alternates:{canonical:'/topics'},
- openGraph:{title:'Browse BYU event topics',description,url:'/topics'},
- twitter:{title:'Browse BYU event topics',description},
+ openGraph:{title:'Browse BYU Event Topics',description,url:'/topics'},
+ twitter:{title:'Browse BYU Event Topics',description},
 };
 
 const PERK_SLUGS=new Set(['free-food','snacks','drinks','free-admission','open-invite','in-person','online']);
@@ -41,20 +41,21 @@ export default async function TopicsDirectoryPage(){
  };
  const groups=[
   {title:'Categories',items:categories},
-  {title:'Majors, clubs & interests',items:subjects},
-  {title:'Perks & format',items:perks},
+  {title:'Majors, Clubs & Interests',items:subjects},
+  {title:'Perks & Format',items:perks},
  ];
  return <div className="event-page topic-page">
   <script type="application/ld+json" dangerouslySetInnerHTML={{__html:jsonLdText(breadcrumbJsonLd)}}/>
   <header className="event-page-head">
    <Link prefetch={false} className="event-page-brand" href="/"><BrandY className="brand-y"/><span>BYU Calendar</span></Link>
+   <nav className="event-page-nav" aria-label="Main navigation"><Link prefetch={false} className="nav-item" href="/">Discover</Link><Link prefetch={false} className="nav-item" href="/?section=saved">My Calendar</Link><Link prefetch={false} className="nav-item" href="/?view=map">Campus Map</Link></nav>
   </header>
   <main className="event-page-card">
    <div className="eyebrow">TOPIC DIRECTORY</div>
-   <h1>Browse BYU event topics</h1>
+   <h1>Browse BYU Event Topics</h1>
    <p className="topic-blurb">Upcoming campus listings organized by time window, category, major, club, and practical details.</p>
    <section className="topics-directory-group">
-    <h2>Happening soon</h2>
+    <h2>Happening Soon</h2>
     <div className="topics-directory-grid">
      {SEARCH_PAGES.map(page=>{
       const count=searchPageEvents(events,page,now).length;
@@ -69,7 +70,7 @@ export default async function TopicsDirectoryPage(){
     </div>
    </section>)}
    <div className="event-page-actions">
-    <Link prefetch={false} className="primary-button" href="/">Open full calendar</Link>
+    <Link prefetch={false} className="primary-button" href="/">Open Full Calendar</Link>
    </div>
    <p className="event-page-source">Listings come from connected public calendars, dated snapshots, and community additions. <a href="/about">About the team</a>.</p>
   </main>

@@ -8,3 +8,4 @@ export function isUpcomingEvent(event:CampusEvent,now?:Date):boolean;
 export function eventJsonLd(event:CampusEvent):Record<string,unknown>;
 export function jsonLdText(value:unknown):string;
 export function sourceDateLabel(value:string|null|undefined):string|null;
+export function splitDescriptionLinks(text?:string):Array<{text:string;href?:string}>;

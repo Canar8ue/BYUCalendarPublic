@@ -52,7 +52,7 @@ before(async () => {
     },
   });
   db = await mf.getD1Database('DB');
-  for (const file of ['0000_pink_scarlet_spider.sql', '0001_byu_accounts_community.sql', '0002_moderator_inbox.sql', '0003_usage_analytics.sql', '0004_event_moderation.sql', '0005_email_digests.sql', '0006_profile_picks.sql', '0007_digest_opt_in.sql', '0008_staff_accounts.sql', '0009_event_saves_profiles.sql']) {
+  for (const file of ['0000_pink_scarlet_spider.sql', '0001_byu_accounts_community.sql', '0002_moderator_inbox.sql', '0003_usage_analytics.sql', '0004_event_moderation.sql', '0005_email_digests.sql', '0006_profile_picks.sql', '0007_digest_opt_in.sql', '0008_staff_accounts.sql', '0009_event_saves_profiles.sql', '0010_listing_approval.sql']) {
     const statements = readFileSync(new URL('../drizzle/' + file, import.meta.url), 'utf8').replaceAll('--> statement-breakpoint', '').split(';').map(s => s.trim()).filter(Boolean);
     await db.batch(statements.map(sql => db.prepare(sql)));
   }
@@ -175,7 +175,13 @@ test('the built Worker publishes a listing and tags, stores private reports, and
   assert.equal((await request('/api/listings', input, memberCookie, {origin: 'https://evil.example'})).status, 403);
   const published = await request('/api/listings', input, memberCookie);
   assert.equal(published.status, 201, await published.clone().text());
-  eventId = (await published.json()).event.id;
+  const publishedJson = await published.json();
+  assert.equal(publishedJson.approvalStatus, 'pending');
+  eventId = publishedJson.event.id;
+  assert.ok(!(await (await request('/api/events', null, '', {}, 'GET')).json()).events.some(e => e.id === eventId), 'student listing stays pending until approved');
+  const invBefore = await (await request('/api/moderation/events', null, reviewerCookie, {}, 'GET')).json();
+  assert.ok(invBefore.pending.some(p => p.id === eventId), 'pending queue contains student listing');
+  assert.equal((await request('/api/moderation/events', {action: 'approve', id: eventId}, reviewerCookie)).status, 200);
   const tag = await request('/api/listings/tags', {eventId, tag: 'IS', note: 'An Information Systems community event.'}, memberCookie);
   assert.equal(tag.status, 200, await tag.text());
   const report = await request('/api/listings/reports', {eventId, reason: 'Incorrect details', details: 'Private test report for a corrected room.'}, memberCookie);
@@ -364,6 +370,7 @@ test('the built Worker lets authors update and delete only their own listings', 
   const createdBody = await created.json();
   assert.equal(created.status, 201, JSON.stringify(createdBody));
   const id = createdBody.event.id;
+  assert.equal((await request('/api/moderation/events', {action: 'approve', id}, reviewerCookie)).status, 200);
   // The first-publication flag drives the author's prompt to Your listings.
   assert.equal(createdBody.first, true, 'a member with no prior listings publishes their first');
   const secondDay = new Date(Date.now() + 5 * 86400000).toISOString().slice(0, 10);
@@ -451,6 +458,8 @@ test('the daily digest is opt-in, emails opted members once per day, and honors 
   const published = await request('/api/listings', input, cookie);
   assert.equal(published.status, 201, await published.clone().text());
   const listingId = (await published.json()).event.id;
+  reviewerCookie = reviewerCookie || await login('reviewer@byu.edu');
+  assert.equal((await request('/api/moderation/events', {action: 'approve', id: listingId}, reviewerCookie)).status, 200);
   assert.equal((await request('/api/preferences', {saved: [listingId], views: []}, cookie, {}, 'PUT')).status, 200);
   assert.equal((await (await request('/api/preferences', null, cookie, {}, 'GET')).json()).digestOptedIn, false);
   // The digest is off until the member opts in: saved events alone send nothing.
@@ -537,6 +546,8 @@ test('personal picks: chat builds a profile, activity feeds tastes, and signatur
   const fair = await request('/api/listings', {submissionId: crypto.randomUUID(), title: 'STEM Career Fair', organizer: 'Career center', description: 'Employers across science, technology, engineering, and math recruit on campus.', category: 'Career & business', location: 'WSC Ballroom', url: 'https://byu.edu/', allDay: false, start: day + 'T19:00', end: ''}, cookie);
   assert.equal(fair.status, 201, await fair.clone().text());
   const fairId = (await fair.json()).event.id;
+  reviewerCookie = reviewerCookie || await login('reviewer@byu.edu');
+  assert.equal((await request('/api/moderation/events', {action: 'approve', id: fairId}, reviewerCookie)).status, 200);
   const calendar = await (await request('/api/events', null, '', {}, 'GET')).json();
   const flagged = calendar.events.find(e => e.id === fairId);
   assert.equal(flagged.important, 'Annual STEM fair');
@@ -684,7 +695,7 @@ test('the campus game entry serves a separate grounded model while the ordinary 
   assert.match(css,/\.race-result\b/);
   assert.match(css,/\.campus-journal-filters\b/, 'the filtered campus journal ships in the production stylesheet');
   assert.doesNotMatch(html,/game\/play\.css/, 'race styles ship in the same hashed production stylesheet');
-  const model = await request('/campus/campus_web.glb?v=20261116mapui1', null, '', {}, 'GET');
+  const model = await request('/campus/campus_web.glb?v=20261118mapui3', null, '', {}, 'GET');
   assert.equal(model.status, 200);
   const ordinaryBytes = new Uint8Array(await model.arrayBuffer());
   const signature = ordinaryBytes.slice(0, 4);
@@ -726,11 +737,17 @@ test('the built Worker verifies BYU staff, labels their events officially, and s
   assert.equal(staffAccount.staff.status, 'verified'); assert.equal(staffAccount.staff.area, 'law');
   // A verified staff listing reads as a BYU-added event; a student listing does not.
   const staffListing = {submissionId: crypto.randomUUID(), title: 'Law careers conversation', organizer: 'BYU Law School', description: 'Faculty host a conversation about legal careers with students.', category: 'Academic', location: 'JRCB 205', url: 'https://law.byu.edu/', allDay: false, start: day + 'T17:00', end: ''};
-  assert.equal((await request('/api/listings', staffListing, staffCookie)).status, 201, 'staff listing publishes');
+  const staffRes = await request('/api/listings', staffListing, staffCookie);
+  assert.equal(staffRes.status, 201, 'staff listing publishes');
+  assert.equal((await staffRes.json()).approvalStatus, 'approved');
   const studentListing = {submissionId: crypto.randomUUID(), title: 'Student pickup basketball', organizer: 'Campus club', description: 'An open basketball night for every skill level on campus.', category: 'Sports & recreation', location: 'RB courts', url: 'https://clubs.byu.edu/', allDay: false, start: day + 'T19:00', end: ''};
   const published = await request('/api/listings', studentListing, studentCookie);
   assert.equal(published.status, 201, await published.clone().text());
-  const publishedEvent = (await published.json()).event;
+  const publishedJson = await published.json();
+  assert.equal(publishedJson.approvalStatus, 'pending');
+  const publishedEvent = publishedJson.event;
+  assert.ok(!(await (await request('/api/events', null, '', {}, 'GET')).json()).events.some(e => e.id === publishedEvent.id));
+  assert.equal((await request('/api/moderation/events', {action: 'approve', id: publishedEvent.id}, adminCookie)).status, 200);
   const calendar = await (await request('/api/events', null, '', {}, 'GET')).json();
   const official = calendar.events.find(e => e.title === 'Law careers conversation');
   const ordinary = calendar.events.find(e => e.id === publishedEvent.id);
@@ -823,7 +840,7 @@ test('search-facing event facts agree with visible TBA and venue information', a
     }
     if (kind === 'away') assert.equal(json.location.address, undefined);
     if (kind === 'unknown') assert.equal(json.location, undefined);
-    assert.deepEqual($('.site-footer a').map((i,node) => $(node).text()).get(), ['Privacy','About us']);
+    assert.deepEqual($('.site-footer a').map((i,node) => $(node).text()).get(), ['Privacy','About Us']);
   }
 });
 
@@ -841,7 +858,7 @@ test('curated date searches render actual event links with individual canonical 
     for(const day of $('.agenda-group').map((i,node)=>$(node).attr('data-date')).get())assert.ok(day>=window.start&&day<=window.end,day);
     for (const event of expected.slice(0,3)) assert.ok($('.event-row-main a[href="/events/' + encodeURIComponent(event.id) + '"]').length, event.id);
     assert.ok(!$('.empty-state').text().includes('Loading events'));
-    assert.deepEqual($('.site-footer a').map((i,node) => $(node).text()).get(), ['Privacy','About us']);
+    assert.deepEqual($('.site-footer a').map((i,node) => $(node).text()).get(), ['Privacy','About Us']);
   }
   const other = parseHTML(await (await request('/?q=pizza+this+weekend', null, '', {}, 'GET')).text());
   assert.equal(other('.planning-summary').length, 0);
@@ -854,7 +871,7 @@ test('curated date searches render actual event links with individual canonical 
   assert.ok(!home('.below-footer').text().startsWith('0 connected'), 'homepage SSR includes connected calendar count');
   assert.ok(home('.below-browse a[href="/topics"]').length === 1);
   for (const page of SEARCH_PAGES) assert.ok(home(`.below-browse a[href="${page.href}"]`).length === 1, page.href);
-  assert.deepEqual(home('.site-footer a').map((i,node) => home(node).text()).get(), ['Privacy','About us']);
+  assert.deepEqual(home('.site-footer a').map((i,node) => home(node).text()).get(), ['Privacy','About Us']);
 
   const today = dayKey(new Date());
   const pastEvent = calendar.events.find(e => lastDay(e) < today);
@@ -898,6 +915,8 @@ test('POST /api/profile works, preferences keep newest 400 notes up to 240 locat
   }, cookie);
   assert.equal(created.status, 201);
   const listingId = (await created.json()).event.id;
+  reviewerCookie = reviewerCookie || await login('reviewer@byu.edu');
+  assert.equal((await request('/api/moderation/events', {action: 'approve', id: listingId}, reviewerCookie)).status, 200);
   assert.equal((await (await request('/api/events', null, '', {}, 'GET')).json()).events.find(e => e.id === listingId).byuOfficial, undefined);
 
   // Auto-verify faculty member AFTER publishing & warming /api/events cache; cache must invalidate immediately.
@@ -909,6 +928,7 @@ test('POST /api/profile works, preferences keep newest 400 notes up to 240 locat
     allDay: false, start: day + 'T15:00', end: day + 'T16:00',
   }, facultyCookie);
   const facId = (await facCreated.json()).event.id;
+  await request('/api/moderation/events', {action: 'approve', id: facId}, reviewerCookie);
   await request('/api/events', null, '', {}, 'GET'); // warm calendar cache
   assert.equal((await request('/api/staff/request', {area: 'computer-science'}, facultyCookie)).status, 200);
   assert.equal((await (await request('/api/events', null, '', {}, 'GET')).json()).events.find(e => e.id === facId).byuOfficial, true);
@@ -933,4 +953,23 @@ test('POST /api/profile works, preferences keep newest 400 notes up to 240 locat
   ]);
   for (const row of rowCounts) assert.equal(row.c, 0);
   assert.equal((await (await request('/api/events', null, '', {}, 'GET')).json()).events.find(e => e.id === listingId), undefined);
+});
+
+test('verified members can suggest an interest into the moderation inbox', async () => {
+  assert.equal((await request('/api/interests/suggest', {interest: 'Astrophotography'})).status, 401);
+  const suggestCookie = await login('interests-user@byu.edu');
+  assert.equal((await request('/api/interests/suggest', {interest: 'x'}, suggestCookie)).status, 400);
+  const res = await request('/api/interests/suggest', {
+    interest: '  Astrophotography ',
+    note: 'Weekly night sky meetups',
+  }, suggestCookie);
+  assert.equal(res.status, 201, await res.clone().text());
+  const data = await res.json();
+  assert.equal(data.ok, true);
+  reviewerCookie = reviewerCookie || await login('reviewer@byu.edu');
+  const inbox = await (await request('/api/emails', null, reviewerCookie, {}, 'GET')).json();
+  const entry = inbox.emails.find(e => e.subject === 'Interest suggestion: Astrophotography');
+  assert.ok(entry, 'interest suggestion should appear in moderator inbox');
+  assert.equal(entry.fromAddress, 'interests-user@byu.edu');
+  assert.match(entry.bodyText, /Weekly night sky meetups/);
 });

@@ -2,7 +2,7 @@
 
 import {useEffect, useRef} from 'react';
 import Link from 'next/link';
-import {ArrowLeft, ArrowUpRight} from 'lucide-react';
+import {ArrowUpRight} from 'lucide-react';
 import BrandY from '../brand-y';
 
 // Fixed camera matching "2508-08 Campus Aerial 140.jpg":
@@ -164,9 +164,9 @@ export default function AboutCanvas() {
               BYU <b>Calendar</b>
             </span>
           </Link>
-          <Link prefetch={false} href="/" className="about-hud-btn">
-            <ArrowLeft size={14} /> Calendar
-          </Link>
+          <Link prefetch={false} href="/" className="about-hud-btn">Discover</Link>
+          <Link prefetch={false} href="/?section=saved" className="about-hud-btn">My Calendar</Link>
+          <Link prefetch={false} href="/?view=map" className="about-hud-btn">Campus Map</Link>
         </div>
       </header>
 

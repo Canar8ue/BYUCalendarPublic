@@ -56,7 +56,8 @@ export const actionLimits = sqliteTable('action_limits', {
 export const communityListings = sqliteTable('community_listings', {
   id: text('id').primaryKey(), userId: text('user_id').notNull().references(() => authUser.id),
   payload: text('payload').notNull(), createdAt: text('created_at').notNull(),
-}, t => [index('community_listings_user_idx').on(t.userId)]);
+  approvalStatus: text('approval_status').notNull().default('approved'),
+}, t => [index('community_listings_user_idx').on(t.userId), index('community_listings_approval_idx').on(t.approvalStatus, t.createdAt)]);
 export const communityTags = sqliteTable('community_tags', {
   id: text('id').primaryKey(), eventId: text('event_id').notNull(), tag: text('tag').notNull(), note: text('note').notNull(),
   userId: text('user_id').notNull().references(() => authUser.id), createdAt: text('created_at').notNull(),

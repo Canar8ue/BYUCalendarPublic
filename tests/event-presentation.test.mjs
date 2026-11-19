@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {eventJsonLd,eventDateLabel,eventTimeLabel,eventVenueLabel,isUpcomingEvent,jsonLdText} from '../lib/event-presentation.mjs';
+import {eventJsonLd,eventDateLabel,eventTimeLabel,eventVenueLabel,isUpcomingEvent,jsonLdText,splitDescriptionLinks} from '../lib/event-presentation.mjs';
 import {classify,mergeEvents} from '../lib/catalog.mjs';
 
 const event=patch=>({id:'test-event',title:'Campus event',description:'Source-provided details.',start:'2026-11-05T17:00:00.000Z',end:null,allDay:false,location:'2330 WSC',format:'In person',sourceId:'byu',sourceName:'BYU Events',tags:[],free:null,cancelled:false,...patch});
@@ -113,4 +113,17 @@ test('structured attendance modes, hybrid venues mentioning Zoom, and invalid da
  assert.equal(eventJsonLd(event({timeTba:true,start:'2026-11-05T07:19:00.000Z',end:'2026-11-06T08:00:00.000Z'})).endDate,undefined);
  assert.equal(eventDateLabel(event({start:'not-a-date'})),'Date not listed');
  assert.equal(eventTimeLabel(event({start:'not-a-date'})),'TBA');
+});
+
+test('splitDescriptionLinks turns URLs in prose into clean link segments without trailing punctuation',()=>{
+ assert.deepEqual(
+  splitDescriptionLinks('Make an appointment (https://byushareyourhair.youcanbook.me/)! Or visit https://byu.edu.'),
+  [
+   {text:'Make an appointment ('},
+   {text:'https://byushareyourhair.youcanbook.me/',href:'https://byushareyourhair.youcanbook.me/'},
+   {text:')! Or visit '},
+   {text:'https://byu.edu',href:'https://byu.edu/'},
+   {text:'.'},
+  ]
+ );
 });

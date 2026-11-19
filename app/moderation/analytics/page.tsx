@@ -43,10 +43,10 @@ export default function ModeratorAnalyticsPage(){
   <div className="eyebrow">COMMUNITY CARE</div>
   <h1>Usage <span>analytics.</span></h1>
   <p className="account-description">How the calendar is used and what the data covers. Aggregate counts only — no names, emails, or IP addresses are recorded, and rows expire after 180 days.</p>
-  <p className="moderator-nav"><a className="text-button" href="/moderation">Review reports</a><span aria-hidden>·</span><a className="text-button" href="/moderation/emails">Message inbox</a><span aria-hidden>·</span><span className="moderator-nav-current">Usage analytics</span></p>
+  <p className="moderator-nav"><a className="text-button" href="/moderation">Review Reports</a><span aria-hidden>·</span><a className="text-button" href="/moderation/emails">Message Inbox</a><span aria-hidden>·</span><span className="moderator-nav-current">Usage Analytics</span></p>
   {(accountError||error)&&<p className="form-error" role="alert">{accountError||error}</p>}
   {!account&&!accountError&&<p>Loading your account…</p>}
-  {account&&!account.permissions.reviewReports&&<p>This page is available to calendar administrators. <a className="text-button" href="/account">View your account</a></p>}
+  {account&&!account.permissions.reviewReports&&<p>This page is available to calendar administrators. <a className="text-button" href="/account">View Your Account</a></p>}
   {account?.permissions.reviewReports&&(!d
    ? <p>Loading analytics…</p>
    : <>

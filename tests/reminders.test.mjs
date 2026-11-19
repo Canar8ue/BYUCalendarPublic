@@ -37,7 +37,7 @@ test('selection keeps only saved events still happening on the digest day', () =
 test('time labels use Mountain Time and all-day or TBA events stay worded plainly', () => {
   assert.equal(digestTimeLabel(event({start: '2026-09-29T17:00:00.000Z', end: '2026-09-29T18:30:00.000Z'})), '11:00 AM–12:30 PM');
   assert.equal(digestTimeLabel(event({start: '2026-09-29T17:00:00.000Z'})), '11:00 AM');
-  assert.equal(digestTimeLabel(event({allDay: true, start: day})), 'All day');
+  assert.equal(digestTimeLabel(event({allDay: true, start: day})), 'All Day');
   assert.equal(digestTimeLabel(event({timeTba: true, start: '2026-09-29T17:19:00.000Z'})), 'Time TBA');
   assert.equal(digestTimeLabel(event({start: 'not-a-date', end: 'bad'})), '');
   assert.equal(digestDayLabel(day), 'Tuesday, September 29');

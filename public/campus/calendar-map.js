@@ -2,13 +2,14 @@ import * as THREE from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {MeshoptDecoder} from './vendor/meshopt_decoder.module.js';
-import {loadValleyContext} from './valley-context.js?v=20261116mapui1';
+import {loadValleyContext} from './valley-context.js?v=20261118mapui3';
 
 const stage=document.getElementById('map'),labels=document.getElementById('labels'),loading=document.getElementById('loading');
 const send=data=>parent.postMessage({channel:'byu-calendar-map',...data},location.origin);
-const palette={blue:'#1a73e8',green:'#188038',purple:'#9334e6',orange:'#e8710a',teal:'#00897b',slate:'#857063'};
+const palette={blue:'#1a73e8',red:'#8b0000',purple:'#9334e6',orange:'#e8710a',teal:'#00897b',chocolate:'#713600'};
 let renderer,controls,camera,scene,model,sun,frame=0,flight=null,groups=[],focus=null,focusToken=null;
-let features=[],pickMeshes=[],pins=[],highlights=[],selectedId=null,ready=false;
+let features=[],pickMeshes=[],collisionTiles=[],campusMatRef=null,pins=[],highlights=[],selectedId=null,ready=false;
+const lastSafeCam=new THREE.Vector3(),hasSafeCam=()=>ready&&lastSafeCam.lengthSq()>0;
 let filterKey;
 let mapFullscreen=false;
 // Full screen is a parent-page expansion: iOS Safari has no element
@@ -16,7 +17,7 @@ let mapFullscreen=false;
 function setFullscreen(value){
   mapFullscreen=Boolean(value);
   const button=document.getElementById('full');
-  if(button){button.textContent=mapFullscreen?'Exit full screen':'Full screen';button.setAttribute('aria-pressed',String(mapFullscreen));}
+  if(button){button.textContent=mapFullscreen?'Exit Full Screen':'Full Screen';button.setAttribute('aria-pressed',String(mapFullscreen));}
 }
 const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const raycaster=new THREE.Raycaster(),pointer=new THREE.Vector2();
@@ -100,12 +101,70 @@ function placePins(){
     pin.line.setAttribute('x1',anchorX);pin.line.setAttribute('y1',anchorY);pin.line.setAttribute('x2',x);pin.line.setAttribute('y2',y-8);
   }
 }
+const CAM_PAD=.9,S=Math.SQRT1_2,camRay=new THREE.Raycaster(),camMove=new THREE.Vector3(),camDir=new THREE.Vector3(),camNorm=new THREE.Vector3(),camProbe=new THREE.Vector3();
+const CARDINALS=[new THREE.Vector3(1,0,0),new THREE.Vector3(-1,0,0),new THREE.Vector3(0,0,1),new THREE.Vector3(0,0,-1),new THREE.Vector3(S,0,S),new THREE.Vector3(-S,0,S),new THREE.Vector3(S,0,-S),new THREE.Vector3(-S,0,-S)],DOWN=new THREE.Vector3(0,-1,0),UP=new THREE.Vector3(0,1,0);
+function castTiles(origin,dir,far){
+  camRay.set(origin,dir);camRay.near=0;camRay.far=far;
+  const near=[];for(const t of collisionTiles)if(camRay.ray.intersectsBox(t.box))near.push(t.mesh);
+  return near.length?camRay.intersectObjects(near,false)[0]||null:null;
+}
+function clampCameraPosition(){
+  if(!collisionTiles.length)return;
+  if(campusMatRef)campusMatRef.side=THREE.DoubleSide;
+  try{
+    if(hasSafeCam()){
+      for(let iter=0;iter<2;iter++){
+        camMove.copy(camera.position).sub(lastSafeCam);
+        const dist=camMove.length();
+        if(dist<=1e-4)break;
+        camDir.copy(camMove).divideScalar(dist);
+        const hit=castTiles(lastSafeCam,camDir,dist+CAM_PAD);
+        if(!hit)break;
+        if(hit.face){
+          camNorm.copy(hit.face.normal).transformDirection(hit.object.matrixWorld).normalize();
+          if(camNorm.dot(camDir)>0)camNorm.negate();
+        }else camNorm.copy(camDir).negate();
+        const safeDist=Math.max(0,hit.distance-CAM_PAD);
+        camProbe.copy(lastSafeCam).addScaledVector(camDir,safeDist);
+        const rem=dist-safeDist;
+        camMove.copy(camDir).multiplyScalar(rem);
+        const into=camMove.dot(camNorm);
+        if(into<0)camMove.addScaledVector(camNorm,-into);
+        camera.position.copy(camProbe).add(camMove);
+      }
+      camMove.copy(camera.position).sub(lastSafeCam);
+      const finalDist=camMove.length();
+      if(finalDist>1e-4){
+        camDir.copy(camMove).divideScalar(finalDist);
+        if(castTiles(lastSafeCam,camDir,finalDist+CAM_PAD*.5))camera.position.copy(lastSafeCam);
+      }
+    }
+    for(const dir of CARDINALS){
+      const hit=castTiles(camera.position,dir,CAM_PAD);
+      if(hit)camera.position.addScaledVector(dir,-(CAM_PAD-hit.distance));
+    }
+    const upHit=castTiles(camera.position,UP,CAM_PAD);
+    if(upHit)camera.position.addScaledVector(UP,-(CAM_PAD-upHit.distance));
+    camProbe.set(camera.position.x,camera.position.y+1.5,camera.position.z);
+    const groundHit=castTiles(camProbe,DOWN,1.5+CAM_PAD);
+    if(groundHit&&groundHit.point.y+CAM_PAD>camera.position.y)camera.position.y=groundHit.point.y+CAM_PAD;
+    if(hasSafeCam()){
+      camMove.copy(camera.position).sub(lastSafeCam);
+      const postDist=camMove.length();
+      if(postDist>1e-4){
+        camDir.copy(camMove).divideScalar(postDist);
+        if(castTiles(lastSafeCam,camDir,postDist+CAM_PAD*.5))camera.position.copy(lastSafeCam);
+      }
+    }
+    lastSafeCam.copy(camera.position);
+  }finally{if(campusMatRef)campusMatRef.side=THREE.FrontSide;}
+}
 function invalidate(){if(!frame)frame=requestAnimationFrame(render);}
 function render(time){
   frame=0;
   let complete;
   if(flight){const t=reduced?1:Math.min(1,(time-flight.start)/650),e=t*t*(3-2*t);camera.position.lerpVectors(flight.from,flight.to,e);controls.target.lerpVectors(flight.fromTarget,flight.target,e);if(t===1){complete=flight.complete;flight=null;}}
-  const changed=controls.update();syncSunShadowTarget();renderer.render(scene,camera);
+  const changed=controls.update();clampCameraPosition();syncSunShadowTarget();renderer.render(scene,camera);
   placePins();
   complete?.();
   if(changed||flight)invalidate();
@@ -179,10 +238,10 @@ try{
   scene.add(sun,sun.target);
   const fill=new THREE.DirectionalLight(0xc9dfff,.40);fill.position.set(32,26,-30);scene.add(fill);
   controls=new OrbitControls(camera,renderer.domElement);controls.target.set(1,1,-5);controls.enableDamping=true;controls.dampingFactor=.09;controls.minDistance=3;controls.maxDistance=280;controls.maxPolarAngle=Math.PI*.47;controls.zoomToCursor=true;controls.screenSpacePanning=true;controls.addEventListener('change',invalidate);controls.addEventListener('start',()=>{flight=null;});
- // Phones use one finger to orbit the map and a two-finger pinch to zoom in or
- // out. Desktop mouse, wheel, and keyboard behavior is unchanged.
+ // Phones use one finger to orbit the map and two fingers to zoom & pan.
+ // Desktop mouse, wheel, and keyboard behavior is unchanged.
  const coarse=matchMedia('(pointer: coarse)').matches;
- if(coarse){controls.touches.TWO=null;const hint=document.querySelector('.hint');if(hint)hint.textContent='One finger to move around · Two fingers to zoom';}
+ if(coarse){controls.touches.TWO=null;const hint=document.querySelector('.hint');if(hint)hint.textContent='One finger to orbit · Two fingers to zoom & pan';}
  // Wheel over a pin button never reaches the canvas, so those gestures zoom
  // through the same public helper the +/- buttons use — never private
  // OrbitControls internals. Pins answer taps only: no pointer forwarding into
@@ -192,22 +251,33 @@ addEventListener('wheel',event=>{event.preventDefault();if(event.target!==render
 labels.addEventListener('contextmenu',event=>event.preventDefault());
   addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);invalidate();});
   const zoom=factor=>{flight=null;const offset=camera.position.clone().sub(controls.target);const nextLen=Math.min(controls.maxDistance,Math.max(controls.minDistance,offset.length()*factor));offset.setLength(nextLen);camera.position.copy(controls.target).add(offset);invalidate();};
-  // Two-finger pinch zooms: fingers separating zoom in, closing zoom out.
-  let pinch=null;
+  // Two-finger pinch & drag: separating/closing zooms, midpoint translation pans.
+  let pinch=null,pinchMid=null;
+  const panScreen=(dx,dy)=>{
+    const dist=camera.position.distanceTo(controls.target);
+    const scale=2*Math.tan(THREE.MathUtils.degToRad(camera.fov*.5))*dist/Math.max(1,innerHeight);
+    const right=new THREE.Vector3().setFromMatrixColumn(camera.matrix,0);
+    const up=new THREE.Vector3().setFromMatrixColumn(camera.matrix,1);
+    const shift=new THREE.Vector3().addScaledVector(right,-dx*scale).addScaledVector(up,dy*scale);
+    camera.position.add(shift);controls.target.add(shift);
+  };
   renderer.domElement.addEventListener('touchstart',event=>{
     if(!coarse||event.touches.length!==2)return;
     event.preventDefault();flight=null;
     const [a,b]=event.touches;
     pinch=Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY)||1;
+    pinchMid=[(a.clientX+b.clientX)/2,(a.clientY+b.clientY)/2];
   },{passive:false});
   renderer.domElement.addEventListener('touchmove',event=>{
     if(!coarse||!pinch||event.touches.length<2)return;
     event.preventDefault();
     const [a,b]=event.touches,distance=Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY)||1;
+    const midX=(a.clientX+b.clientX)/2,midY=(a.clientY+b.clientY)/2;
+    if(pinchMid)panScreen(midX-pinchMid[0],midY-pinchMid[1]);
     zoom(pinch/distance);
-    pinch=distance;
+    pinch=distance;pinchMid=[midX,midY];
   },{passive:false});
-  const endTouch=event=>{if(event.touches.length<2)pinch=null;};
+  const endTouch=event=>{if(event.touches.length<2){pinch=null;pinchMid=null;}};
   renderer.domElement.addEventListener('touchend',endTouch);renderer.domElement.addEventListener('touchcancel',endTouch);
   document.getElementById('reset').onclick=reset;document.getElementById('fit').onclick=fit;
   document.getElementById('top').onclick=()=>fly(controls.target.clone(),camera.position.distanceTo(controls.target),true);
@@ -229,15 +299,17 @@ labels.addEventListener('contextmenu',event=>event.preventDefault());
   });
   renderer.domElement.addEventListener('webglcontextlost',event=>{event.preventDefault();loading.hidden=false;loading.textContent='3D graphics paused. Reload the page to restore the map. Events are still available below.';send({type:'error'});});
   const loader=new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
-  const [gltf,catalog]=await Promise.all([loader.loadAsync('./campus_web.glb?v=20261116mapui1'),fetch('./coordinates.json?v=20261116mapui1').then(r=>{if(!r.ok)throw new Error('Location data unavailable');return r.json();})]);
-  const toonRamp=createToonRamp(),campusMat=createStylizedCampusMaterial(toonRamp);
+  const [gltf,catalog]=await Promise.all([loader.loadAsync('./campus_web.glb?v=20261118mapui3'),fetch('./coordinates.json?v=20261118mapui3').then(r=>{if(!r.ok)throw new Error('Location data unavailable');return r.json();})]);
+  const toonRamp=createToonRamp(),campusMat=createStylizedCampusMaterial(toonRamp);campusMatRef=campusMat;
   model=gltf.scene;features=catalog.features;scene.add(model);model.updateMatrixWorld(true);
   model.traverse(o=>{
     if(o.isMesh){
       o.material=campusMat;o.castShadow=true;o.receiveShadow=true;
+      o.geometry.computeBoundingBox();
+      if(o.geometry.boundingBox){const box=o.geometry.boundingBox.clone().applyMatrix4(o.matrixWorld);box.expandByScalar(1.2);collisionTiles.push({mesh:o,box});}
       if(o.geometry.getAttribute('_feature_id'))pickMeshes.push(o);
     }
   });
-  ready=true;loading.hidden=true;reset();buildPins();send({type:'ready'});
+  ready=true;lastSafeCam.copy(camera.position);loading.hidden=true;reset();buildPins();send({type:'ready'});
   loadValleyContext(loader,scene,camera,invalidate,{gradientMap:toonRamp,sunPosition:sun.position});
 }catch(error){loading.hidden=false;loading.textContent='The 3D map could not load. You can still browse locations and events below.';send({type:'error'});console.error(error);}

@@ -51,12 +51,12 @@ test('flagging adds the label and tag once, and leaves other events alone',()=>{
   assert.deepEqual(plain.tags,[]);
 });
 
-test('important events lead their day; timed events precede ordinary all-day events',()=>{
+test('important events lead their day; ordinary all-day events precede timed events',()=>{
   const morning=event({id:'morning',title:'Morning social',start:'2026-10-01T16:00:00.000Z'});
   const signature=applyImportantEvents([event({id:'sig',title:'STEM Career Fair',start:'2026-10-01T21:00:00.000Z'})])[0];
   const afternoon=event({id:'after',title:'Afternoon workshop',start:'2026-10-01T18:00:00.000Z'});
   const ordinaryAllDay=event({id:'holiday',title:'Campus Spirit Week',start:'2026-10-01',allDay:true});
-  assert.deepEqual([ordinaryAllDay,signature,afternoon,morning].sort(dayOrder).map(e=>e.id),['sig','morning','after','holiday']);
+  assert.deepEqual([ordinaryAllDay,signature,afternoon,morning].sort(dayOrder).map(e=>e.id),['sig','holiday','morning','after']);
   // Important all-day entries still lead ordinary timed events.
   const allDay=applyImportantEvents([event({id:'allday',title:'Utah Utes at BYU Cougars Football',start:'2026-10-01',allDay:true})])[0];
   assert.deepEqual([afternoon,allDay].sort(dayOrder).map(e=>e.id),['allday','after']);

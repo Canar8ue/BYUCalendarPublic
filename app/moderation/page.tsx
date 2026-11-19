@@ -2,11 +2,12 @@
 import {useCallback, useEffect, useState} from 'react';
 import AccountShell from '../account-shell';
 import {postJSON, useAccount} from '../account-client';
-import type {ListingReport} from '../types';
+import type {CampusEvent, ListingReport} from '../types';
 
+type PendingListing = {id: string; createdAt: string; submitterEmail: string; submitterName: string; event: CampusEvent};
 type HiddenListing = {id: string; title: string | null; location: string; community: boolean; updatedAt: string};
 type CorrectedListing = {id: string; title: string | null; location: string | null; updatedAt: string};
-type ModerationInventory = {hidden: HiddenListing[]; overrides: CorrectedListing[]};
+type ModerationInventory = {pending: PendingListing[]; hidden: HiddenListing[]; overrides: CorrectedListing[]};
 type StaffRequest = {userId: string; email: string; name: string; area: string; areaLabel: string; status: string; autoVerified: boolean; requestedAt: string; resolvedAt: string | null};
 
 export default function ModerationPage() {
@@ -26,7 +27,7 @@ export default function ModerationPage() {
       ]);
       if (!reports.ok) throw new Error('Reports could not be loaded.');
       setReports((await reports.json() as {reports: ListingReport[]}).reports);
-      setInventory(inventory.ok ? await inventory.json() as ModerationInventory : {hidden: [], overrides: []});
+      setInventory(inventory.ok ? await inventory.json() as ModerationInventory : {pending: [], hidden: [], overrides: []});
       setStaffRequests(staff.ok ? (await staff.json() as {requests: StaffRequest[]}).requests : []);
     }
     catch (err) { setError(err instanceof Error ? err.message : 'Could not load reports.'); }
@@ -36,7 +37,7 @@ export default function ModerationPage() {
     let active = true;
     Promise.all([
       fetch('/api/moderation/reports', {cache: 'no-store'}).then(async r => { if (!r.ok) throw new Error('Reports could not be loaded.'); return r.json() as Promise<{reports: ListingReport[]}>; }),
-      fetch('/api/moderation/events', {cache: 'no-store'}).then(r => r.ok ? r.json() as Promise<ModerationInventory> : Promise.resolve({hidden: [], overrides: []} as ModerationInventory)),
+      fetch('/api/moderation/events', {cache: 'no-store'}).then(r => r.ok ? r.json() as Promise<ModerationInventory> : Promise.resolve({pending: [], hidden: [], overrides: []} as ModerationInventory)),
       fetch('/api/moderation/staff', {cache: 'no-store'}).then(r => r.ok ? r.json() as Promise<{requests: StaffRequest[]}> : Promise.resolve({requests: []})),
     ]).then(([reportData, inventoryData, staffData]) => {
       if (active) { setReports(reportData.reports); setInventory(inventoryData); setStaffRequests(staffData.requests); }
@@ -49,9 +50,9 @@ export default function ModerationPage() {
     catch (err) { setError(err instanceof Error ? err.message : 'Could not review this report.'); }
     finally { setBusy(false); }
   }
-  // Source-listing moderation: restores hidden listings and reverts stored
-  // corrections. Community deletions are permanent and leave nothing to list.
-  async function moderate(body: {id: string; action: 'restore' | 'revert'}) {
+  // Source-listing moderation: approves/rejects pending submissions, restores
+  // hidden listings, deletes community listings, and reverts stored corrections.
+  async function moderate(body: {id: string; action: 'restore' | 'revert' | 'approve' | 'reject' | 'delete'}) {
     setBusy(true); setError('');
     try { await postJSON('/api/moderation/events', body); await load(); }
     catch (err) { setError(err instanceof Error ? err.message : 'Could not update the listing.'); }
@@ -71,28 +72,51 @@ export default function ModerationPage() {
         <div className="eyebrow">COMMUNITY CARE</div>
         <h1>Review <span>reports.</span></h1>
         <p className="account-description">Private reports from verified members. Open reports appear first; up to 100 recent reports are shown.</p>
-        <p className="moderator-nav"><span className="moderator-nav-current">Review reports</span><span aria-hidden>·</span><a className="text-button" href="/moderation/emails">Message inbox</a><span aria-hidden>·</span><a className="text-button" href="/moderation/analytics">Usage analytics</a></p>
+        <p className="moderator-nav"><span className="moderator-nav-current">Review Reports</span><span aria-hidden>·</span><a className="text-button" href="/moderation/emails">Message Inbox</a><span aria-hidden>·</span><a className="text-button" href="/moderation/analytics">Usage Analytics</a></p>
         {(accountError || error) && <p className="form-error" role="alert">{accountError || error}</p>}
         {!account && !accountError && <p>Loading your account…</p>}
-        {account && !account.permissions.reviewReports && <p>This page is available to calendar administrators. <a className="text-button" href="/account">View your account</a></p>}
-        {isModerator && (reports === null
-          ? <p>Loading reports…</p>
-          : reports.length === 0
-            ? <p>No reports yet.</p>
-            : reports.map(report => (
-              <article className="report-card" key={report.id}>
-                <div className="report-status"><span className="community-badge">{report.status}</span><small>{new Date(report.createdAt).toLocaleDateString()}{report.hidden && ' · Listing hidden'}</small></div>
-                <h2>{report.event.title}</h2>
-                <p><b>{report.reason}</b></p>
-                <p className="description">{report.details}</p>
-                <a className="text-button" href={report.event.url} target="_blank" rel="noreferrer">View original listing ↗</a>
+        {account && !account.permissions.reviewReports && <p>This page is available to calendar administrators. <a className="text-button" href="/account">View Your Account</a></p>}
+        {isModerator && inventory && <>
+          <h2 className="analytics-section">Pending Event Submissions</h2>
+          <p className="account-description">Listings submitted by students stay hidden until approved here. Verified BYU staff and admin listings publish immediately.</p>
+          {!inventory.pending?.length
+            ? <p>No submissions waiting for approval.</p>
+            : inventory.pending.map(item => (
+              <article className="report-card" key={'pending-' + item.id}>
+                <div className="report-status"><span className="community-badge">Pending Approval</span><small>{new Date(item.createdAt).toLocaleDateString()} · {item.submitterName || item.submitterEmail || 'Student'}</small></div>
+                <h2>{item.event.title}</h2>
+                <p><b>{item.event.organizer || item.event.sourceName}</b> · {item.event.location} · {item.event.start}</p>
+                <p className="description">{item.event.description}</p>
+                <a className="text-button" href={item.event.url} target="_blank" rel="noreferrer">View Organizer Link ↗</a>
                 <div className="account-actions">
-                  {report.status === 'open' && <button disabled={busy} className="outline-button" onClick={() => review(report.id, 'dismiss')}>Dismiss report</button>}
-                  <button disabled={busy} className="outline-button" onClick={() => review(report.id, report.hidden ? 'restore' : 'hide')}>{report.hidden ? 'Restore listing' : 'Hide listing'}</button>
-                  <button disabled={busy} className="outline-button" onClick={() => review(report.id, 'clear-tags')}>Remove community tags</button>
+                  <button disabled={busy} className="primary-button" onClick={() => moderate({id: item.id, action: 'approve'})}>Approve Listing</button>
+                  <button disabled={busy} className="outline-button" onClick={() => moderate({id: item.id, action: 'reject'})}>Decline</button>
+                  <button disabled={busy} className="outline-button" onClick={() => moderate({id: item.id, action: 'delete'})}>Delete</button>
                 </div>
               </article>
-            )))}
+            ))}
+        </>}
+        {isModerator && <>
+          <h2 className="analytics-section">Event Reports</h2>
+          {reports === null
+            ? <p>Loading reports…</p>
+            : reports.length === 0
+              ? <p>No reports yet.</p>
+              : reports.map(report => (
+                <article className="report-card" key={report.id}>
+                  <div className="report-status"><span className="community-badge">{report.status}</span><small>{new Date(report.createdAt).toLocaleDateString()}{report.hidden && ' · Listing hidden'}</small></div>
+                  <h2>{report.event.title}</h2>
+                  <p><b>{report.reason}</b></p>
+                  <p className="description">{report.details}</p>
+                  <a className="text-button" href={report.event.url} target="_blank" rel="noreferrer">View Original Listing ↗</a>
+                  <div className="account-actions">
+                    {report.status === 'open' && <button disabled={busy} className="outline-button" onClick={() => review(report.id, 'dismiss')}>Dismiss Report</button>}
+                    <button disabled={busy} className="outline-button" onClick={() => review(report.id, report.hidden ? 'restore' : 'hide')}>{report.hidden ? 'Restore Listing' : 'Hide Listing'}</button>
+                    <button disabled={busy} className="outline-button" onClick={() => review(report.id, 'clear-tags')}>Remove Community Tags</button>
+                  </div>
+                </article>
+              ))}
+        </>}
         {isModerator && staffRequests && <>
           <h2 className="analytics-section">BYU professor & staff verification.</h2>
           <p className="account-description">Requests from verified BYU members. Approving labels their events “BYU added event” and lets them correct listings in their area; addresses on the researched directory were verified automatically at sign-up. Confirm the person teaches or works in the area they named before approving.</p>

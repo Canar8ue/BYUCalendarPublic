@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import ICAL from 'ical.js';
-import {parseICS,classify,clean,civilToISO,eventDays,mergeEvents,splitDescriptionProvenance,timeLabel} from '../lib/catalog.mjs';
+import {parseICS,classify,clean,civilToISO,eventDays,mergeEvents,splitDescriptionProvenance,timeLabel,displayCategory,displayTag,mountainZoneAbbr} from '../lib/catalog.mjs';
 import {parseSearch,matchesEvent,exportICS,eventSlug,googleCalendarUrl,outlookCalendarUrl,personalCalendarKind,savedViewSummary} from '../lib/search.mjs';
 import {listingLinks,eventPage,importSource,sameSite,sportsSchedule} from '../lib/source-import.mjs';
 import {parseClubSnapshot} from '../lib/club-snapshot.mjs';
@@ -447,14 +447,18 @@ test('interest filters match inclusively (OR) with IS/AIS equivalence while perk
 });
 
 test('saved set summaries read like the filter bar and never double up IS/AIS',()=>{
- assert.equal(savedViewSummary('',[],[]),'All events');
- assert.equal(savedViewSummary('this week',[],['IS','Clubs','Food provided']),'this week · IS / AIS · Clubs · Food provided');
+ assert.equal(savedViewSummary('',[],[]),'All Events');
+ assert.equal(savedViewSummary('this week',[],['IS','Clubs','Food provided']),'this week · IS / AIS · Clubs · Food Provided');
  // A pair stored by the picks chat or an older filter set collapses to one label.
  assert.equal(savedViewSummary('',[],['IS','AIS']),'IS / AIS');
  // An AIS-only set is described the way the bar renders its AIS tag.
  assert.equal(savedViewSummary('',['Academic'],['AIS']),'Academic · IS / AIS');
  // Duplicates and empty entries never leak into the label.
  assert.equal(savedViewSummary('',['Academic','Academic'],['Clubs','','Clubs']),'Academic · Academic · Clubs');
+ assert.equal(displayCategory('Career & business'),'Career & Business');
+ assert.equal(displayTag('Food provided'),'Food Provided');
+ assert.equal(mountainZoneAbbr('2026-01-15T18:00:00Z'),'MST');
+ assert.equal(mountainZoneAbbr('2026-07-15T18:00:00Z'),'MDT');
 });
 
 test('search parsing preserves Q&A, contractions, time edge cases, and multi-word phrases',()=>{
@@ -517,6 +521,21 @@ test('merge, date range, and search helpers tolerate non-Latin titles, bad bound
  const sparse={id:'sparse',title:'Music Night',start:'2026-09-18T18:00:00Z',allDay:false,description:undefined,location:null,category:undefined,sourceName:undefined,tags:null};
  assert.equal(matchesEvent(sparse,parseSearch('undefined'),[],[],now),false);
  assert.equal(matchesEvent(sparse,parseSearch('music'),[],[],now),true);
+});
+
+test('clean preserves safe inline ICS and HTML links while stripping scripts and unsafe hrefs',()=>{
+ assert.equal(
+  clean('Please make an appointment using this link<https://byushareyourhair.youcanbook.me/>! Walk-ins welcome.'),
+  'Please make an appointment using this link (https://byushareyourhair.youcanbook.me/)! Walk-ins welcome.'
+ );
+ assert.equal(
+  clean('<p>Sign up <a href="https://yserve.byu.edu/share-your-hair">here</a> or <a href="https://byu.edu">https://byu.edu</a>.</p>'),
+  'Sign up here (https://yserve.byu.edu/share-your-hair) or https://byu.edu/.'
+ );
+ assert.equal(
+  clean('<a href="javascript:alert(1)">Click</a><script>alert(1)</script>'),
+  'Click'
+ );
 });
 
 

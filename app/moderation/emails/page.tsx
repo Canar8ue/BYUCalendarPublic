@@ -53,10 +53,10 @@ export default function ModeratorInboxPage() {
     <div className="eyebrow">COMMUNITY CARE</div>
     <h1>Message <span>inbox.</span></h1>
     <p className="account-description">Mail sent to {inboxAddress} by privacy requests and community members. Replies go out from the same address; messages stay private to administrators.</p>
-    <p className="moderator-nav"><a className="text-button" href="/moderation">Review reports</a><span aria-hidden>·</span><span className="moderator-nav-current">Message inbox</span><span aria-hidden>·</span><a className="text-button" href="/moderation/analytics">Usage analytics</a></p>
+    <p className="moderator-nav"><a className="text-button" href="/moderation">Review Reports</a><span aria-hidden>·</span><span className="moderator-nav-current">Message Inbox</span><span aria-hidden>·</span><a className="text-button" href="/moderation/analytics">Usage Analytics</a></p>
     {(accountError || error) && <p className="form-error" role="alert">{accountError || error}</p>}
     {!account && !accountError && <p>Loading your account…</p>}
-    {account && !account.permissions.reviewReports && <p>This page is available to calendar administrators. <a className="text-button" href="/account">View your account</a></p>}
+    {account && !account.permissions.reviewReports && <p>This page is available to calendar administrators. <a className="text-button" href="/account">View Your Account</a></p>}
     {account?.permissions.reviewReports && (configured
       ? <>{emails === null ? <p>Loading messages…</p> : !emails.length ? <p>No messages yet. Anything sent to {inboxAddress} appears here.</p> : emails.map(email => <article className="inbox-thread" key={email.id}>
         <button type="button" className="inbox-item" aria-expanded={openId === email.id} onClick={() => openEmail(email)}>
